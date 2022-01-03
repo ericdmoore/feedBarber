@@ -1,4 +1,4 @@
-# 🩺🍽💉 Feed Doctor
+#🍽🩺💉 Feed Doctor
 
 > The Feed Doctor is a feed proxy that can innoculate, mend, or bulk up your anemic feeds.
 
@@ -11,7 +11,8 @@
 - Have you ever found an awesome site, but they are too inlove with their ads to give you the full content in the rss feed? The Feed Doctor can cure that.
 - Have you ever wished you could rank a feed based on data in the feed itself? The Feed Doctor can cure that.
 - Have you ever wished you could convert things into a feed that dont have a feed? The Feed Doctor can often cure that.
-- And many other problems
+- Ever wished you could remove ads from a feed. The Feed Doctor can cure that too. 
+- And many other ailments...
 
 ## Usage
 
@@ -21,9 +22,8 @@
 
 Then you would subscribe to the proxied-url like these exmaples:
 
-- `https://thefeedDoctor.com/rss/< cure1 >/https://othersite.com/feed.xml`
-  
-- `https://thefeedDoctor.com/atom/< cure2 >/https://othersite.com/atom.xml`
+- `https://thefeedDoctor.com/rss/{ cure1 }/https://othersite.com/feed.xml`
+- `https://thefeedDoctor.com/atom/{ cure2 }/https://othersite.com/atom.xml`
 
 ## Finding a Cure
   
