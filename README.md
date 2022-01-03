@@ -36,7 +36,7 @@ List your cure for sale:
 - give a before/after picture of the feed in a reader application
 - list the price
   
-### Buy and Prescribe a Cure
+### Buying and Prescribing a Cure
 
 - browse the shelves of cures for ailed pages
 - some are general purpose
