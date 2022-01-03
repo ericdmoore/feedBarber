@@ -27,7 +27,7 @@ Then you would subscribe to the proxied-url like these exmaples:
 
 ## Finding a Cure
   
-### Sell a Cure
+### Selling a Cure
 
 List your cure for sale:
 
@@ -46,6 +46,20 @@ List your cure for sale:
 - Save the configured-cure
 - subscribe to the proxied-feed
 
-### Use an Open Cure
+### Composing a Cures
+
+- You can use other cures within your own cure
+- you can use cures that you have purchased, as well as public cures
+- So its possible to have a cure that is merely a novel composition of other cures.
+- however, if you were to list your cure "for sale"
+- the dependent cures get a percentage of the final sale price
 
 # Feed Doctor Accounts
+
+| Account Type | Cleaned Posts Per Month | Access to Composer | Access to Marketplace | 
+|--------------|-------------------------|--------------------|-----------------------|
+| Free | XX | ✅ | ✅ | 
+| Brozne | YY | ✅ | ✅ | 
+| Silver | ZZ | ✅ | ✅ | 
+| Gold  | WW | ✅ | ✅ | 
+| Self Hosted | ♾ | ❌ | ❌ |
