@@ -22,8 +22,8 @@
 
 Then you would subscribe to the proxied-url like these exmaples:
 
-- `https://thefeedDoctor.com/rss/{cure1}/https://othersite.com/feed.xml`
-- `https://thefeedDoctor.com/atom/{cure2}/https://othersite.com/atom.xml`
+- `https://thefeedDoctor.com/rss/{cure1}/othersite.com/feed.xml`
+- `https://thefeedDoctor.com/atom/{cure2}/othersite.com/atom.xml`
 
 ## Finding a Cure
   
@@ -56,10 +56,10 @@ List your cure for sale:
 
 # Feed Doctor Accounts
 
-| Account Type | Cleaned Posts Per Month | Access to Composer | Access to Marketplace | 
+| Account Type | Healed Posts Per Month  | Access to Composer | Access to Marketplace | 
 |--------------|-------------------------|--------------------|-----------------------|
-| Free | XX | ✅ | ✅ | 
-| Brozne | YY | ✅ | ✅ | 
-| Silver | ZZ | ✅ | ✅ | 
-| Gold  | WW | ✅ | ✅ | 
-| Self Hosted | ♾ | ✅ | ❌ |
+| Free         |                      XX |                 ✅ |                    ✅ | 
+| Brozne       |                      YY |                 ✅ |                    ✅ | 
+| Silver       |                      ZZ |                 ✅ |                    ✅ | 
+| Gold         |                      WW |                 ✅ |                    ✅ | 
+| Self Hosted  |                       ♾ |                 ✅ |                    ❌ |
