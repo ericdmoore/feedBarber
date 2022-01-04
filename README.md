@@ -16,14 +16,16 @@
 
 ## Usage
 
-1. Choose a Cure.
+So you found an anemic feed... geez there's a plague of them out there. Your next steps are to:
+
+1. Find a Cure.
 2. Setup the Cure.
 3. Subscribe the sick feed through, your new prescription.
 
 Then you would subscribe to the proxied-url like these exmaples:
 
-- `https://thefeedDoctor.com/rss/{cure1}/othersite.com/feed.xml`
-- `https://thefeedDoctor.com/atom/{cure2}/othersite.com/atom.xml`
+- `https://thefeedDoctor.com/rss/{cure1_ID}/somesite.com/feed.xml`
+- `https://thefeedDoctor.com/atom/{cure2_ID}/anemicsite.com/atom.xml`
 
 ## Finding a Cure
   
@@ -47,6 +49,8 @@ List your cure for sale:
 - subscribe to the proxied-feed
 
 ### Composing a Cures
+
+[See `Cure` on the Wiki](//github.com/ericdmoore/feedDoctor/wiki/cure)
 
 - You can use other cures within your own cure
 - you can use cures that you have purchased, as well as public cures
