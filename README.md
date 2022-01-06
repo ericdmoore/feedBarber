@@ -14,6 +14,9 @@
 - Ever wished you could remove ads from a feed. The Feed Doctor can cure that too. 
 - And many other ailments...
 
+## What does this NOT DO
+- Unless you enjoy reading XML, this is not the best way to collect/aggregate/read an cured/enhanced feed. This IS a way to make the content that shows up in your existing feed reader - BETTER
+
 ## Usage
 
 So you found an anemic feed... geez there's a plague of them out there. Your next steps are to:
@@ -24,8 +27,8 @@ So you found an anemic feed... geez there's a plague of them out there. Your nex
 
 Then you would subscribe to the proxied-url like these exmaples:
 
-- `https://thefeedDoctor.com/rss/{cure1_ID}/somesite.com/feed.xml`
-- `https://thefeedDoctor.com/atom/{cure2_ID}/anemicsite.com/atom.xml`
+- `https://thefeedDoctor.com/rss/{{cure1_ID}}/somesite.com/feed.xml`
+- `https://thefeedDoctor.com/atom/{{cure2_ID}}/anemicsite.com/atom.xml`
 
 ## Finding a Cure
   
