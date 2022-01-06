@@ -27,8 +27,8 @@ So you found an unkept feed with terrible bangs, or worse a bald feed.... geez t
 
 You then subscribe to the proxied-url like these exmaples:
 
-- `https://thefeedBarber.com/rss/{{cure1_ID}}/somesite.com/feed.xml`
-- `https://thefeedBarber.com/atom/{{cure2_ID}}/anemicsite.com/atom.xml`
+- `https://thefeedBarber.com/rss/{{enhance1_ID}}/somesite.com/feed.xml`
+- `https://thefeedBarber.com/atom/{{enhance2_ID}}/anemicsite.com/atom.xml`
 
 ## Finding Enhancements
   
