@@ -14,7 +14,7 @@
 - Ever wished you could remove ads from a feed. The Feed Doctor can cure that too. 
 - And many other ailments...
 
-## What does this NOT DO
+## NON-GOALs
 - Unless you enjoy reading XML, this is not the best way to collect/aggregate/read an cured/enhanced feed. This IS a way to make the content that shows up in your existing feed reader - BETTER
 
 ## Usage
