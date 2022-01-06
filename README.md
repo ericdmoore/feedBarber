@@ -1,17 +1,17 @@
-# 🍽🩺💉 Feed Doctor
+# 🍽💈💇🏽 Feed Barber
 
-> The Feed Doctor is a feed proxy that can innoculate, mend, or bulk up your anemic feeds.
+> The Feed Barber is a feed proxy that can trim up, shape up, condition, and pretty up your unkept feeds. 
 
 # Overview
 
 ## What is it?
-- **The Feed Doctor** is self-hostable rss proxy that can change rss feeds on the fly.
+- **The Feed Barber** is self-hostable rss proxy that can change rss feeds on the fly.
 
 ## What Problems Does This Solve?
-- Have you ever found an awesome site, but they are too inlove with their ads to give you the full content in the rss feed? The Feed Doctor can cure that.
-- Have you ever wished you could rank a feed based on data in the feed itself? The Feed Doctor can cure that.
-- Have you ever wished you could convert things into a feed that dont have a feed? The Feed Doctor can often cure that.
-- Ever wished you could remove ads from a feed. The Feed Doctor can cure that too. 
+- Have you ever found an awesome site, but they are too inlove with their ads to give you the full content in the rss feed? The Feed Barber can cure that.
+- Have you ever wished you could rank a feed based on data in the feed itself? The Feed Barber can cure that.
+- Have you ever wished you could convert things into a feed that dont have a feed? The Feed Barber can often cure that.
+- Ever wished you could remove ads from a feed. The Feed Barber can cure that too. 
 - And many other ailments...
 
 ## NON-GOALs
@@ -19,31 +19,32 @@
 
 ## Usage
 
-So you found an anemic feed... geez there's a plague of them out there. Your next steps are to:
+So you found an unkept feed with terrible bangs, or worse a bald feed.... geez there's a plague of them out there. Your next steps are to:
 
-1. Find a Cure.
-2. Setup the Cure.
-3. Subscribe the sick feed through, your new prescription.
+1. Choose an Enhancement.
+2. Setup the Enhancement.
+3. Subscribe the unkept feed through, your new Enhancement.
 
-Then you would subscribe to the proxied-url like these exmaples:
+You then subscribe to the proxied-url like these exmaples:
 
-- `https://thefeedDoctor.com/rss/{{cure1_ID}}/somesite.com/feed.xml`
-- `https://thefeedDoctor.com/atom/{{cure2_ID}}/anemicsite.com/atom.xml`
+- `https://thefeedBarber.com/rss/{{cure1_ID}}/somesite.com/feed.xml`
+- `https://thefeedBarber.com/atom/{{cure2_ID}}/anemicsite.com/atom.xml`
 
-## Finding a Cure
+## Finding Enhancements
   
-### Selling a Cure
+### Selling Enhancements
 
-List your cure for sale:
+List your Enhancement for sale:
 
 - explain what it does
-- give exmaple sites that it works on
+- give exmaple sites where it works as intentded
 - give a before/after picture of the feed in a reader application
-- list the price
+- list the price - or list as publically available
+- listing versions as public is a one-way door or an irrersible process
   
-### Buying and Prescribing a Cure
+### Buying and Setting up Enhancements
 
-- browse the shelves of cures for ailed pages
+- browse the shelves of Enhancements for ugly pages
 - some are general purpose
 - some are highly specific
 - Buy $10 of credits and spend your credits.
@@ -51,17 +52,21 @@ List your cure for sale:
 - Save the configured-cure
 - subscribe to the proxied-feed
 
-### Composing a Cures
+### Composing an Enhancement
 
-[See `Cure` on the Wiki](//github.com/ericdmoore/feedDoctor/wiki/cure)
+[See `Enhancement` on the Wiki](//github.com/ericdmoore/feedDoctor/wiki/enhancements)
 
-- You can use other cures within your own cure
-- you can use cures that you have purchased, as well as public cures
+- You can use other 'Enhancements' within your own
+- You can use 'Enhancements' that you have purchased, as well as public 'Enhancements'
 - So its possible to have a cure that is merely a novel composition of other cures.
-- however, if you were to list your cure "for sale"
-- the dependent cures get a percentage of the final sale price
+- If you were to list your 'Enhancements' "for sale", then dependent 'Enhancements' get a percentages of your list price
 
-# Feed Doctor Accounts
+### Software Library Support
+
+After watching how package and modules, permitting unlimited dependency trees (im looking at your npm) eventually fail to create a monetization path for those that maintain crucial elements of plugin support, it is the strong opinion of `feedbarber` that anything sold within the ecosystem should support the underlying software libraries.
+
+
+# Feed Barber Accounts
 
 | Account Type | Healed Posts Per Month  | Access to Composer | Access to Marketplace | 
 |--------------|-------------------------|--------------------|-----------------------|
