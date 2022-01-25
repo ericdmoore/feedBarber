@@ -3,10 +3,7 @@
 // import { fromXml } from "../mod.ts";
 // atom
 // import { atom, rss } from "./parsers/index.ts";
-import {
-  parseAndPickType,
-  typedValidation,
-} from "./pickType.ts";
+import { parseAndPickType, typedValidation } from "./pickType.ts";
 
 export const start = async (url: string) => {
   const remoteData = await fetch(url);
@@ -20,7 +17,7 @@ export const urls = {
     // "https://flyingmeat.com/sitemap.xml",
     // "https://www.manton.org/sitemap.xml",
     // "https://timetable.manton.org/sitemap.xml",
-    "https://thedefineddish.com/sitemap_index.xml"
+    "https://thedefineddish.com/sitemap_index.xml",
   ],
   _rss: [
     // "https://danluu.com/atom.xml", // is actually rss
@@ -35,7 +32,7 @@ export const urls = {
     // "http://www.politico.com/rss/politicopicks.xml",
     // "https://feeds.npr.org/1002/rss.xml",
     // "https://feeds.npr.org/3/rss.xml",
-    "https://randsinrepose.com/feed/"
+    "https://randsinrepose.com/feed/",
   ],
   _atom: [
     // "https://aphyr.com/posts.atom",
@@ -49,7 +46,7 @@ export const urls = {
     // "https://learnbyexample.github.io/atom.xml",
     // "https://meowni.ca/atom.xml",
   ],
-  _jsonFeed:[
+  _jsonFeed: [
     // "https://daringfireball.net/feeds/json",
     // "http://maybepizza.com/feed.json",
     // "https://flyingmeat.com/blog/feed.json",
@@ -61,8 +58,8 @@ export const urls = {
     "https://timetable.manton.org/feed.json",
     "http://therecord.co/feed.json",
     "http://www.allenpike.com/feed.json",
-    "https://www.jsonfeed.org/feed.json"
-  ]
+    "https://www.jsonfeed.org/feed.json",
+  ],
 };
 
 (async () => {
@@ -72,11 +69,16 @@ export const urls = {
       (url) =>
         start(url)
           .then((txt) => parseAndPickType(txt))
-          .then(d => {console.log('0: ',(d.data as any)); return d})
+          .then((d) => {
+            console.log("0: ", d.data as any);
+            return d;
+          })
           .then((typedData) => typedValidation(typedData))
-          .then(d => {console.log('1: ',d); return d})
+          .then((d) => {
+            console.log("1: ", d);
+            return d;
+          })
           .then((t) => {
-            
             if (t.kind === "rss") {
               console.log({
                 url: t.data.rss.channel.link._text,
@@ -95,14 +97,14 @@ export const urls = {
               console.log({
                 url: t.data.feed_url,
                 numEntries: t.data.items.length,
-                titles: t.data.items.map((v)=>v.title ?? v.id),
+                titles: t.data.items.map((v) => v.title ?? v.id),
               });
             }
             if (t.kind === "sitemap") {
               console.log({
                 url,
                 numEntries: t.data.urlset?.url.length,
-                titles: t.data.urlset?.url.map(l => l.loc._text),
+                titles: t.data.urlset?.url.map((l) => l.loc._text),
               });
             }
             return t;
@@ -119,4 +121,3 @@ export const urls = {
 
 export const load = start;
 export default start;
-

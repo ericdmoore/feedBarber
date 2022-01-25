@@ -1,21 +1,21 @@
 import { superstruct, toXml } from "../../mod.ts";
 import { IValidate } from "../../types.ts";
-import {InnerText} from "./helpers/composedPrimitives.ts"
-import er from "./helpers/error.ts"
+import { InnerText } from "./helpers/composedPrimitives.ts";
+import er from "./helpers/error.ts";
 
 const { object, type, optional, array, string } = superstruct;
 
 const UrlLoc = object({
-  loc : InnerText,
+  loc: InnerText,
   lastmod: optional(InnerText),
   changefreq: optional(InnerText),
-  priority: optional(InnerText)
-})
+  priority: optional(InnerText),
+});
 
 const SitemapLoc = object({
-  loc : InnerText,
+  loc: InnerText,
   lastmod: optional(InnerText),
-})
+});
 
 export const SitemapKind = type({
   _declaration: object({
@@ -23,21 +23,20 @@ export const SitemapKind = type({
       version: optional(string()),
       encoding: optional(string()),
       standalone: optional(string()),
-    })
+    }),
   }),
   urlset: optional(object({
     url: array(UrlLoc),
     _attributes: object({
-      xmlns: string()
+      xmlns: string(),
     }),
   })),
   sitemapindex: optional(object({
     sitemap: array(SitemapLoc),
     _attributes: object({
-        xmlns: optional(string())
-      })
-    })
-  )
+      xmlns: optional(string()),
+    }),
+  })),
 });
 
 export type RespStruct = typeof SitemapKind.TYPE;
@@ -49,9 +48,9 @@ export const Sitemap = (compactParse: unknown): IValidate<RespStruct> => {
     inputKind: "sitemap",
     clone: Sitemap,
 
-    /** 
+    /**
      * Need to expand the sitemapindex versions to a flattened urlLoc version
-    */
+     */
     validate: (): Promise<RespStruct> => {
       let err: superstruct.StructError | undefined;
       let validated: unknown;
@@ -65,13 +64,15 @@ export const Sitemap = (compactParse: unknown): IValidate<RespStruct> => {
         );
       }
 
-      if ((compactParse as RespStruct).urlset || (compactParse as RespStruct).sitemapindex ) {
+      if (
+        (compactParse as RespStruct).urlset ||
+        (compactParse as RespStruct).sitemapindex
+      ) {
         [err, validated] = SitemapKind.validate(compactParse, {
           coerce: true,
         });
 
         if (!err && validated) {
-          
           // if sitemapindex
           // expand
           // concat the refs to a flat urlloc version, and re validate
@@ -104,7 +105,7 @@ export const Sitemap = (compactParse: unknown): IValidate<RespStruct> => {
         );
       }
     },
-    paginateFrom: (pos: number = 0, pageBy: number= 50) => {
+    paginateFrom: (pos: number = 0, pageBy: number = 50) => {
       return Promise.resolve({
         val: compactParse as RespStruct,
         canPrev: false,

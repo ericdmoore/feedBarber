@@ -7,14 +7,25 @@ import type { AST, IValidate } from "../../types.ts";
 import { superstruct, toXml } from "../../mod.ts";
 import er from "./helpers/error.ts";
 
-const { number, union, literal, optional, type, object, string, array, boolean, record } = superstruct;
+const {
+  number,
+  union,
+  literal,
+  optional,
+  type,
+  object,
+  string,
+  array,
+  boolean,
+  record,
+} = superstruct;
 // define, union
 
 export const JsonFeedAuthor = type({
-  name:string(),
-  url:optional(string()),
-  avatar:optional(string())
-})
+  name: string(),
+  url: optional(string()),
+  avatar: optional(string()),
+});
 
 export const JsonAttachments = type({
   url: string(),
@@ -22,12 +33,12 @@ export const JsonAttachments = type({
   title: optional(string()),
   size_in_bytes: optional(number()),
   duration_in_seconds: optional(number()),
-})
+});
 
 export const JsonFeedItem = type({
   id: string(), // can also be the permalink
-  url: string(),// permalink
-  external_url: optional(string()), // 
+  url: string(), // permalink
+  external_url: optional(string()), //
   title: optional(string()),
   content_html: optional(string()),
   content_text: optional(string()),
@@ -49,17 +60,17 @@ export const JsonFeedItem = type({
       defaultUrl: string(),
     }),
     events: record(
-      union([ 
-        literal('read'), 
-        literal('share')
+      union([
+        literal("read"),
+        literal("share"),
       ]),
       object({
         ts: number(),
         feedUri: string(),
         postUri: string(),
-      })
-    )
-  }))
+      }),
+    ),
+  })),
 });
 
 export const JsonFeedKind = type({
@@ -70,16 +81,16 @@ export const JsonFeedKind = type({
   items: array(JsonFeedItem),
   author: optional(JsonFeedAuthor),
   authors: optional(array(JsonFeedAuthor)),
-  description:optional(string()), // of feed 
-  user_comment:optional(string()), // developer comment
-  next_url:optional(string()), // 
-  icon:optional(string()), // 
-  favicon:optional(string()),
-  language:optional(string()),
-  expired:optional(boolean()),
-  hubs:optional(array(object({
-    type: string(), 
-    url: string() 
+  description: optional(string()), // of feed
+  user_comment: optional(string()), // developer comment
+  next_url: optional(string()), //
+  icon: optional(string()), //
+  favicon: optional(string()),
+  language: optional(string()),
+  expired: optional(boolean()),
+  hubs: optional(array(object({
+    type: string(),
+    url: string(),
   }))),
 });
 
@@ -99,14 +110,20 @@ export const JsonFeed = (
       let validated: unknown;
 
       if (typeof compactParse === "string") {
-        return Promise.reject(er(compactParse, "JsonFeed: must passe the string before validation", new Error().stack));
+        return Promise.reject(
+          er(
+            compactParse,
+            "JsonFeed: must passe the string before validation",
+            new Error().stack,
+          ),
+        );
       }
       if (compactParse == null) {
         return Promise.reject(
           er(
-            compactParse, 
-            "JsonFeed: found null input", 
-            new Error().stack
+            compactParse,
+            "JsonFeed: found null input",
+            new Error().stack,
           ),
         );
       }
@@ -118,20 +135,20 @@ export const JsonFeed = (
 
         if (validated && !err) {
           return Promise.resolve(validated as RespStruct);
-        } else if (err ) {
+        } else if (err) {
           return Promise.reject(
             er(
-              compactParse, 
-              "JsonFeed: validation application error", 
-               err.toString()
+              compactParse,
+              "JsonFeed: validation application error",
+              err.toString(),
             ),
           );
         } else {
           return Promise.reject(
             er(
-              compactParse, 
-              "JsonFeed: validation application error", 
-              new Error().stack
+              compactParse,
+              "JsonFeed: validation application error",
+              new Error().stack,
             ),
           );
         }

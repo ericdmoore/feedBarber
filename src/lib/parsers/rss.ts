@@ -5,10 +5,19 @@
 import { superstruct, toXml } from "../../mod.ts";
 import { AST, IValidate } from "../../types.ts";
 import er from "./helpers/error.ts";
-import {InnerText, Generator, OptInnerText, Link, TypedInnerText, GUID, Enclosure} from "./helpers/composedPrimitives.ts";
+import {
+  Enclosure,
+  Generator,
+  GUID,
+  InnerText,
+  Link,
+  OptInnerText,
+  TypedInnerText,
+} from "./helpers/composedPrimitives.ts";
 
 // number, is
-const { union, is, define, partial, object, string, array, literal, optional } = superstruct;
+const { union, is, define, partial, object, string, array, literal, optional } =
+  superstruct;
 
 export const RssItem = object({
   title: InnerText,
@@ -22,7 +31,7 @@ export const RssItem = object({
   "content:encoded": optional(TypedInnerText),
   "wfw:commentRss": optional(InnerText),
   "slash:comments": optional(InnerText),
-  enclosure: optional(union([Enclosure, array(Enclosure)]))
+  enclosure: optional(union([Enclosure, array(Enclosure)])),
 });
 
 export const RssResponse = object({
@@ -96,7 +105,7 @@ export const Rss = (
             er(
               compactParse,
               "RSS: validation application error",
-              err.toString()
+              err.toString(),
             ),
           );
         } else {

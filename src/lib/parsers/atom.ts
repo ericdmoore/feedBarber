@@ -16,7 +16,12 @@
 
 import { superstruct, toXml } from "../../mod.ts";
 import { AST, IValidate } from "../../types.ts";
-import { InnerText, TextOrHTML, TypedInnerText, Generator } from "./helpers/composedPrimitives.ts";
+import {
+  Generator,
+  InnerText,
+  TextOrHTML,
+  TypedInnerText,
+} from "./helpers/composedPrimitives.ts";
 // number, is
 const { union, define, partial, object, string, array, literal, optional } =
   superstruct;
@@ -66,8 +71,6 @@ export const Content = object({
 });
 
 const Summary = Content;
-
-
 
 const LinkSet = array(Link);
 
@@ -148,7 +151,7 @@ export const Atom = (
     _: compactParse as RespStruct,
     inputKind: "atom",
     clone: Atom,
-    paginateFrom: (pos: number = 0, offset: number=50) => {
+    paginateFrom: (pos: number = 0, offset: number = 50) => {
       return Promise.resolve({
         val: compactParse as RespStruct,
         canPrev: false,
@@ -206,7 +209,8 @@ export const Atom = (
         return Promise.reject({
           error: true,
           compactParse,
-          reason: `Atom: string structure lacks a feed tag within the xml to parse`,
+          reason:
+            `Atom: string structure lacks a feed tag within the xml to parse`,
           err: new Error().stack,
         });
       }

@@ -1,5 +1,6 @@
 import { superstruct } from "../../../mod.ts";
-const { partial, optional, object, string, union, literal, define, is } = superstruct;
+const { partial, optional, object, string, union, literal, define, is } =
+  superstruct;
 
 export type TextOrHTMLUnion =
   | "text"
@@ -24,26 +25,26 @@ export const OptInnerText = object({ _text: optional(string()) });
 
 export const GUID = partial(object({
   _text: string(),
-  _attributes: object({ 
-    isPermaLink: optional(string())
-  })
-}))
+  _attributes: object({
+    isPermaLink: optional(string()),
+  }),
+}));
 
 export const Enclosure = object({
   _attributes: object({
     url: string(),
     type: optional(string()),
-    length: optional(string())
-  })
-})
+    length: optional(string()),
+  }),
+});
 
 export const Link = object({
   _attributes: object({
     href: string(),
     rel: optional(string()),
     type: optional(string()),
-  })
-})
+  }),
+});
 
 export const TypedInnerText = partial(
   object({
@@ -52,7 +53,7 @@ export const TypedInnerText = partial(
     }),
     _text: string(),
     _cdata: string(),
-  })
+  }),
 );
 
 export const LinkedVersionedTextOrCData = partial(object({
@@ -64,5 +65,4 @@ export const LinkedVersionedTextOrCData = partial(object({
   _cdata: string(),
 }));
 
-
-export const Generator = LinkedVersionedTextOrCData
+export const Generator = LinkedVersionedTextOrCData;

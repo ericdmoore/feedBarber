@@ -41,14 +41,14 @@ export const parseAndPickType = (
         data: jsO as typeof jsonfeed.JsonFeedKind.TYPE,
       };
     } else {
-      return { 
-        kind: "JS_SELECTION_ERROR", 
-        data: new Error() 
+      return {
+        kind: "JS_SELECTION_ERROR",
+        data: new Error(),
       };
     }
   } catch (_) {
     const jsO = fromXml.xml2js(responseText, { compact: true });
-    console.log({jsO})
+    console.log({ jsO });
     if (jsO?.feed) {
       return { kind: "atom", data: jsO as typeof atom.AtomResponse.TYPE };
     } else if (jsO?.rss) {
@@ -70,7 +70,10 @@ export const typedValidation = async (
     case "atom":
       return { kind: "atom", data: await atom.Atom(input.data).validate() };
     case "jsonFeed":
-      return { kind: "jsonFeed", data: await jsonfeed.JsonFeed(input.data).validate() };
+      return {
+        kind: "jsonFeed",
+        data: await jsonfeed.JsonFeed(input.data).validate(),
+      };
     case "sitemap":
       return {
         kind: "sitemap",
