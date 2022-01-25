@@ -6,13 +6,10 @@
 # Overview
 
 ## What is it?
-<<<<<<< HEAD
 
 - **The Feed Barber** is self-hostable rss proxy that can change rss feeds on
-  the fly.
-=======
-- **The Feed Barber** is self-hostable rss proxy that can change rss feeds on the fly, give them a trim, add some body, and much more based on what you setup.
->>>>>>> 7ec1492ffe04565239edc9394cc07a6dfbc01b55
+  the fly, give them a trim, add some body, and much more based on what you
+  setup.
 
 ## What Problems Does This Solve?
 
@@ -91,10 +88,10 @@ underlying software libraries.
 
 # Feed Barber Accounts
 
-| Account Type | Healed Posts Per Month | Access to Composer | Access to Marketplace |
-| ------------ | ---------------------- | ------------------ | --------------------- |
-| Free         | XX                     | ✅                  | ✅                     |
-| Brozne       | YY                     | ✅                  | ✅                     |
-| Silver       | ZZ                     | ✅                  | ✅                     |
-| Gold         | WW                     | ✅                  | ✅                     |
-| Self Hosted  | ♾                      | ✅                  | ❌                     |
+| Account Type | Healed Posts Per Month | Access to Composer | Access to Feed Barber Market |
+| ------------ | ---------------------- | ------------------ | ---------------------------- |
+| Free         | XX                     | ✅                  | ✅                            |
+| Brozne       | YY                     | ✅                  | ✅                            |
+| Silver       | ZZ                     | ✅                  | ✅                            |
+| Gold         | WW                     | ✅                  | ✅                            |
+| Self Hosted  | ♾                      | ✅                  | ❌                            |

@@ -2,135 +2,227 @@
 // perform the fetch
 // validate the response
 
-import { superstruct, xml } from "../../mod.ts";
+// input types - super loose
+// output type - as tight as we can make it
+//
+//
+// Output Fix NUmber1...
+//
+// Content:
+// _attributes
+//   type: "html"
+// _text: () => 'move to _cdata'
+// _cdata
 
-// deno-lint-ignore no-unused-vars
-import { Dict, maybe } from "./helpers/maybe.ts";
-
-// define
-const { is, union, number, object, string, array, literal, optional } =
+import { superstruct, toXml } from "../../mod.ts";
+import { AST, IValidate } from "../../types.ts";
+import { InnerText, TextOrHTML, TypedInnerText, Generator } from "./helpers/composedPrimitives.ts";
+// number, is
+const { union, define, partial, object, string, array, literal, optional } =
   superstruct;
 
-const PersonKind = object({
-  name: string(),
-  uri: maybe(string()),
-  email: maybe(string()),
-});
+const Encoding = define<"utf-8">(
+  "Encoding",
+  (s: unknown) => ["utf-8"].includes((s as string).toLowerCase()),
+);
 
-const TypedInnerText = object({
-  _attributes: optional(object({
-    type: literal("text"),
-  })),
-  _text: string(),
-});
+const Title = TypedInnerText;
+const Subitle = TypedInnerText;
 
-const Title  = TypedInnerText
-const Subitle = TypedInnerText
-
-const InnerText = object({ _text: string() });
 const ID = InnerText;
-const Updated = InnerText;
+// const Updated = InnerText;
 
-const Author = object({
-  name: object({
-    _text: string(),
-  }),
-  uri: object({
-    _text: string(),
-  }),
-});
+const Author = partial(object({
+  name: partial(object({
+    _text: string(), // prefer
+    _cdata: string(),
+  })),
+  uri: partial(object({
+    _text: string(), // prefer
+    _cdata: string(),
+  })),
+  email: partial(object({
+    _text: string(), // prefer
+    _cdata: string(),
+  })),
+}));
 
-const Link = object({
-  _attributes: object({
+export const Link = object({
+  _attributes: partial(object({
     rel: string(),
     type: string(),
+    hreflang: string(),
     href: string(),
-  }),
+  })),
 });
 
-const Content = object({
+export const Content = object({
   _attributes: object({
-    type: literal('html'),
-    "xml:base": optional(string())
+    type: TextOrHTML,
+    "xml:base": optional(string()),
   }),
-  _cdata: string()
-})
+  _text: optional(string()),
+  _cdata: optional(string()), //*
+});
 
-const Summary = Content
+const Summary = Content;
+
+
 
 const LinkSet = array(Link);
 
 const LinkOrLinkSet = union([Link, LinkSet]);
 
-const MaybePersonOrSting = maybe(union([string(), PersonKind]));
+// const MaybePersonOrSting = optional(union([string(), PersonKind]));
 
-const EntryKind = object({
+export const EntryKind = object({
   id: ID,
-  title: Title,
-  published: string(),
+  title: union([Title, TypedInnerText]),
   link: LinkOrLinkSet,
-  updated: maybe(Updated),
-  author: maybe(Author),
-  summary: maybe(Summary),
-  content: maybe(Content),
-  // name: maybe(string()),
-  // email: maybe(string()),
-  // uri: maybe(string()),
+  published: optional(union([InnerText, string()])),
+  updated: optional(InnerText),
+  author: optional(Author),
+  summary: optional(Summary),
+  content: optional(Content),
+  _attributes: optional(object({
+    // xmlns: literal("http://www.w3.org/2005/Atom"),
+    "xml:lang": optional(string()), //* default to?? 'en-US' | 'en'
+  })),
+  // name: optional(string()),
+  // email: optional(string()),
+  // uri: optional(string()),
 });
 
-const AtomKind = object({
-  id: ID,
+export const AtomFeedKind = object({
   title: Title,
   updated: InnerText,
   link: LinkOrLinkSet,
-  //
-  generator: maybe(string()),
-  icon: maybe(string()),
-  logo: maybe(string()),
-  subtitle: maybe(string()),
-  author: MaybePersonOrSting,
-  contributor: MaybePersonOrSting,
-  category: maybe(array(string())),
-  rights: maybe(string()),
-  //
   entry: array(EntryKind),
+  // id: ID,
+  //
+  _attributes: optional(object({
+    xmlns: literal("http://www.w3.org/2005/Atom"),
+    "xml:lang": optional(string()), //* default to?? 'en-US' \ 'en'
+  })),
+  id: optional(ID),
+  generator: optional(union([InnerText, Generator])),
+  icon: optional(union([string(), InnerText])),
+  logo: optional(union([string(), InnerText])),
+  subtitle: optional(Subitle),
+  author: optional(Author),
+  contributor: optional(array(Author)),
+  category: optional(array(string())),
+  rights: optional(InnerText),
 });
 
+export const AtomResponse = object({
+  _declaration: object({
+    _attributes: object({
+      version: string(),
+      encoding: Encoding,
+    }),
+  }),
+  feed: AtomFeedKind,
+});
 
-type ParserReturn<T> = ParserReturnClean<T> | ParserReturnWithErr<T>
-type ParserReturnClean<T> = [null, T]
-type ParserReturnWithErr<T> = [superstruct.StructError, T | null]
+type ValidationReturn<T> =
+  | ValidationReturnClean<T>
+  | ValidationReturnWithErr<T>;
+type ValidationReturnClean<T> = [null, T];
+type ValidationReturnWithErr<T> = [superstruct.StructError, T | null];
 
-export const Atom = () => {
+type ValidationError = superstruct.StructError | undefined;
 
-  let compactParse = {} as typeof AtomKind.TYPE;
+export type RespStruct = typeof AtomResponse.TYPE;
+// export type AtomValidator = IValidate<RespStruct> extends IValidate
+
+export const Atom = (
+  compactParse = {} as RespStruct | unknown,
+): IValidate<RespStruct> => {
+  const structs = {
+    feed: AtomFeedKind,
+    response: AtomResponse,
+  };
 
   return {
-    structs: {
-      parsed: AtomKind,
+    _: compactParse as RespStruct,
+    inputKind: "atom",
+    clone: Atom,
+    paginateFrom: (pos: number = 0, offset: number=50) => {
+      return Promise.resolve({
+        val: compactParse as RespStruct,
+        canPrev: false,
+        canNext: false,
+      });
     },
-    isType: {
-      parsed: (input: string) => is(input, Atom().structs.parsed),
-    },
-    validate: (input: string | unknown ): ParserReturn<typeof AtomKind.TYPE> =>{
-      let data: null | typeof AtomKind.TYPE = null
+    prev: () =>
+      Promise.resolve({
+        val: compactParse as RespStruct,
+        canNext: false,
+        canPrev: false,
+      }),
+    next: () =>
+      Promise.resolve({
+        val: compactParse as RespStruct,
+        canNext: false,
+        canPrev: false,
+      }),
+    validate: (): Promise<RespStruct> => {
+      let err: ValidationError;
+      let validated: unknown;
 
-      if(typeof input ==='string'){
-        data = Atom().parse(input) as typeof AtomKind.TYPE
-      }else{
-        data = input as typeof AtomKind.TYPE
+      if (typeof compactParse === "string") {
+        return Promise.reject({
+          error: true,
+          compactParse,
+          err: new Error().stack,
+          reason: `parse before validating`,
+        });
       }
 
-      const [err, validated] = Atom().structs.parsed.validate(data)
-      
-      if(err) {
-          return [err, validated] as [null, typeof AtomKind.TYPE]
+      if ((compactParse as typeof AtomResponse.TYPE).feed) {
+        [err, validated] = structs.response.validate(compactParse, {
+          coerce: true,
+        });
+
+        if (validated) {
+          return Promise.resolve(validated as typeof AtomResponse.TYPE);
+        } else if (err) {
+          return Promise.reject({
+            error: true,
+            compactParse,
+            reason: `Atom: validation application error : ${err}`,
+            err,
+          });
         } else {
-          return [null, validated] as [null, typeof AtomKind.TYPE]
+          return Promise.reject({
+            error: true,
+            compactParse,
+            reason: `Atom: validation application error`,
+            err: new Error().stack,
+          });
+        }
+      } else {
+        return Promise.reject({
+          error: true,
+          compactParse,
+          reason: `Atom: string structure lacks a feed tag within the xml to parse`,
+          err: new Error().stack,
+        });
       }
     },
-    parse: (s: string): typeof AtomKind.TYPE => {
-      return xml.xml2js(s, {compact: true}) as unknown as typeof AtomKind.TYPE;
+    toXML: () => {
+      return toXml.js2xml(compactParse as typeof AtomResponse.TYPE, {
+        compact: true,
+      });
+    },
+    /**
+     * Contains logic to get the Syntax to an AST repr
+     * @returns ASTShell
+     */
+    toAST: () => {
+      // based on compactParse
+      return Promise.resolve({} as AST);
     },
   };
 };

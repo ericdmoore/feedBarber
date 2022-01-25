@@ -1,85 +1,46 @@
-import type { FeedData } from "feed-reader";
-import { string } from "fp-ts";
+import type { ISupportedTypes } from "./lib/pickType.ts";
+export type PaginationResp<T> = Promise<
+  { val: T; canPrev: boolean; canNext: boolean }
+>;
 
-interface Person {
-  name: string;
-  email: string;
-  uri: string;
+export interface IValidate<T> {
+  _: T;
+  inputKind: "rss" | "atom" | "sitemap" | "jsonFeed" | "scrape";
+  clone: (i: unknown) => IValidate<T>;
+  paginateFrom: (pos?: number, offset?: number) => PaginationResp<T>;
+  validate: () => Promise<T>;
+  prev: () => PaginationResp<T>;
+  next: () => PaginationResp<T>;
+  toXML: () => string;
+  toAST: () => Promise<AST>;
 }
 
-export interface InputRSS {
-  link: string;
-  title: string;
-  description: string;
-
-  language?: string;
-  copyright?: string;
-
-  image?: {
-    url: string;
-    title: string;
-    link: string;
+export interface ASTShell {
+  ast: AST;
+  pos: {
+    pageBy: number;
+    total: number;
+    cur: number;
+    remaining: number;
   };
-
-  lastBuildDate?: Date;
-  generator?: string;
-  entries?: EntryFromRssFeed[];
+  parserData: ISupportedTypes;
+  next: () => Promise<ASTShell>;
+  prev: () => Promise<ASTShell>;
+  use: (Fns: MapperFn[]) => Promise<ASTShell>;
+  toXML: () => string;
 }
 
-export interface EntryFromRssFeed {
-  link: string;
-  title: string;
-  subtitle?: string;
-  content: string;
-  summary?: string;
-  author?: Person;
-  pubDate: Date;
-  guid?: string;
-  category?: string[];
-  enclosure?: {
-    url: string;
-    length: number;
-    type: string;
-  };
-  "content:encoded": string;
-  "dc:creator": string;
-  "dc:contributor": string;
-  "atom:link": string;
-  "media:content": {
-    "media:credit": string;
-    "media:title": string;
-    "media:thumbnail": string;
-  };
-  "media:group": {
-    "media:content": string[];
-  };
-  "media:thumbnail": string;
-  "feedburner:origLink": string;
-  "maz:template": string;
-  "maz:modified": number;
-}
+export type ReducerFn = (
+  prior: ASTShell,
+  cur: ASTShell,
+  i: number,
+  all: ASTShell[],
+) => Promise<ASTShell>;
+export type MapperFn = (input: ASTShell) => Promise<ASTShell>;
 
-export interface InputAtom {
-  id: string;
-  title: string;
-  updated: string;
-  link: string;
-  author?: Person;
-  generator?: string;
-  subtitle?: string;
-  rights?: string;
-  entry: EntryFromAtomFeed[];
-}
-
-export interface EntryFromAtomFeed {
-  id: string;
-  title: string;
-  link: string;
-  content: string;
-  summary?: string;
-  published?: string;
-  updated?: string;
-  author?: Person;
+export interface AST {
+  title?: string;
+  entries?: string[];
 }
 
 /*
