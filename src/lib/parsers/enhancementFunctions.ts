@@ -37,12 +37,11 @@ export const parseFunctions = (path: string) => {
         ? {fname: f.fname, params: undefined}
         : f
     )
-
     return objectToUndef
 }
 
 
-const test1 = `preview()||addBody(css='a'|%20root='#%20main%20')||rmAds(list='')||addsubs/`
+const test1 = `preview()||addBody(css='a'|%20root='#main%20')||rmAds(list='')||addsubs/`
 // const test2 = `preview(show=false)||addBody(css='a'|root='#main')||rmAds(list='')||addsubs/`
 
 console.log(parseFunctions(test1))

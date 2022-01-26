@@ -40,8 +40,8 @@ there's a plague of them out there. Your next steps are to:
 
 You then subscribe to the proxied-url like these exmaples:
 
-- `https://thefeedBarber.com/rss/{{enhance1_ID}}/somesite.com/feed.xml`
-- `https://thefeedBarber.com/atom/{{enhance2_ID}}/anemicsite.com/atom.xml`
+- `https://thefeedBarber.com/{{userID}}/rss/{{enhance1_ID}}/somesite.com/feed.xml`
+- `https://thefeedBarber.com/{{userID}}/atom/{{enhance2_ID}}/anemicsite.com/atom.xml`
 
 ## Finding Enhancements
 
