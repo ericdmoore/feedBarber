@@ -1,9 +1,9 @@
-import { RSS } from "../../types";
+import { RSS } from '../../types';
 
 export interface RemoveAdsParams {
-  elementBanList: string;
+	elementBanList: string;
 }
 
 export const removeAds = (params: RemoveAdsParams) =>
-  async (rss: RSS) => {
-  };
+	async (rss: RSS) => {
+	};

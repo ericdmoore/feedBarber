@@ -11,19 +11,18 @@
 // import type { RSS } from "../../types.ts"
 // import { start } from "../start";
 
+import { fetchSite } from '../analysis/fetchBody.ts';
+
 export interface AddBodyParams {
-  cssSelectors: string[]
-  fetchParams: {
-    credentials: {
-      username: string;
-      password: string;
-    };
-  };
+	cssSelectors: string[];
+	fetchParams: {
+		credentials: {
+			username: string;
+			password: string;
+		};
+	};
 }
 
-export const addBody = (addBodyHere: string): Promise<{}> => {
-  
-  
-  
-  return Promise.resolve({})
-}
+export const addBody = (addBodyHere: string): Promise<null> => {
+	return Promise.resolve(null);
+};

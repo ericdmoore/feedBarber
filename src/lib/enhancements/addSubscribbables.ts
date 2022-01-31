@@ -1,5 +1,5 @@
-import { RSS } from "../../types";
+import { RSS } from '../../types';
 
 export const addSubs = () =>
-  async (rss: RSS) => {
-  };
+	async (rss: RSS) => {
+	};
