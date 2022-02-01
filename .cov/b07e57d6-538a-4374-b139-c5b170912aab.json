@@ -1,0 +1,11 @@
+{
+  "scriptId": "76",
+  "url": "deno:runtime/js/99_main.js",
+  "functions": [
+    {
+      "functionName": "",
+      "ranges": [{ "startOffset": 20275, "endOffset": 20329, "count": 1 }],
+      "isBlockCoverage": true
+    }
+  ]
+}

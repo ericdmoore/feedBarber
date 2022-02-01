@@ -13,8 +13,8 @@ import {
 	InnerText,
 	Link,
 	OptInnerText,
+	txtorCData,
 	TypedInnerText,
-	txtorCData
 } from './helpers/composedPrimitives.ts';
 
 // number, is
@@ -165,73 +165,79 @@ export const Rss = (
 				images: {
 					favicon: '',
 					icon: '',
-					bannerImage: ''
+					bannerImage: '',
 				},
 				language: 'en-US',
-				links: { 
+				links: {
 					feedUrl: c.rss.channel.link._text,
-				 	homeUrl: c.rss.channel.link._text,
+					homeUrl: c.rss.channel.link._text,
 				},
 				paging: {
 					itemCount: 0,
 					nextUrl: '',
 					prevUrl: '',
 				},
-				_rss:{},
-				items: (c.rss.channel.item ??[]).map(i=>{
+				_rss: {},
+				items: (c.rss.channel.item ?? []).map((i) => {
 					return {
 						title: txtorCData('', i.title),
-						summary:txtorCData('', i.description),
+						summary: txtorCData('', i.description),
 						language: txtorCData('en-US', c.rss.channel.language),
-						url: txtorCData('_gone',i.link),
-						id: txtorCData('_gone',i.guid),
-						authors:[ {
-							name: txtorCData('>>anonymous<<',i['dc:creator']), 
+						url: txtorCData('_gone', i.link),
+						id: txtorCData('_gone', i.guid),
+						authors: [{
+							name: txtorCData('>>anonymous<<', i['dc:creator']),
 							email: undefined,
 							url: undefined,
-							imageURL: undefined
+							imageURL: undefined,
 						}],
-						content:{
-							htmlL: txtorCData('Err: 105 - Missing Content',i['content:encoded']),
+						content: {
+							htmlL: txtorCData('Err: 105 - Missing Content', i['content:encoded']),
 							makrdown: undefined,
 							text: undefined,
 						},
-						images:{ 
+						images: {
 							indexImage: undefined,
 							bannerImage: undefined,
 						},
-						dates:{ published:0, modified:0 },
-						links:{
-							category: txtorCData('',i.category),
+						dates: { published: 0, modified: 0 },
+						links: {
+							category: txtorCData('', i.category),
 							nextPost: undefined,
 							prevPost: undefined,
-							tags:[],
-							externalURLs:[],
+							tags: [],
+							externalURLs: [],
 						},
-						expires:undefined,
-						attachments: Array.isArray(i.enclosure) 
-							? i.enclosure.filter(e=> e?._attributes.type && e?._attributes.url  ).map( e =>{ return {
-								durationInSeconds: 0,
-								sizeInBytes: e?._attributes.length && !Number.isNaN(Number.parseInt(e?._attributes.length)) 
-									? Number.parseInt(e?._attributes.length) 
-									: undefined,
-								mimeType: e?._attributes.type as string,
-								url: e?._attributes.url  as string,
-								title: e?._attributes.url as string,
-							}})
-							: i.enclosure?._attributes.type && i.enclosure?._attributes.url
-							?   [{
+						_rss: {},
+						expires: undefined,
+						attachments: Array.isArray(i.enclosure)
+							? i.enclosure.filter((e) => e?._attributes.type && e?._attributes.url).map((e) => {
+								return {
 									durationInSeconds: 0,
-									sizeInBytes: i.enclosure?._attributes.length && !Number.isNaN(Number.parseInt(i.enclosure?._attributes.length)) 
-										? Number.parseInt(i.enclosure?._attributes.length) 
+									sizeInBytes:
+										e?._attributes.length && !Number.isNaN(Number.parseInt(e?._attributes.length))
+											? Number.parseInt(e?._attributes.length)
+											: undefined,
+									mimeType: e?._attributes.type as string,
+									url: e?._attributes.url as string,
+									title: e?._attributes.url as string,
+								};
+							})
+							: i.enclosure?._attributes.type && i.enclosure?._attributes.url
+							? [{
+								durationInSeconds: 0,
+								sizeInBytes:
+									i.enclosure?._attributes.length &&
+										!Number.isNaN(Number.parseInt(i.enclosure?._attributes.length))
+										? Number.parseInt(i.enclosure?._attributes.length)
 										: undefined,
-									mimeType: i.enclosure?._attributes.type ?? '',
-									url: i.enclosure?._attributes.url ?? '',
-									title: i.enclosure?._attributes.url ?? ''
-								}]
-							: []
-					}
-				})
+								mimeType: i.enclosure?._attributes.type ?? '',
+								url: i.enclosure?._attributes.url ?? '',
+								title: i.enclosure?._attributes.url ?? '',
+							}]
+							: [],
+					};
+				}),
 			};
 		},
 	};

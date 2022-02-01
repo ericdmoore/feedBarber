@@ -1,0 +1,20 @@
+{
+  "scriptId": "4",
+  "url": "deno:core/01_core.js",
+  "functions": [
+    {
+      "functionName": "unwrapOpResult",
+      "ranges": [
+        { "startOffset": 3347, "endOffset": 4119, "count": 2 },
+        { "startOffset": 3463, "endOffset": 3480, "count": 1 },
+        { "startOffset": 3482, "endOffset": 4099, "count": 0 }
+      ],
+      "isBlockCoverage": true
+    },
+    {
+      "functionName": "opSync",
+      "ranges": [{ "startOffset": 4602, "endOffset": 4726, "count": 2 }],
+      "isBlockCoverage": true
+    }
+  ]
+}

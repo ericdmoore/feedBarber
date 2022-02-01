@@ -16,7 +16,13 @@
 import type { ASTcomputable } from '../parsers/ast.ts';
 import { superstruct as s, toXml } from '../../mod.ts';
 import { IValidate } from '../../types.ts';
-import { Generator, InnerText, TextOrHTML, TypedInnerText, txtorCData } from './helpers/composedPrimitives.ts';
+import {
+	Generator,
+	InnerText,
+	TextOrHTML,
+	txtorCData,
+	TypedInnerText,
+} from './helpers/composedPrimitives.ts';
 // number, is
 const { union, define, partial, object, string, array, literal, optional } = s;
 
@@ -221,17 +227,17 @@ export const Atom = (
 			const c = await compactParse as RespStruct;
 			return {
 				title: txtorCData('>> no title << ', c.feed.title),
-				description: txtorCData( '>> no description <<', c.feed.subtitle),
+				description: txtorCData('>> no description <<', c.feed.subtitle),
 				language: 'en-US',
 				authors: [{
-					name: txtorCData('', c.feed.author?.name),
-					url: txtorCData('', c.feed.author?.uri),
-					email: txtorCData('', c.feed.author?.email),
+					name: txtorCData('_missing name', c.feed.author?.name),
+					url: txtorCData('_missing url', c.feed.author?.uri),
+					email: txtorCData('_missing email', c.feed.author?.email),
 				}],
 				images: {
 					favicon: typeof c.feed.logo === 'string' ? c.feed.logo : c.feed.logo?._text ?? '',
 					icon: typeof c.feed.logo === 'string' ? c.feed.logo : c.feed.logo?._text ?? '',
-					bannerImage: typeof c.feed.logo === 'string' ? c.feed.logo : c.feed.logo?._text ?? ''
+					bannerImage: typeof c.feed.logo === 'string' ? c.feed.logo : c.feed.logo?._text ?? '',
 				},
 				links: {
 					feedUrl: async () => '',
@@ -245,6 +251,7 @@ export const Atom = (
 					nextUrl: async () => '',
 					prevUrl: async () => '',
 				},
+				_atom: {},
 				items: (c.feed.entry ?? []).map((i: s.Infer<typeof EntryKind>) => ({
 					id: i.id._text,
 					url: Array.isArray(i.link)
@@ -269,7 +276,7 @@ export const Atom = (
 					content: {
 						html: i.content?._cdata,
 						makrdown: '',
-						text: i.content?._text
+						text: i.content?._text,
 					},
 					dates: {
 						modified: i.updated ? new Date(i.updated._text).getTime() : Date.now(),
@@ -281,6 +288,7 @@ export const Atom = (
 					},
 					attachments: [],
 					expires: undefined,
+					_atom: {},
 				})),
 			};
 		},

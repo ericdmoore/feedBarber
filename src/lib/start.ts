@@ -6,6 +6,7 @@
 
 import type { IDictValidPayloadTypes } from './pickType.ts';
 import { parseAndPickType, typedValidation } from './pickType.ts';
+import { validatedInputToAst } from './parsers/ast.ts';
 
 export const start = async (url: string) => {
 	const remoteData = await fetch(url);
@@ -118,6 +119,13 @@ const allKindsprinter = (url: string, t: IDictValidPayloadTypes) => {
 					.then((t) => {
 						allKindsprinter(url, t);
 						return t;
+					})
+					.then((d) => {
+						return validatedInputToAst(d);
+					})
+					.then((d) => {
+						console.log('2: ', d);
+						return d;
 					})
 					.catch((er) => {
 						console.error('CAUGHT THE ERROR in ', url);

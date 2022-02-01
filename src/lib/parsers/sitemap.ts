@@ -1,4 +1,4 @@
-import type { ASTcomputable } from "./ast.ts"
+import type { ASTcomputable } from './ast.ts';
 import { superstruct, toXml } from '../../mod.ts';
 import { IValidate } from '../../types.ts';
 import { InnerText } from './helpers/composedPrimitives.ts';
@@ -209,66 +209,73 @@ export const Sitemap = (compactParse: unknown): IValidate<RespStruct> => {
 		toXML: () => toXml.js2xml(compactParse as RespStruct, { compact: true }),
 		// fromAST : (inmput: ASTcomputable | ASTjson ):Promise<RespStruct>=> {},
 		toAST: async (): Promise<ASTcomputable> => {
-			const c = compactParse as RespStruct
+			const c = compactParse as RespStruct;
 			return {
-				title : 'feed from ...',
+				title: 'feed from ...',
 				description: 'this feed is generated from a sitemap',
 				language: 'en-US',
 
 				links: {
-					homeUrl: '', 
-					feedUrl: ""
+					homeUrl: '',
+					feedUrl: '',
 				},
-				images:{ 
-					icon: '', 
-					favicon:'', 
-					bannerImage:''
+				images: {
+					icon: '',
+					favicon: '',
+					bannerImage: '',
 				},
-				paging: { 
-					nextUrl:'', 
-					prevUrl:'', 
-					itemCount:0 
+				paging: {
+					nextUrl: '',
+					prevUrl: '',
+					itemCount: 0,
 				},
-				authors: async () =>  {return [{name:''}]},
-				_sitemap:{},
+				authors: async () => {
+					return [{ name: '' }];
+				},
+				_sitemap: {},
 				items: (c.urlset?.url ?? []).map((u) => {
 					return {
 						id: u.loc._text,
 						url: u.loc._text,
-						language:'en-US',
+						language: 'en-US',
 
 						title: async () => '',
 						summary: async () => '',
-						authors: async ()=> { return [{name:''}]},
+						authors: async () => {
+							return [{ name: '' }];
+						},
 
-						content:{
+						content: {
 							html: async () => '',
 							makrdown: async () => '',
-							text: async () =>'',
+							text: async () => '',
 						},
-						dates:{
-							published: async ()=> -1,
-							modified: async ()=> -1,
+						dates: {
+							published: async () => -1,
+							modified: async () => -1,
 						},
 
-						images:{
+						images: {
 							bannerImage: async () => '',
 							indexImage: async () => '',
 						},
-						
-						links:{
+
+						links: {
 							nextPost: async () => '',
 							prevPost: async () => '',
 							category: async () => '',
 							tags: async () => [''],
 							externalURLs: async () => [''],
 						},
-						attachments: async () => { return [{ url:'', mimeType:''}] },
-						// expires: undefined
-					}
-				})
-			}
-		}
+						attachments: async () => {
+							return [{ url: '', mimeType: '' }];
+						},
+						expires: undefined,
+						_sitemap: {},
+					};
+				}),
+			};
+		},
 	};
 };
 export default Sitemap;

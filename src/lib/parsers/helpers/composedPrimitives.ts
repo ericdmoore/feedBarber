@@ -64,32 +64,32 @@ export const LinkedVersionedTextOrCData = partial(object({
 	_cdata: string(),
 }));
 
-export interface ITextWithCData { 
-	_text?:string
-	_cdata?:string 
+export interface ITextWithCData {
+	_text?: string;
+	_cdata?: string;
 }
 
-export const pickText:IPickerFn = (data?:ITextWithCData)=>{
-	return data?._text
-}
-export const pickCData:IPickerFn = (data?:ITextWithCData)=>{
-	return data?._cdata
-}
+export const pickText: IPickerFn = (data?: ITextWithCData) => {
+	return data?._text;
+};
+export const pickCData: IPickerFn = (data?: ITextWithCData) => {
+	return data?._cdata;
+};
 
-type IPickerFn = (data?:ITextWithCData) => string | undefined
-type PickerReducerFnPriorType  = string | ITextWithCData | undefined 
-export const pickFromObject = (defaul:string, ...pickers: IPickerFn[] ) => 
-	(data?:ITextWithCData) => {
+type IPickerFn = (data?: ITextWithCData) => string | undefined;
+type PickerReducerFnPriorType = string | ITextWithCData | undefined;
+export const pickFromObject = (defaul: string, ...pickers: IPickerFn[]) =>
+	(data?: ITextWithCData) => {
 		const picked = pickers.reduce(
-			(prior :PickerReducerFnPriorType , picker: IPickerFn) => {
-				return typeof prior ==='string' 
-					? prior 
-					: picker(prior)},
-			data as PickerReducerFnPriorType) as string | undefined
-		return picked ?? defaul
-	}
+			(prior: PickerReducerFnPriorType, picker: IPickerFn) => {
+				return typeof prior === 'string' ? prior : picker(prior);
+			},
+			data as PickerReducerFnPriorType,
+		) as string | undefined;
+		return picked ?? defaul;
+	};
 
-export const txtorCData = (d:string, data?:ITextWithCData) => pickFromObject(d, pickText, pickCData)(data)
-
+export const txtorCData = (d: string, data?: ITextWithCData) =>
+	pickFromObject(d, pickText, pickCData)(data);
 
 export const Generator = LinkedVersionedTextOrCData;

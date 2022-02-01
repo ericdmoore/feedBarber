@@ -1,0 +1,11 @@
+{
+  "scriptId": "80",
+  "url": "file:///Users/ericmoore/Web/feedBarber/src/tests/mocks/definedDish.ts",
+  "functions": [
+    {
+      "functionName": "",
+      "ranges": [{ "startOffset": 0, "endOffset": 236, "count": 1 }],
+      "isBlockCoverage": true
+    }
+  ]
+}

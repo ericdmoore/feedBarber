@@ -1,0 +1,6 @@
+{
+	"imports": {
+		"hast": "./mods/hast.ts",
+		"unist": "./mods/unist.ts"
+	}
+}

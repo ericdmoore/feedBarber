@@ -58,17 +58,17 @@ const astToShell = async (
 		},
 		// items: {
 		// 	stream: () => {},
-		// 	asyncIter: () => {},
+		// 	iter: () => {},
 		//  all: () => {}
 		// },
 		next: async () => {
 			const { val } = await parser.next();
-			ast = await parser.clone(val).toAST()
+			ast = await parser.clone(val).toAST();
 			return astToShell(parser, ast, pos);
 		},
 		prev: async () => {
 			const { val } = await parser.prev();
-			ast = await parser.clone(val).toAST()
+			ast = await parser.clone(val).toAST();
 			return astToShell(parser, ast, pos);
 		},
 		use: async (fns) => {
@@ -83,7 +83,7 @@ const astToShell = async (
 		},
 		toXML: () => {
 			// ast ? parser.fromAST(ast).toXml() : parser.
-			return ''
+			return '';
 		},
 	};
 };
@@ -159,7 +159,7 @@ export const ASTFeedItemJson = type({
 	content: object({
 		html: optional(string()),
 		text: optional(string()),
-		makrdown: optional(string()),
+		markdown: optional(string()),
 	}),
 
 	images: object({
@@ -178,12 +178,12 @@ export const ASTFeedItemJson = type({
 		nextPost: optional(string()),
 		prevPost: optional(string()),
 	}),
-	
+
 	authors: nonempty(array(ASTAuthor)),
 	expires: optional(number()),
 
 	attachments: optional(array(ASTAttachment)),
-	
+
 	_: record(string(), unknown()),
 	_rss: record(string(), unknown()),
 	_atom: record(string(), unknown()),
@@ -201,7 +201,7 @@ export const ASTFeedItemThunk = type({
 	content: object({
 		html: optional(eitherThunkOr(string())),
 		text: optional(eitherThunkOr(string())),
-		makrdown: optional(eitherThunkOr(string())),
+		markdown: optional(eitherThunkOr(string())),
 	}),
 
 	images: type({
@@ -218,19 +218,19 @@ export const ASTFeedItemThunk = type({
 			Thunk<number>(),
 		])),
 	}),
-	
-	_rss: optional(union([ record(string(), unknown()), Thunk<Record<string, unknown>>() ])),
-	_atom: optional(union([ record(string(), unknown()), Thunk<Record<string, unknown>>() ])),
-	_sitemap: optional(union([ record(string(), unknown()), Thunk<Record<string, unknown>>() ])),
-	__analysis: optional(union([ record(string(), unknown()), Thunk<Record<string, unknown>>() ])),
-	__enhancement: optional(union([ record(string(), unknown()), Thunk<Record<string, unknown>>() ])),
+
+	_rss: optional(union([record(string(), unknown()), Thunk<Record<string, unknown>>()])),
+	_atom: optional(union([record(string(), unknown()), Thunk<Record<string, unknown>>()])),
+	_sitemap: optional(union([record(string(), unknown()), Thunk<Record<string, unknown>>()])),
+	__analysis: optional(union([record(string(), unknown()), Thunk<Record<string, unknown>>()])),
+	__enhancement: optional(union([record(string(), unknown()), Thunk<Record<string, unknown>>()])),
 
 	links: type({
 		nextPost: optional(eitherThunkOr(string())),
 		prevPost: optional(eitherThunkOr(string())),
 		category: optional(eitherThunkOr(string())),
-		tags: optional(union([ array(string()), Thunk<string[]>() ])),
-		externalURLs: optional(union([ array(string()), Thunk<string[]>() ])),
+		tags: optional(union([array(string()), Thunk<string[]>()])),
+		externalURLs: optional(union([array(string()), Thunk<string[]>()])),
 	}),
 
 	authors: optional(union([
@@ -280,11 +280,11 @@ export const ASTKindJson = type({
 		tokenData: string(),
 		feedEvents: optional(nonempty(array(EventStreamKind))),
 	})),
-	_rss: optional(  record(string(), unknown()) ), // [tagName]: value
-	_atom: optional(  record(string(), unknown()) ),
-	_sitemap: optional(  record(string(), unknown()) ),
-	__analysis: optional(  record(string(), unknown()) ), // [pluginName]: {someObject or value}
-	__enhancement: optional(  record(string(), unknown()) ), // [pluginName]: {someObject or value}
+	_rss: optional(record(string(), unknown())), // [tagName]: value
+	_atom: optional(record(string(), unknown())),
+	_sitemap: optional(record(string(), unknown())),
+	__analysis: optional(record(string(), unknown())), // [pluginName]: {someObject or value}
+	__enhancement: optional(record(string(), unknown())), // [pluginName]: {someObject or value}
 });
 
 export const ASTKindComputable = type({
@@ -314,20 +314,26 @@ export const ASTKindComputable = type({
 		feedUrl: eitherThunkOr(string()),
 	})),
 
-	items: union([
-		Thunk<typeof ASTFeedItemThunk.TYPE[]>(),
-		array(ASTFeedItemThunk),
-	]),
+	item: object({
+		list: union([
+			array(ASTFeedItemThunk),
+			Thunk<typeof ASTFeedItemThunk.TYPE[]>(),
+		]),
+		next: union([
+			array(ASTFeedItemThunk),
+			Thunk<typeof ASTFeedItemThunk.TYPE[]>(),
+		]),
+	}),
 
 	eventStreamFromViewer: optional(object({
 		tokenData: eitherThunkOr(string()),
 		feedEvents: optional(nonempty(array(EventStreamKind))),
 	})),
-	_rss: optional(union([ record(string(), unknown()), Thunk<Record<string, unknown>>() ])),
-	_atom: optional(union([ record(string(), unknown()), Thunk<Record<string, unknown>>() ])),
-	_sitemap: optional(union([ record(string(), unknown()), Thunk<Record<string, unknown>>() ])),
-	__analysis: optional(union([ record(string(), unknown()), Thunk<Record<string, unknown>>() ])),
-	__enhancement: optional(union([ record(string(), unknown()), Thunk<Record<string, unknown>>() ])),
+	_rss: optional(union([record(string(), unknown()), Thunk<Record<string, unknown>>()])),
+	_atom: optional(union([record(string(), unknown()), Thunk<Record<string, unknown>>()])),
+	_sitemap: optional(union([record(string(), unknown()), Thunk<Record<string, unknown>>()])),
+	__analysis: optional(union([record(string(), unknown()), Thunk<Record<string, unknown>>()])),
+	__enhancement: optional(union([record(string(), unknown()), Thunk<Record<string, unknown>>()])),
 });
 
 export type ASTjson = s.Infer<typeof ASTKindJson>;

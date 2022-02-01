@@ -1,5 +1,7 @@
 import type { ISupportedTypes } from './lib/pickType.ts';
-import type { AST } from './lib/parsers/ast.ts';
+import type { AST as _AST, ASTcomputable } from './lib/parsers/ast.ts';
+import type { Node as _Node } from './mods/unist.ts';
+import { vfile } from './mod.ts';
 
 export type PaginationResp<T> = Promise<
 	{ val: T; canPrev: boolean; canNext: boolean }
@@ -14,11 +16,11 @@ export interface IValidate<T> {
 	prev: () => PaginationResp<T>;
 	next: () => PaginationResp<T>;
 	toXML: () => string;
-	toAST: () => Promise<AST>;
+	toAST: () => Promise<_AST>;
 }
 
 export interface ASTShell {
-	ast: AST;
+	ast: _AST;
 	pos: {
 		pageBy: number;
 		total: number;
@@ -40,3 +42,15 @@ export type ReducerFn = (
 ) => Promise<ASTShell>;
 
 export type MapperFn = (input: ASTShell) => Promise<ASTShell>;
+export type AST = _AST;
+export type ASTComputable = ASTcomputable;
+
+export type UnifiedAttacher = (...options: unknown[]) => UnfiedTransformer;
+export type UnfiedTransformer = (
+	node: _Node,
+	file: vfile.VFile,
+	next: UnfiedTransformer,
+) => Promise<_Node>;
+
+export type Node = _Node
+export type VFile = vfile.VFile
