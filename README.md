@@ -43,7 +43,22 @@ You then subscribe to the proxied-url like these exmaples:
 - `https://thefeedBarber.com/{{userID}}/rss/{{enhance1_ID}}/somesite.com/feed.xml`
 - `https://thefeedBarber.com/{{userID}}/atom/{{enhance2_ID}}/anemicsite.com/atom.xml`
 
-## Finding Enhancements
+
+## Developers Note
+
+This project uses a `makefile` insead of `package.json#scripts` as the script runner
+
+```bash
+$> make
+
+Available make commands:
+
+fmt
+start
+test
+  ...
+  ...
+```
 
 ### Selling Enhancements
 
