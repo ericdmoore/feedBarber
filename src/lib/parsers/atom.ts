@@ -14,8 +14,10 @@
 // _text: () => 'move to _cdata'
 // _cdata
 import type { ASTcomputable } from '../parsers/ast.ts';
+import type { TypedValidator } from '../pickType.ts';
 import { superstruct as s, toXml } from '../../mod.ts';
 import { IValidate } from '../../types.ts';
+
 import {
 	Generator,
 	InnerText,
@@ -139,8 +141,8 @@ type ValidationError = s.StructError | undefined;
 export type RespStruct = typeof AtomResponse.TYPE;
 // export type AtomValidator = IValidate<RespStruct> extends IValidate
 
-export const Atom = (
-	compactParse = {} as RespStruct | unknown,
+export const Atom: TypedValidator = (
+	compactParse: RespStruct | unknown,
 ): IValidate<RespStruct> => {
 	const structs = {
 		feed: AtomFeedKind,
@@ -252,44 +254,47 @@ export const Atom = (
 					prevUrl: async () => '',
 				},
 				_atom: {},
-				items: (c.feed.entry ?? []).map((i: s.Infer<typeof EntryKind>) => ({
-					id: i.id._text,
-					url: Array.isArray(i.link)
-						? i.link.filter((l: s.Infer<typeof Link>) => l._attributes.rel === 'self')[0]
-							._attributes.href ?? ''
-						: i.link._attributes.href ?? '',
-					title: i.title._text ?? i.title._cdata ?? '',
-					summary: i.summary?._cdata ?? i.summary?._text ?? '>> no summary <<',
-					language: 'en-US',
-					authors: [{
-						name: txtorCData('', i.author?.name),
-						email: txtorCData('', i.author?.email),
-						url: txtorCData('', i.author?.uri),
-					}],
-					links: {
-						category: 'uncategorized',
-						tags: [],
-						externalURLs: [],
-						nextPost: '',
-						prevPost: '',
-					},
-					content: {
-						html: i.content?._cdata,
-						makrdown: '',
-						text: i.content?._text,
-					},
-					dates: {
-						modified: i.updated ? new Date(i.updated._text).getTime() : Date.now(),
-						published: i.published ? new Date(i.published._text).getTime() : Date.now(),
-					},
-					images: {
-						bannerImage: '',
-						indexImage: '',
-					},
-					attachments: [],
-					expires: undefined,
-					_atom: {},
-				})),
+				item: {
+					next: async () => [],
+					list: (c.feed.entry ?? []).map((i: s.Infer<typeof EntryKind>) => ({
+						id: i.id._text,
+						url: Array.isArray(i.link)
+							? i.link.filter((l: s.Infer<typeof Link>) => l._attributes.rel === 'self')[0]
+								._attributes.href ?? ''
+							: i.link._attributes.href ?? '',
+						title: i.title._text ?? i.title._cdata ?? '',
+						summary: i.summary?._cdata ?? i.summary?._text ?? '>> no summary <<',
+						language: 'en-US',
+						authors: [{
+							name: txtorCData('', i.author?.name),
+							email: txtorCData('', i.author?.email),
+							url: txtorCData('', i.author?.uri),
+						}],
+						links: {
+							category: 'uncategorized',
+							tags: [],
+							externalURLs: [],
+							nextPost: '',
+							prevPost: '',
+						},
+						content: {
+							html: i.content?._cdata,
+							makrdown: '',
+							text: i.content?._text,
+						},
+						dates: {
+							modified: i.updated ? new Date(i.updated._text).getTime() : Date.now(),
+							published: i.published ? new Date(i.published._text).getTime() : Date.now(),
+						},
+						images: {
+							bannerImage: '',
+							indexImage: '',
+						},
+						attachments: [],
+						expires: undefined,
+						_atom: {},
+					})),
+				},
 			};
 		},
 	};

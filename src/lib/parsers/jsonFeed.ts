@@ -3,6 +3,7 @@
 // validate the response
 
 import type { IValidate } from '../../types.ts';
+import type { ISupportedTypes, TypedValidator } from '../pickType.ts';
 import { superstruct as s, toXml } from '../../mod.ts';
 import type { ASTcomputable } from './ast.ts';
 import er from './helpers/error.ts';
@@ -96,12 +97,10 @@ export const JsonFeedKind = type({
 
 export type RespStruct = typeof JsonFeedKind.TYPE;
 
-export const JsonFeed = (
+export const JsonFeed: TypedValidator = (
 	compactParse: RespStruct | unknown,
 ): IValidate<RespStruct> => {
-	const structs = {
-		response: JsonFeedKind,
-	};
+	const structs = { response: JsonFeedKind };
 
 	return {
 		inputKind: 'jsonFeed',
@@ -237,59 +236,62 @@ export const JsonFeed = (
 						},
 					],
 				},
-				items: c.items.map((i: typeof JsonFeedItem.TYPE) => ({
-					id: i.id,
-					url: i.url,
-					title: i.title,
-					summary: i.summary,
-					language: i.language ?? 'en-US',
+				item: {
+					next: async () => [],
+					list: c.items.map((i: typeof JsonFeedItem.TYPE) => ({
+						id: i.id,
+						url: i.url,
+						title: i.title,
+						summary: i.summary,
+						language: i.language ?? 'en-US',
 
-					authors: Array.isArray(i.authors)
-						? i.authors.map((a) => ({
-							name: a.name,
-							email: undefined,
-							imageUrl: a.avatar,
-							url: a.url,
-						}))
-						: i.author
-						? [{
-							name: i.author.name,
-							imageUrl: i.author.avatar,
-							url: i.author.url,
-							email: undefined,
-						}]
-						: [{ name: '', imageUrl: undefined, url: undefined, email: undefined }],
-					content: {
-						html: i.content_html,
-						makrdown: i.content_makrdown,
-						text: i.content_text,
-					},
-					dates: {
-						modified: i.date_modified ? (new Date(i.date_modified)).getTime() : Date.now(),
-						published: i.date_published ? (new Date(i.date_published)).getTime() : Date.now(),
-					},
-					images: {
-						bannerImage: async () => '',
-						indexImage: async () => '',
-					},
-					links: {
-						category: '',
-						externalURLs: [],
-						nextPost: '',
-						prevPost: '',
-					},
-					expires: undefined,
-					attachments: async () =>
-						(i.attachments ?? []).map((a) => {
-							return {
+						authors: Array.isArray(i.authors)
+							? i.authors.map((a) => ({
+								name: a.name,
+								email: undefined,
+								imageUrl: a.avatar,
 								url: a.url,
-								title: a.title,
-								mimeType: a.mime_type,
-								sizeInBytes: a.size_in_bytes,
-								durationInSeconds: a.duration_in_seconds,
-							};
-						}),
-				})),
+							}))
+							: i.author
+							? [{
+								name: i.author.name,
+								imageUrl: i.author.avatar,
+								url: i.author.url,
+								email: undefined,
+							}]
+							: [{ name: '', imageUrl: undefined, url: undefined, email: undefined }],
+						content: {
+							html: i.content_html,
+							makrdown: i.content_makrdown,
+							text: i.content_text,
+						},
+						dates: {
+							modified: i.date_modified ? (new Date(i.date_modified)).getTime() : Date.now(),
+							published: i.date_published ? (new Date(i.date_published)).getTime() : Date.now(),
+						},
+						images: {
+							bannerImage: async () => '',
+							indexImage: async () => '',
+						},
+						links: {
+							category: '',
+							externalURLs: [],
+							nextPost: '',
+							prevPost: '',
+						},
+						expires: undefined,
+						attachments: async () =>
+							(i.attachments ?? []).map((a) => {
+								return {
+									url: a.url,
+									title: a.title,
+									mimeType: a.mime_type,
+									sizeInBytes: a.size_in_bytes,
+									durationInSeconds: a.duration_in_seconds,
+								};
+							}),
+					})),
+				},
 			};
 		},
 	};

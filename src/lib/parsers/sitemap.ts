@@ -1,4 +1,5 @@
 import type { ASTcomputable } from './ast.ts';
+import type { ISupportedTypes, TypedValidator } from '../pickType.ts';
 import { superstruct, toXml } from '../../mod.ts';
 import { IValidate } from '../../types.ts';
 import { InnerText } from './helpers/composedPrimitives.ts';
@@ -102,7 +103,9 @@ export const expand = async (compactParse: RespStruct): Promise<RespStruct> => {
 	};
 };
 
-export const Sitemap = (compactParse: unknown): IValidate<RespStruct> => {
+export const Sitemap: TypedValidator = (
+	compactParse: unknown | RespStruct,
+): IValidate<RespStruct> => {
 	let isValidated = false;
 	return {
 		_: {} as RespStruct,
@@ -233,47 +236,50 @@ export const Sitemap = (compactParse: unknown): IValidate<RespStruct> => {
 					return [{ name: '' }];
 				},
 				_sitemap: {},
-				items: (c.urlset?.url ?? []).map((u) => {
-					return {
-						id: u.loc._text,
-						url: u.loc._text,
-						language: 'en-US',
+				item: {
+					next: async () => [],
+					list: (c.urlset?.url ?? []).map((u) => {
+						return {
+							id: u.loc._text,
+							url: u.loc._text,
+							language: 'en-US',
 
-						title: async () => '',
-						summary: async () => '',
-						authors: async () => {
-							return [{ name: '' }];
-						},
+							title: async () => '',
+							summary: async () => '',
+							authors: async () => {
+								return [{ name: '' }];
+							},
 
-						content: {
-							html: async () => '',
-							makrdown: async () => '',
-							text: async () => '',
-						},
-						dates: {
-							published: async () => -1,
-							modified: async () => -1,
-						},
+							content: {
+								html: async () => '',
+								makrdown: async () => '',
+								text: async () => '',
+							},
+							dates: {
+								published: async () => -1,
+								modified: async () => -1,
+							},
 
-						images: {
-							bannerImage: async () => '',
-							indexImage: async () => '',
-						},
+							images: {
+								bannerImage: async () => '',
+								indexImage: async () => '',
+							},
 
-						links: {
-							nextPost: async () => '',
-							prevPost: async () => '',
-							category: async () => '',
-							tags: async () => [''],
-							externalURLs: async () => [''],
-						},
-						attachments: async () => {
-							return [{ url: '', mimeType: '' }];
-						},
-						expires: undefined,
-						_sitemap: {},
-					};
-				}),
+							links: {
+								nextPost: async () => '',
+								prevPost: async () => '',
+								category: async () => '',
+								tags: async () => [''],
+								externalURLs: async () => [''],
+							},
+							attachments: async () => {
+								return [{ url: '', mimeType: '' }];
+							},
+							expires: undefined,
+							_sitemap: {},
+						};
+					}),
+				},
 			};
 		},
 	};

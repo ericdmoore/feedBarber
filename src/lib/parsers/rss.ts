@@ -3,6 +3,7 @@
 // validate the response
 
 import type { ASTcomputable } from './ast.ts';
+import type { ISupportedTypes, TypedValidator } from '../pickType.ts';
 import { superstruct, toXml } from '../../mod.ts';
 import { IValidate } from '../../types.ts';
 import er from './helpers/error.ts';
@@ -72,7 +73,7 @@ export const RssResponse = object({
 
 export type RespStruct = typeof RssResponse.TYPE;
 
-export const Rss = (
+export const Rss: TypedValidator = (
 	compactParse: RespStruct | unknown,
 ): IValidate<RespStruct> => {
 	const structs = {
@@ -178,66 +179,68 @@ export const Rss = (
 					prevUrl: '',
 				},
 				_rss: {},
-				items: (c.rss.channel.item ?? []).map((i) => {
-					return {
-						title: txtorCData('', i.title),
-						summary: txtorCData('', i.description),
-						language: txtorCData('en-US', c.rss.channel.language),
-						url: txtorCData('_gone', i.link),
-						id: txtorCData('_gone', i.guid),
-						authors: [{
-							name: txtorCData('>>anonymous<<', i['dc:creator']),
-							email: undefined,
-							url: undefined,
-							imageURL: undefined,
-						}],
-						content: {
-							htmlL: txtorCData('Err: 105 - Missing Content', i['content:encoded']),
-							makrdown: undefined,
-							text: undefined,
-						},
-						images: {
-							indexImage: undefined,
-							bannerImage: undefined,
-						},
-						dates: { published: 0, modified: 0 },
-						links: {
-							category: txtorCData('', i.category),
-							nextPost: undefined,
-							prevPost: undefined,
-							tags: [],
-							externalURLs: [],
-						},
-						_rss: {},
-						expires: undefined,
-						attachments: Array.isArray(i.enclosure)
-							? i.enclosure.filter((e) => e?._attributes.type && e?._attributes.url).map((e) => {
-								return {
+				item: {
+					next: async () => [],
+					list: (c.rss.channel.item ?? []).map((i) => {
+						return {
+							title: txtorCData('', i.title),
+							summary: txtorCData('', i.description),
+							language: txtorCData('en-US', c.rss.channel.language),
+							url: txtorCData('_gone', i.link),
+							id: txtorCData('_gone', i.guid),
+							authors: [{
+								name: txtorCData('>>anonymous<<', i['dc:creator']),
+								email: undefined,
+								url: undefined,
+								imageURL: undefined,
+							}],
+							content: {
+								htmlL: txtorCData('Err: 105 - Missing Content', i['content:encoded']),
+								makrdown: undefined,
+								text: undefined,
+							},
+							images: {
+								indexImage: undefined,
+								bannerImage: undefined,
+							},
+							dates: { published: 0, modified: 0 },
+							links: {
+								category: txtorCData('', i.category),
+								nextPost: undefined,
+								prevPost: undefined,
+								tags: [],
+								externalURLs: [],
+							},
+							_rss: {},
+							expires: undefined,
+							attachments: Array.isArray(i.enclosure)
+								? i.enclosure.filter((e) => e?._attributes.type && e?._attributes.url).map((e) => {
+									return {
+										durationInSeconds: 0,
+										sizeInBytes:
+											e?._attributes.length && !Number.isNaN(Number.parseInt(e?._attributes.length))
+												? Number.parseInt(e?._attributes.length)
+												: undefined,
+										mimeType: e?._attributes.type as string,
+										url: e?._attributes.url as string,
+										title: e?._attributes.url as string,
+									};
+								})
+								: i.enclosure?._attributes.type && i.enclosure?._attributes.url
+								? [{
 									durationInSeconds: 0,
-									sizeInBytes:
-										e?._attributes.length && !Number.isNaN(Number.parseInt(e?._attributes.length))
-											? Number.parseInt(e?._attributes.length)
-											: undefined,
-									mimeType: e?._attributes.type as string,
-									url: e?._attributes.url as string,
-									title: e?._attributes.url as string,
-								};
-							})
-							: i.enclosure?._attributes.type && i.enclosure?._attributes.url
-							? [{
-								durationInSeconds: 0,
-								sizeInBytes:
-									i.enclosure?._attributes.length &&
-										!Number.isNaN(Number.parseInt(i.enclosure?._attributes.length))
+									sizeInBytes: i.enclosure?._attributes.length &&
+											!Number.isNaN(Number.parseInt(i.enclosure?._attributes.length))
 										? Number.parseInt(i.enclosure?._attributes.length)
 										: undefined,
-								mimeType: i.enclosure?._attributes.type ?? '',
-								url: i.enclosure?._attributes.url ?? '',
-								title: i.enclosure?._attributes.url ?? '',
-							}]
-							: [],
-					};
-				}),
+									mimeType: i.enclosure?._attributes.type ?? '',
+									url: i.enclosure?._attributes.url ?? '',
+									title: i.enclosure?._attributes.url ?? '',
+								}]
+								: [],
+						};
+					}),
+				},
 			};
 		},
 	};

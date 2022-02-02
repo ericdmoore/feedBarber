@@ -7,6 +7,7 @@
 import type { IDictValidPayloadTypes } from './pickType.ts';
 import { parseAndPickType, typedValidation } from './pickType.ts';
 import { validatedInputToAst } from './parsers/ast.ts';
+import { astShell } from './parsers/ast.ts';
 
 export const start = async (url: string) => {
 	const remoteData = await fetch(url);
@@ -15,12 +16,12 @@ export const start = async (url: string) => {
 
 export const urls = {
 	_sitemaps: [
-		// "https://danluu.com/sitemap.xml",
+		'https://danluu.com/sitemap.xml',
 		// "https://daringfireball.net/sitemap.xml",
 		// "https://flyingmeat.com/sitemap.xml",
 		// "https://www.manton.org/sitemap.xml",
 		// "https://timetable.manton.org/sitemap.xml",
-		'https://thedefineddish.com/sitemap_index.xml',
+		// 'https://thedefineddish.com/sitemap_index.xml',
 	],
 	_rss: [
 		// "https://danluu.com/atom.xml", // is actually rss
@@ -121,10 +122,13 @@ const allKindsprinter = (url: string, t: IDictValidPayloadTypes) => {
 						return t;
 					})
 					.then((d) => {
-						return validatedInputToAst(d);
+						return astShell(d.parser, validatedInputToAst(d));
 					})
 					.then((d) => {
 						console.log('2: ', d);
+						return d;
+					})
+					.then((d) => {
 						return d;
 					})
 					.catch((er) => {

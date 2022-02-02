@@ -52,5 +52,5 @@ export type UnfiedTransformer = (
 	next: UnfiedTransformer,
 ) => Promise<_Node>;
 
-export type Node = _Node
-export type VFile = vfile.VFile
+export type Node = _Node;
+export type VFile = vfile.VFile;

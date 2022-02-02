@@ -42,7 +42,7 @@ export const validatedInputToAst = async (
 	}
 };
 
-const astToShell = async (
+const astShell = async (
 	parser: IValidate<ISupportedTypes>,
 	ast?: AST,
 	pos: { pageBy: number; cur: number } = { pageBy: 50, cur: 0 },
@@ -64,17 +64,17 @@ const astToShell = async (
 		next: async () => {
 			const { val } = await parser.next();
 			ast = await parser.clone(val).toAST();
-			return astToShell(parser, ast, pos);
+			return astShell(parser, ast, pos);
 		},
 		prev: async () => {
 			const { val } = await parser.prev();
 			ast = await parser.clone(val).toAST();
-			return astToShell(parser, ast, pos);
+			return astShell(parser, ast, pos);
 		},
 		use: async (fns) => {
 			return fns.reduce(
 				async (p, f) => f(await p),
-				astToShell(
+				astShell(
 					parser,
 					ast ?? await parser.toAST(),
 					pos,
