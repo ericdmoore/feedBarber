@@ -17,6 +17,8 @@ import type { ASTcomputable } from '../parsers/ast.ts';
 import type { TypedValidator } from '../pickType.ts';
 import { superstruct as s, toXml } from '../../mod.ts';
 import { IValidate } from '../../types.ts';
+import { Rss } from './rss.ts';
+import { JsonFeed } from './jsonFeed.ts';
 
 import {
 	Generator,
@@ -141,7 +143,7 @@ type ValidationError = s.StructError | undefined;
 export type RespStruct = typeof AtomResponse.TYPE;
 // export type AtomValidator = IValidate<RespStruct> extends IValidate
 
-export const Atom: TypedValidator = (
+export const Atom = ((
 	compactParse: RespStruct | unknown,
 ): IValidate<RespStruct> => {
 	const structs = {
@@ -221,6 +223,22 @@ export const Atom: TypedValidator = (
 				compact: true,
 			});
 		},
+		fromAST: async (input: ASTcomputable): Promise<RespStruct> => {
+			return compactParse as RespStruct;
+		},
+		exportAs: async (type: 'rss' | 'atom' | 'jsonfeed'): Promise<string> => {
+			const ast = await Rss(compactParse).toAST() as ASTcomputable;
+
+			switch (type) {
+				case 'rss':
+					return Rss(await Rss({}).fromAST(ast)).toXML();
+				case 'atom':
+					return Atom(await Atom({}).fromAST(ast)).toXML();
+				case 'jsonfeed':
+					return JsonFeed(await JsonFeed({}).fromAST(ast)).toXML();
+			}
+			return '';
+		},
 		/**
 		 * Contains logic to get the Syntax to an AST repr
 		 * @returns ASTShell
@@ -230,7 +248,7 @@ export const Atom: TypedValidator = (
 			return {
 				title: txtorCData('>> no title << ', c.feed.title),
 				description: txtorCData('>> no description <<', c.feed.subtitle),
-				language: 'en-US',
+				language: c.feed._attributes?.['xml:lang'] ?? 'en-US',
 				authors: [{
 					name: txtorCData('_missing name', c.feed.author?.name),
 					url: txtorCData('_missing url', c.feed.author?.uri),
@@ -242,9 +260,13 @@ export const Atom: TypedValidator = (
 					bannerImage: typeof c.feed.logo === 'string' ? c.feed.logo : c.feed.logo?._text ?? '',
 				},
 				links: {
-					feedUrl: async () => '',
+					feedUrl: async (): Promise<string> => {
+						return '';
+					},
 					homeUrl: Array.isArray(c.feed.link)
-						? c.feed.link.filter((l: s.Infer<typeof Link>) => l._attributes.rel === 'self')[0]
+						? c.feed.link.filter(
+							(l: s.Infer<typeof Link>) => l._attributes.rel === 'self',
+						)[0]
 							._attributes.href ?? ''
 						: c.feed.link._attributes.href ?? '',
 				},
@@ -264,7 +286,7 @@ export const Atom: TypedValidator = (
 							: i.link._attributes.href ?? '',
 						title: i.title._text ?? i.title._cdata ?? '',
 						summary: i.summary?._cdata ?? i.summary?._text ?? '>> no summary <<',
-						language: 'en-US',
+						language: i._attributes?.['xml:lang'] ?? 'en-US',
 						authors: [{
 							name: txtorCData('', i.author?.name),
 							email: txtorCData('', i.author?.email),
@@ -298,4 +320,4 @@ export const Atom: TypedValidator = (
 			};
 		},
 	};
-};
+}) as TypedValidator;

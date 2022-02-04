@@ -1,7 +1,12 @@
-import type { ASTcomputable } from './ast.ts';
+import type { ASTcomputable, ASTFeedItemJson, ASTjson } from './ast.ts';
 import type { ISupportedTypes, TypedValidator } from '../pickType.ts';
 import { superstruct, toXml } from '../../mod.ts';
 import { IValidate } from '../../types.ts';
+import { computableToJson } from './ast.ts';
+import * as jf from './jsonFeed.ts';
+import * as atom from './atom.ts';
+import * as rss from './rss.ts';
+
 import { InnerText } from './helpers/composedPrimitives.ts';
 import { IDictUnionOfPayloadTypes, parseAndPickType } from '../pickType.ts';
 import er from './helpers/error.ts';
@@ -103,7 +108,7 @@ export const expand = async (compactParse: RespStruct): Promise<RespStruct> => {
 	};
 };
 
-export const Sitemap: TypedValidator = (
+export const Sitemap: TypedValidator = ((
 	compactParse: unknown | RespStruct,
 ): IValidate<RespStruct> => {
 	let isValidated = false;
@@ -111,10 +116,6 @@ export const Sitemap: TypedValidator = (
 		_: {} as RespStruct,
 		inputKind: 'sitemap',
 		clone: Sitemap,
-
-		/**
-		 * Need to expand the sitemapindex versions to a flattened urlLoc version
-		 */
 		validate: async (): Promise<RespStruct> => {
 			let err: superstruct.StructError | undefined;
 			let validated: unknown;
@@ -209,8 +210,56 @@ export const Sitemap: TypedValidator = (
 				canPrev: false,
 				canNext: false,
 			}),
-		toXML: () => toXml.js2xml(compactParse as RespStruct, { compact: true }),
-		// fromAST : (inmput: ASTcomputable | ASTjson ):Promise<RespStruct>=> {},
+		toXML: () => {
+			return toXml.js2xml(
+				compactParse as RespStruct,
+				{ compact: true },
+			);
+		},
+		fromAST: async (
+			_ast: ASTcomputable,
+			lastmod?: string,
+			priority?: string,
+			changefreq?: string,
+		): Promise<RespStruct> => {
+			const ast = await computableToJson(_ast);
+			const asInnerText = (s?: string) => {
+				return { _text: s };
+			};
+			return {
+				_declaration: {
+					_attributes: {
+						version: ast._sitemap?.version as string | undefined,
+						encoding: ast._sitemap?.encoding as string | undefined,
+						standalone: ast._sitemap?.standalone as string | undefined,
+					},
+				},
+				urlset: {
+					_attributes: {
+						xmlns: ast._sitemap?.urlset_xmlns as string | undefined,
+					},
+					url: ast.items.map((i) => {
+						return {
+							loc: asInnerText(i.url),
+							lastmod: asInnerText(lastmod),
+							priority: asInnerText(priority),
+							changefreq: asInnerText(changefreq),
+						};
+					}),
+				},
+			} as RespStruct;
+		},
+		exportAs: async (type: 'rss' | 'atom' | 'jsonfeed') => {
+			const ast: ASTcomputable = await Sitemap(compactParse).toAST();
+			switch (type) {
+				case 'rss':
+					return rss.Rss(await rss.Rss({}).fromAST(ast)).toXML();
+				case 'atom':
+					return atom.Atom(await atom.Atom({}).fromAST(ast)).toXML();
+				case 'jsonfeed':
+					return jf.JsonFeed(await jf.JsonFeed({}).fromAST(ast)).toXML();
+			}
+		},
 		toAST: async (): Promise<ASTcomputable> => {
 			const c = compactParse as RespStruct;
 			return {
@@ -283,5 +332,5 @@ export const Sitemap: TypedValidator = (
 			};
 		},
 	};
-};
+}) as TypedValidator;
 export default Sitemap;

@@ -1,67 +1,38 @@
-import { h, jsx, serve } from "https://deno.land/x/sift@0.4.3/mod.ts";
+/** @jsx h */
 
-const App = (title = 'Hello World!') => h(
-  'div', {}, [
-    h('h1',{}, [
-      title
-    ])
-  ]
-);
+import { h, jsx, serve } from 'https://deno.land/x/sift@0.4.3/mod.ts';
+import configure from './pages/configure.tsx';
+import create from './pages/create.tsx';
+import logout from './pages/logout.tsx';
+import newForm from './pages/new.tsx';
+import preview from './pages/preview.tsx';
+import proxy from './pages/proxy.ts';
+import signin from './pages/signin.tsx';
+import token from './pages/token.tsx';
+import user from './pages/user.tsx';
 
-const NotFound = () => h(
-  'div',{},[
-    h('h1', {},[ 'Page not found'])
-  ]
-);
+// @see  NOTES from '../../notes/accounts.md'
+
+const App = (title = 'Hello World!') => h('div', {}, [h('h1', {}, [title])]);
+
+const NotFound = () =>
+	h('div', {}, [
+		h('h1', {}, ['Page not found']),
+	]);
 
 serve({
-  "/": () => jsx(App()), // Home Page?
-  "/create": () => jsx(App('Create')), // User Auth
-  "/signin": () => jsx(App('SignIn')), // User Auth
-  "/logout": () => jsx(App('Logout')), // User Auth
-  "/new": () => jsx(App('New')), // Spit out a new token - 
-  "/t:token": () => jsx(App('Token Available Compositions')), // List Recpies availabel for the Token ?
-  "/u:user": () => jsx(App('User Available Compositions')), // List Recpies availabel for the Token ?
-  "/{u|t}:token/:outputFmt/:composition": () => jsx(App()), // Configure + Confirm Composition
-  "/:token/:outputFmt/:composition/preview/:url": () => jsx(App()), // Visualize the result of the composition
-  "/:token/:outputFmt/:composition/:url": () => jsx(App()), // Proxy URL
-  404: () => jsx(NotFound(), { status: 404 }),
+	'/': () => jsx(App()), // Home Page?
+	'/create': create,
+	'/signin': signin,
+	'/logout': logout,
+	'/new': newForm,
+	'/user': user,
+	'/t-:tempToken': token,
+	'/u-:userToken': token,
+	'/(u|t)-:userOrTempToken/:outputFmt/': configure('Configure From Scratch'),
+	'/(u|t)-:userOrTempToken/:outputFmt/:composition': configure(),
+	'/(u|t)-:userOrTempToken/:outputFmt/:composition/:url': proxy,
+	'/(u|t)-:userOrTempToken/:outputFmt/:composition/preview/:url': preview,
+	'/exhausted/:priorURL': () => jsx(App('Exhausted')), // Ask For
+	404: () => jsx(NotFound(), { status: 404 }),
 });
-
-
-// Token Types
-// temporary
-// user account: Basic 
-// user account: Advanced 
-// user account: Pro
-
-
-// # Temporary Token
-// One Composition Per Token
-// 60 days or 1k posts items/entries clean for free
-// Access To Public feedSalon
-// 
-// # User Accounts: 
-// 
-// ## Free
-// 1k posts cleaned free per month
-// Access To Paid + Public feedSalon
-// Access to `Feed Composer`
-// Barter Composition Credits 
-//
-//
-// ## Advanced:
-// Credit Card on file
-// 10k posts cleaned per month
-// Access To Paid + Public feedSalon
-// Access to `Feed Composer`
-// Composition Credits 1st covers your your bill and then accumulate as Bankable Credit
-// 
-//
-// ## Pro:
-// Credit Card on file
-// 20k posts cleaned per month
-// Access To Paid + Public feedSalon
-// Access to `Feed Composer`
-// All Credits are Bankable Credit
-// 

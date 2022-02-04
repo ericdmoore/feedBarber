@@ -42,7 +42,7 @@ export const validatedInputToAst = async (
 	}
 };
 
-const astShell = async (
+export const astShell = async (
 	parser: IValidate<ISupportedTypes>,
 	ast?: AST,
 	pos: { pageBy: number; cur: number } = { pageBy: 50, cur: 0 },
@@ -184,10 +184,12 @@ export const ASTFeedItemJson = type({
 
 	attachments: optional(array(ASTAttachment)),
 
-	_: record(string(), unknown()),
-	_rss: record(string(), unknown()),
-	_atom: record(string(), unknown()),
-	_sitemap: record(string(), unknown()),
+	_: optional(record(string(), unknown())), // for what?
+	_rss: optional(record(string(), unknown())),
+	_atom: optional(record(string(), unknown())),
+	_sitemap: optional(record(string(), unknown())),
+	__analysis: optional(record(string(), unknown())),
+	__enhancement: optional(record(string(), unknown())),
 });
 
 export const ASTFeedItemThunk = type({
@@ -287,6 +289,23 @@ export const ASTKindJson = type({
 	__enhancement: optional(record(string(), unknown())), // [pluginName]: {someObject or value}
 });
 
+const ASTimages = type({
+	icon: eitherThunkOr(string()),
+	bannerImage: eitherThunkOr(string()),
+	favicon: eitherThunkOr(string()),
+});
+
+const ASTpaging = type({
+	nextUrl: eitherThunkOr(string()),
+	prevUrl: eitherThunkOr(string()),
+	itemCount: union([Thunk<number>(), number()]),
+});
+
+const ASTlinks = type({
+	homeUrl: eitherThunkOr(string()),
+	feedUrl: eitherThunkOr(string()),
+});
+
 export const ASTKindComputable = type({
 	title: eitherThunkOr(string()),
 	description: eitherThunkOr(string()),
@@ -296,33 +315,27 @@ export const ASTKindComputable = type({
 		Thunk<s.Infer<typeof ASTAuthor>[]>(),
 		nonempty(array(ASTAuthor)),
 	]),
+	images: union([
+		ASTimages,
+		Thunk<s.Infer<typeof ASTimages>>(),
+	]),
 
-	images: eitherThunkOr(type({
-		icon: eitherThunkOr(string()),
-		bannerImage: eitherThunkOr(string()),
-		favicon: eitherThunkOr(string()),
-	})),
+	paging: union([
+		ASTpaging,
+		Thunk<s.Infer<typeof ASTpaging>>(),
+	]),
 
-	paging: eitherThunkOr(type({
-		nextUrl: eitherThunkOr(string()),
-		prevUrl: eitherThunkOr(string()),
-		itemCount: union([Thunk<number>(), number()]),
-	})),
-
-	links: eitherThunkOr(type({
-		homeUrl: eitherThunkOr(string()),
-		feedUrl: eitherThunkOr(string()),
-	})),
+	links: union([
+		ASTlinks,
+		Thunk<s.Infer<typeof ASTlinks>>(),
+	]),
 
 	item: object({
 		list: union([
 			array(ASTFeedItemThunk),
 			Thunk<typeof ASTFeedItemThunk.TYPE[]>(),
 		]),
-		next: union([
-			array(ASTFeedItemThunk),
-			Thunk<typeof ASTFeedItemThunk.TYPE[]>(),
-		]),
+		next: Thunk<typeof ASTFeedItemThunk.TYPE[]>(),
 	}),
 
 	eventStreamFromViewer: optional(object({
@@ -335,6 +348,80 @@ export const ASTKindComputable = type({
 	__analysis: optional(union([record(string(), unknown()), Thunk<Record<string, unknown>>()])),
 	__enhancement: optional(union([record(string(), unknown()), Thunk<Record<string, unknown>>()])),
 });
+
+type Thunk<T> = () => Promise<T>;
+const rezVal = async <T>(i: T | Thunk<T>) => typeof i !== 'function' ? i : (i as Thunk<T>)();
+
+export const computableToJson = async (
+	ast: ASTcomputable,
+	comment = '',
+	ref = '',
+	v = '',
+): Promise<ASTjson> => {
+	const _images = await rezVal(ast.images);
+	const _links = await rezVal(ast.links);
+	const _paging = await rezVal(ast.paging);
+	const _item = await rezVal(ast.item);
+	const _list = await rezVal(_item.list);
+
+	return {
+		_meta: {
+			comment,
+			reference: ref,
+			version: v,
+		},
+		title: await rezVal(ast.title),
+		description: await rezVal(ast.description),
+		language: await rezVal(ast.language),
+		images: {
+			bannerImage: await rezVal(_images.bannerImage),
+			favicon: await rezVal(_images.favicon),
+			icon: await rezVal(_images.icon),
+		},
+		links: {
+			feedUrl: await rezVal(_links.feedUrl),
+			homeUrl: await rezVal(_links.homeUrl),
+		},
+		paging: {
+			itemCount: await rezVal(_paging.itemCount),
+			nextUrl: await rezVal(_paging.nextUrl),
+			prevUrl: await rezVal(_paging.prevUrl),
+		},
+		authors: await rezVal(ast.authors),
+		items: await Promise.all((_list ?? []).map(async (i) => {
+			return {
+				title: await rezVal(i.title),
+				summary: await rezVal(i.summary),
+				language: await rezVal(i.language),
+				url: await rezVal(i.url),
+				id: await rezVal(i.id),
+				authors: await rezVal(i.authors),
+				content: {
+					html: await rezVal(i.content.html),
+					markdown: await rezVal(i.content.html),
+					text: await rezVal(i.content.html),
+				},
+				images: {
+					bannerImage: await rezVal(i.images.bannerImage),
+					indexImage: await rezVal(i.images.indexImage),
+				},
+				dates: {
+					published: await rezVal(i.dates.published),
+					modified: await rezVal(i.dates.modified),
+				},
+				links: {
+					category: await rezVal(i.links.category),
+					tags: await rezVal(i.links.tags),
+					nextPost: await rezVal(i.links.nextPost),
+					prevPost: await rezVal(i.links.prevPost),
+					externalURLs: await rezVal(i.links.externalURLs),
+				},
+				expires: await rezVal(i.expires),
+				attachments: await rezVal(i.attachments),
+			} as s.Infer<typeof ASTFeedItemJson>;
+		})),
+	};
+};
 
 export type ASTjson = s.Infer<typeof ASTKindJson>;
 export type ASTcomputable = s.Infer<typeof ASTKindComputable>;

@@ -9,7 +9,7 @@ export type PaginationResp<T> = Promise<
 
 export interface IValidate<T> {
 	_: T;
-	inputKind: 'rss' | 'atom' | 'sitemap' | 'jsonFeed' | 'scrape';
+	inputKind: 'rss' | 'atom' | 'sitemap' | 'jsonfeed' | 'scrape';
 	clone: (i: unknown) => IValidate<T>;
 	paginateFrom: (pos?: number, offset?: number) => PaginationResp<T>;
 	validate: () => Promise<T>;
@@ -17,6 +17,8 @@ export interface IValidate<T> {
 	next: () => PaginationResp<T>;
 	toXML: () => string;
 	toAST: () => Promise<_AST>;
+	exportAs: (type: 'rss' | 'atom' | 'jsonfeed') => Promise<string>;
+	fromAST: (ast: ASTComputable) => Promise<T>;
 }
 
 export interface ASTShell {
@@ -41,10 +43,6 @@ export type ReducerFn = (
 	all: ASTShell[],
 ) => Promise<ASTShell>;
 
-export type MapperFn = (input: ASTShell) => Promise<ASTShell>;
-export type AST = _AST;
-export type ASTComputable = ASTcomputable;
-
 export type UnifiedAttacher = (...options: unknown[]) => UnfiedTransformer;
 export type UnfiedTransformer = (
 	node: _Node,
@@ -52,5 +50,8 @@ export type UnfiedTransformer = (
 	next: UnfiedTransformer,
 ) => Promise<_Node>;
 
+export type MapperFn = (input: ASTShell) => Promise<ASTShell>;
+export type AST = _AST;
+export type ASTComputable = ASTcomputable;
 export type Node = _Node;
 export type VFile = vfile.VFile;

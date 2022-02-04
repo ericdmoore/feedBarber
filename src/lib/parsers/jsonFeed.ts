@@ -97,13 +97,13 @@ export const JsonFeedKind = type({
 
 export type RespStruct = typeof JsonFeedKind.TYPE;
 
-export const JsonFeed: TypedValidator = (
+export const JsonFeed = ((
 	compactParse: RespStruct | unknown,
 ): IValidate<RespStruct> => {
 	const structs = { response: JsonFeedKind };
 
 	return {
-		inputKind: 'jsonFeed',
+		inputKind: 'jsonfeed',
 		validate: (): Promise<RespStruct> => {
 			let err: s.StructError | undefined;
 			let validated: unknown;
@@ -191,6 +191,12 @@ export const JsonFeed: TypedValidator = (
 		},
 		toXML: () => {
 			return toXml.js2xml(compactParse as RespStruct, { compact: true });
+		},
+		fromAST: async (input: ASTcomputable): Promise<RespStruct> => {
+			return compactParse as RespStruct;
+		},
+		exportAs: async (type: 'atom' | 'rss' | 'jsonfeed') => {
+			return type;
 		},
 		toAST: async (): Promise<ASTcomputable> => {
 			const c = await compactParse as RespStruct;
@@ -295,4 +301,4 @@ export const JsonFeed: TypedValidator = (
 			};
 		},
 	};
-};
+}) as TypedValidator;

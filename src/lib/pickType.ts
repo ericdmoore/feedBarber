@@ -91,25 +91,25 @@ export const typedValidation = async (
 				kind: 'rss',
 				data: await rss.Rss(input.data).validate(),
 				parser: rss.Rss,
-			};
+			} as IDictValidPayloadTypes;
 		case 'atom':
 			return {
 				kind: 'atom',
 				data: await atom.Atom(input.data).validate(),
 				parser: atom.Atom,
-			};
+			} as IDictValidPayloadTypes;
 		case 'jsonFeed':
 			return {
 				kind: 'jsonFeed',
 				data: await jsonfeed.JsonFeed(input.data).validate(),
 				parser: jsonfeed.JsonFeed,
-			};
+			} as IDictValidPayloadTypes;
 		case 'sitemap':
 			return {
 				kind: 'sitemap',
 				data: await sitemap.Sitemap(input.data).validate(),
 				parser: sitemap.Sitemap,
-			};
+			} as IDictValidPayloadTypes;
 		default:
 			return {} as never;
 	}

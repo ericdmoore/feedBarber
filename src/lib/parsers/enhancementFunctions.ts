@@ -53,4 +53,4 @@ const percent20Test =
 	`preview(show=false)||%20addBody(css%20='a'|%20root='#main')||rmAds(list='')||%20addsubs%20`;
 const mean1 = `preview(())|%20addBody(css%20='a',%20root='#main')||rmAds(list='')||%20addsubs%20`;
 
-console.log(parseFunctions(mean1));
+// console.log(parseFunctions(mean1));

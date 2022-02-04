@@ -6,6 +6,12 @@ import type { ASTcomputable } from './ast.ts';
 import type { ISupportedTypes, TypedValidator } from '../pickType.ts';
 import { superstruct, toXml } from '../../mod.ts';
 import { IValidate } from '../../types.ts';
+
+import { computableToJson } from './ast.ts';
+
+import { JsonFeed } from './jsonFeed.ts';
+import { Atom } from './atom.ts';
+
 import er from './helpers/error.ts';
 import {
 	Enclosure,
@@ -18,8 +24,17 @@ import {
 	TypedInnerText,
 } from './helpers/composedPrimitives.ts';
 
-// number, is
-const { union, is, define, partial, object, string, array, literal, optional } = superstruct;
+const {
+	union,
+	object,
+	string,
+	array,
+	optional,
+	literal,
+	is,
+	define,
+	partial,
+} = superstruct;
 
 export const RssItem = object({
 	title: InnerText,
@@ -73,7 +88,7 @@ export const RssResponse = object({
 
 export type RespStruct = typeof RssResponse.TYPE;
 
-export const Rss: TypedValidator = (
+export const Rss = ((
 	compactParse: RespStruct | unknown,
 ): IValidate<RespStruct> => {
 	const structs = {
@@ -156,7 +171,85 @@ export const Rss: TypedValidator = (
 		toXML: (): string => {
 			return toXml.js2xml(compactParse as RespStruct, { compact: true });
 		},
-		// fromAST: async():Promise<RespStruct> =>  { },
+		exportAs: async (type: 'rss' | 'atom' | 'jsonfeed'): Promise<string> => {
+			const ast = await Rss(compactParse).toAST() as ASTcomputable;
+
+			switch (type) {
+				case 'rss':
+					return Rss(Rss(await Rss<RespStruct>({}).fromAST(ast))).toXML();
+				case 'atom':
+					return Atom(Atom(await Atom({}).fromAST(ast))).toXML();
+				case 'jsonfeed':
+					return JsonFeed(JsonFeed(await JsonFeed({}).fromAST(ast))).toXML();
+			}
+		},
+		fromAST: async (_ast: ASTcomputable): Promise<RespStruct> => {
+			const ast = await computableToJson(_ast);
+			const g = ast?._rss?.generator as {
+				_attributes: { uri?: string; version?: string };
+				_cdata: string;
+				_text: string;
+			} | undefined;
+
+			return {
+				_declaration: {
+					_attributes: {
+						version: ast._rss?.version as string | undefined,
+					},
+				},
+				rss: {
+					_attributes: {
+						'xmlns:atom': ast._rss?.['xmlns:atom'] as string | undefined,
+						'xmlns:content': ast?._rss?.['xmlns:atom'] as string | undefined,
+						'xmlns:dc': ast?._rss?.['xmlns:atom'] as string | undefined,
+						'xmlns:geo': ast?._rss?.['xmlns:atom'] as string | undefined,
+						'xmlns:georss': ast?._rss?.['xmlns:atom'] as string | undefined,
+						'xmlns:slash': ast?._rss?.['xmlns:atom'] as string | undefined,
+						'xmlns:sy': ast?._rss?.['xmlns:atom'] as string | undefined,
+						'xmlns:wfw': ast?._rss?.['xmlns:atom'] as string | undefined,
+						version: ast?._rss?.version as string | undefined,
+					},
+					channel: {
+						link: { _text: ast.links.feedUrl ?? '' },
+						title: { _text: ast.title },
+						description: { _text: ast.description },
+						generator: {
+							_attributes: {
+								uri: g?._attributes?.uri,
+								version: g?._attributes?.version,
+							},
+							_cdata: g?._cdata,
+							_text: g?._text,
+						},
+						item: await Promise.all(ast.items.map(async (i) => {
+							return {
+								title: { _text: i.title ?? '' },
+								link: { _text: i.url ?? '' },
+								guid: { _text: i.id ?? '' },
+								description: { _text: i.summary ?? '' },
+								'content:encoded': { _text: '' },
+								'dc:creator': {
+									_attributes: { type: 'text' },
+									_cdata: '',
+									_text: '',
+								},
+								'slash:comments': { _text: '' },
+								'wfw:commentRss': { _text: '' },
+								category: { _attributes: {}, _cdata: '', _text: '' },
+								comments: { _text: '' },
+								enclosure: [{
+									_attributes: {
+										url: '',
+										length: '',
+										type: '',
+									},
+								}],
+							};
+						})),
+					},
+				},
+			};
+		},
 		toAST: async (): Promise<ASTcomputable> => {
 			const c = compactParse as RespStruct;
 			return {
@@ -244,4 +337,4 @@ export const Rss: TypedValidator = (
 			};
 		},
 	};
-};
+}) as TypedValidator;

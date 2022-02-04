@@ -121,9 +121,9 @@ const allKindsprinter = (url: string, t: IDictValidPayloadTypes) => {
 						allKindsprinter(url, t);
 						return t;
 					})
-					.then((d) => {
-						return astShell(d.parser, validatedInputToAst(d));
-					})
+					// .then((d) => {
+					// 	return astShell(d.parser as IValidate<ISupportedTypes>, validatedInputToAst(d));
+					// })
 					.then((d) => {
 						console.log('2: ', d);
 						return d;
