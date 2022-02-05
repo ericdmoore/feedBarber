@@ -29,7 +29,7 @@ serve({
 	'/logout': logout,
 	'/new': newForm,
 	'/user': user,
-	'/ast/:url': astDisplay,
+	'/ast/:url+': astDisplay,
 	'/t-:tempToken': token,
 	'/u-:userToken': token,
 	'/(u|t)-:userOrTempToken/:outputFmt/': configure('Configure From Scratch'),
