@@ -10,6 +10,7 @@ import proxy from './pages/proxy.ts';
 import signin from './pages/signin.tsx';
 import token from './pages/token.tsx';
 import user from './pages/user.tsx';
+import header from './pages/header.tsx'
 import astDisplay from './pages/ast.tsx';
 
 // @see  NOTES from '../../notes/accounts.md'
@@ -22,7 +23,7 @@ const NotFound = () =>
 	]);
 
 serve({
-	'/': () => jsx(App()), // Home Page?
+	'/': header, // Home Page?
 	'/create': create,
 	'/signin': signin,
 	'/logout': logout,
