@@ -3,9 +3,9 @@
 // validate the response
 
 import type { IValidate } from '../../types.ts';
-import type { ISupportedTypes, TypedValidator } from '../pickType.ts';
+import type { ISupportedTypes, TypedValidator } from '../start.ts';
 import { superstruct as s, toXml } from '../../mod.ts';
-import type { ASTcomputable } from './ast.ts';
+import type { ASTcomputable, ASTjson} from './ast.ts';
 import er from './helpers/error.ts';
 
 const {
@@ -192,7 +192,7 @@ export const JsonFeed = ((
 		toXML: () => {
 			return toXml.js2xml(compactParse as RespStruct, { compact: true });
 		},
-		fromAST: async (input: ASTcomputable): Promise<RespStruct> => {
+		fromAST: async (input: ASTcomputable | ASTjson): Promise<RespStruct> => {
 			return compactParse as RespStruct;
 		},
 		exportAs: async (type: 'atom' | 'rss' | 'jsonfeed') => {

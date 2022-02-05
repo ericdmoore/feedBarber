@@ -1,5 +1,5 @@
 import type { ASTcomputable, ASTFeedItemJson, ASTjson } from './ast.ts';
-import type { ISupportedTypes, TypedValidator } from '../pickType.ts';
+import type { ISupportedTypes, TypedValidator } from '../start.ts';
 import { superstruct, toXml } from '../../mod.ts';
 import { IValidate } from '../../types.ts';
 import { computableToJson } from './ast.ts';
@@ -8,7 +8,7 @@ import * as atom from './atom.ts';
 import * as rss from './rss.ts';
 
 import { InnerText } from './helpers/composedPrimitives.ts';
-import { IDictUnionOfPayloadTypes, parseAndPickType } from '../pickType.ts';
+import { IDictUnionOfPayloadTypes, parseAndPickType } from '../start.ts';
 import er from './helpers/error.ts';
 
 const { object, type, optional, array, string } = superstruct;
@@ -111,7 +111,7 @@ export const expand = async (compactParse: RespStruct): Promise<RespStruct> => {
 export const Sitemap: TypedValidator = ((
 	compactParse: unknown | RespStruct,
 ): IValidate<RespStruct> => {
-	let isValidated = false;
+	// let isValidated = false;
 	return {
 		_: {} as RespStruct,
 		inputKind: 'sitemap',
@@ -217,11 +217,15 @@ export const Sitemap: TypedValidator = ((
 			);
 		},
 		fromAST: async (
-			_ast: ASTcomputable,
-			lastmod?: string,
-			priority?: string,
-			changefreq?: string,
+			_ast: ASTjson | ASTcomputable,
 		): Promise<RespStruct> => {
+
+			const opts = {
+				lastmod: '',
+				priority: '',
+				changefreq: ''
+			}
+
 			const ast = await computableToJson(_ast);
 			const asInnerText = (s?: string) => {
 				return { _text: s };
@@ -241,9 +245,9 @@ export const Sitemap: TypedValidator = ((
 					url: ast.items.map((i) => {
 						return {
 							loc: asInnerText(i.url),
-							lastmod: asInnerText(lastmod),
-							priority: asInnerText(priority),
-							changefreq: asInnerText(changefreq),
+							lastmod: asInnerText(opts.lastmod),
+							priority: asInnerText(opts.priority),
+							changefreq: asInnerText(opts.changefreq),
 						};
 					}),
 				},

@@ -10,6 +10,7 @@ import proxy from './pages/proxy.ts';
 import signin from './pages/signin.tsx';
 import token from './pages/token.tsx';
 import user from './pages/user.tsx';
+import astDisplay from './pages/ast.tsx';
 
 // @see  NOTES from '../../notes/accounts.md'
 
@@ -27,6 +28,7 @@ serve({
 	'/logout': logout,
 	'/new': newForm,
 	'/user': user,
+	'/ast/:url': astDisplay,
 	'/t-:tempToken': token,
 	'/u-:userToken': token,
 	'/(u|t)-:userOrTempToken/:outputFmt/': configure('Configure From Scratch'),

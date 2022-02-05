@@ -1,5 +1,5 @@
-import type { ISupportedTypes } from './lib/pickType.ts';
-import type { AST as _AST, ASTcomputable } from './lib/parsers/ast.ts';
+import type { ISupportedTypes } from './lib/start.ts';
+import type { AST as _AST, ASTcomputable, ASTjson } from './lib/parsers/ast.ts';
 import type { Node as _Node } from './mods/unist.ts';
 import { vfile } from './mod.ts';
 
@@ -18,7 +18,7 @@ export interface IValidate<T> {
 	toXML: () => string;
 	toAST: () => Promise<_AST>;
 	exportAs: (type: 'rss' | 'atom' | 'jsonfeed') => Promise<string>;
-	fromAST: (ast: ASTComputable) => Promise<T>;
+	fromAST: (ast: ASTjson | ASTComputable, ...other: unknown[]) => Promise<T>;
 }
 
 export interface ASTShell {

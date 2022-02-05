@@ -11,7 +11,7 @@ server:
 	deno run --allow-net --allow-env ./src/bin/handler.ts
 
 start:
-	deno run --allow-net --import-map=./src/import_map.json src/lib/start.ts
+	deno run --allow-net src/bin/go.ts
 
 fmt:
 	deno fmtmake 

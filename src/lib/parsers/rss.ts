@@ -2,12 +2,11 @@
 // perform the fetch
 // validate the response
 
-import type { ASTcomputable } from './ast.ts';
-import type { ISupportedTypes, TypedValidator } from '../pickType.ts';
+import type { ISupportedTypes, TypedValidator } from '../start.ts';
+
+import { ASTcomputable, ASTjson, computableToJson } from './ast.ts';
 import { superstruct, toXml } from '../../mod.ts';
 import { IValidate } from '../../types.ts';
-
-import { computableToJson } from './ast.ts';
 
 import { JsonFeed } from './jsonFeed.ts';
 import { Atom } from './atom.ts';
@@ -183,7 +182,7 @@ export const Rss = ((
 					return JsonFeed(JsonFeed(await JsonFeed({}).fromAST(ast))).toXML();
 			}
 		},
-		fromAST: async (_ast: ASTcomputable): Promise<RespStruct> => {
+		fromAST: async (_ast: ASTcomputable |ASTjson): Promise<RespStruct> => {
 			const ast = await computableToJson(_ast);
 			const g = ast?._rss?.generator as {
 				_attributes: { uri?: string; version?: string };

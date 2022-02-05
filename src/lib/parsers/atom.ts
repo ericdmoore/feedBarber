@@ -13,10 +13,11 @@
 //   type: "html"
 // _text: () => 'move to _cdata'
 // _cdata
-import type { ASTcomputable } from '../parsers/ast.ts';
-import type { TypedValidator } from '../pickType.ts';
+
+import type { TypedValidator } from '../start.ts';
+import type{ IValidate } from '../../types.ts';
+import { ASTcomputable, ASTjson, computableToJson } from '../parsers/ast.ts';
 import { superstruct as s, toXml } from '../../mod.ts';
-import { IValidate } from '../../types.ts';
 import { Rss } from './rss.ts';
 import { JsonFeed } from './jsonFeed.ts';
 
@@ -223,8 +224,75 @@ export const Atom = ((
 				compact: true,
 			});
 		},
-		fromAST: async (input: ASTcomputable): Promise<RespStruct> => {
-			return compactParse as RespStruct;
+		fromAST: async (_ast: ASTcomputable | ASTjson): Promise<RespStruct> => {
+			const ast = await computableToJson(_ast)
+			const version = (ast?._atom?._declaration as any)?._attributes?.version as string | undefined
+			const xmlLang = (ast?._atom?.feed as any)._attributes['xml:lang'] ?? 'en-US' as string
+			
+			const typedText = (s = '')=>{
+				if(/<\/?[a-z][\s\S]*>/i.test(s)){
+					return {
+						_attributes:{type:'html'},
+						_cdata:s
+					}
+				}
+				else{
+					return {
+						_attributes:{type:'text'},
+						_text:s, 
+					}
+				}
+			}
+			
+			return {
+				_declaration:{
+					_attributes:{ encoding:'utf-8', version: version},	
+				},
+				feed:{
+					_attributes:{
+						xmlns:'http://www.w3.org/2005/Atom',
+						"xml:lang": xmlLang,
+					},
+					title: typedText(''),
+					subtitle: typedText(''),
+					link:[{
+						_attributes:{
+							href:'',
+							hreflang:'',
+							rel:'',
+							type:''
+						}
+					}],
+					updated:{_text:''},
+					author: {
+						email:{_text:''},
+						name:{_text:''}, 
+						uri:{_text:''}
+					},
+					contributor:[{
+						email:{_text:''},
+						name:{_text:''}, 
+						uri:{_text:''}
+					}],
+					category:[] as string[],
+					icon:{_text:''},
+					logo:{_text:''},
+					generator:{_attributes:{uri:'', version:''}, _cdata:'', _text:''},
+					id:{_text:''},
+					rights:{_text:''},
+					entry:[{
+						_attributes:{"xml:lang":'en-US'},
+						title: typedText(''),
+						summary: typedText(''),
+						id:{_text:''},
+						link:{_attributes:{href:'',hreflang:'',rel:'',type:''}},
+						author:{email:{_text:''},name:{_text:''},uri:{_text:''}},
+						content:{_attributes:{type:'html'},_text:'',_cdata:''},
+						published:{_text:''},
+						updated:{_text:''}
+					}]
+				}
+			} as RespStruct;
 		},
 		exportAs: async (type: 'rss' | 'atom' | 'jsonfeed'): Promise<string> => {
 			const ast = await Rss(compactParse).toAST() as ASTcomputable;

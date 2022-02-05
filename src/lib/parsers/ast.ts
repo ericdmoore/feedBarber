@@ -1,4 +1,4 @@
-import type { IDictValidPayloadTypes, ISupportedTypes } from '../pickType.ts';
+import type { IDictValidPayloadTypes, ISupportedTypes } from '../start.ts';
 
 import { superstruct as s } from '../../mod.ts';
 import { ASTShell, IValidate } from '../../types.ts';
@@ -353,74 +353,78 @@ type Thunk<T> = () => Promise<T>;
 const rezVal = async <T>(i: T | Thunk<T>) => typeof i !== 'function' ? i : (i as Thunk<T>)();
 
 export const computableToJson = async (
-	ast: ASTcomputable,
+	ast: ASTcomputable | ASTjson,
 	comment = '',
 	ref = '',
 	v = '',
 ): Promise<ASTjson> => {
-	const _images = await rezVal(ast.images);
-	const _links = await rezVal(ast.links);
-	const _paging = await rezVal(ast.paging);
-	const _item = await rezVal(ast.item);
-	const _list = await rezVal(_item.list);
-
-	return {
-		_meta: {
-			comment,
-			reference: ref,
-			version: v,
-		},
-		title: await rezVal(ast.title),
-		description: await rezVal(ast.description),
-		language: await rezVal(ast.language),
-		images: {
-			bannerImage: await rezVal(_images.bannerImage),
-			favicon: await rezVal(_images.favicon),
-			icon: await rezVal(_images.icon),
-		},
-		links: {
-			feedUrl: await rezVal(_links.feedUrl),
-			homeUrl: await rezVal(_links.homeUrl),
-		},
-		paging: {
-			itemCount: await rezVal(_paging.itemCount),
-			nextUrl: await rezVal(_paging.nextUrl),
-			prevUrl: await rezVal(_paging.prevUrl),
-		},
-		authors: await rezVal(ast.authors),
-		items: await Promise.all((_list ?? []).map(async (i) => {
-			return {
-				title: await rezVal(i.title),
-				summary: await rezVal(i.summary),
-				language: await rezVal(i.language),
-				url: await rezVal(i.url),
-				id: await rezVal(i.id),
-				authors: await rezVal(i.authors),
-				content: {
-					html: await rezVal(i.content.html),
-					markdown: await rezVal(i.content.html),
-					text: await rezVal(i.content.html),
-				},
-				images: {
-					bannerImage: await rezVal(i.images.bannerImage),
-					indexImage: await rezVal(i.images.indexImage),
-				},
-				dates: {
-					published: await rezVal(i.dates.published),
-					modified: await rezVal(i.dates.modified),
-				},
-				links: {
-					category: await rezVal(i.links.category),
-					tags: await rezVal(i.links.tags),
-					nextPost: await rezVal(i.links.nextPost),
-					prevPost: await rezVal(i.links.prevPost),
-					externalURLs: await rezVal(i.links.externalURLs),
-				},
-				expires: await rezVal(i.expires),
-				attachments: await rezVal(i.attachments),
-			} as s.Infer<typeof ASTFeedItemJson>;
-		})),
-	};
+	if('_meta' in ast){
+		return ast as ASTjson
+	}else{
+		const _images = await rezVal(ast.images);
+		const _links = await rezVal(ast.links);
+		const _paging = await rezVal(ast.paging);
+		const _item = await rezVal(ast?.item);
+		const _list = await rezVal(_item.list);
+	
+		return {
+			_meta: {
+				comment,
+				reference: ref,
+				version: v,
+			},
+			title: await rezVal(ast.title),
+			description: await rezVal(ast.description),
+			language: await rezVal(ast.language),
+			images: {
+				bannerImage: await rezVal(_images.bannerImage),
+				favicon: await rezVal(_images.favicon),
+				icon: await rezVal(_images.icon),
+			},
+			links: {
+				feedUrl: await rezVal(_links.feedUrl),
+				homeUrl: await rezVal(_links.homeUrl),
+			},
+			paging: {
+				itemCount: await rezVal(_paging.itemCount),
+				nextUrl: await rezVal(_paging.nextUrl),
+				prevUrl: await rezVal(_paging.prevUrl),
+			},
+			authors: await rezVal(ast.authors),
+			items: await Promise.all((_list ?? []).map(async (i) => {
+				return {
+					title: await rezVal(i.title),
+					summary: await rezVal(i.summary),
+					language: await rezVal(i.language),
+					url: await rezVal(i.url),
+					id: await rezVal(i.id),
+					authors: await rezVal(i.authors),
+					content: {
+						html: await rezVal(i.content.html),
+						markdown: await rezVal(i.content.html),
+						text: await rezVal(i.content.html),
+					},
+					images: {
+						bannerImage: await rezVal(i.images.bannerImage),
+						indexImage: await rezVal(i.images.indexImage),
+					},
+					dates: {
+						published: await rezVal(i.dates.published),
+						modified: await rezVal(i.dates.modified),
+					},
+					links: {
+						category: await rezVal(i.links.category),
+						tags: await rezVal(i.links.tags),
+						nextPost: await rezVal(i.links.nextPost),
+						prevPost: await rezVal(i.links.prevPost),
+						externalURLs: await rezVal(i.links.externalURLs),
+					},
+					expires: await rezVal(i.expires),
+					attachments: await rezVal(i.attachments),
+				} as s.Infer<typeof ASTFeedItemJson>;
+			})),
+		};
+	}
 };
 
 export type ASTjson = s.Infer<typeof ASTKindJson>;
