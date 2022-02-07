@@ -8,7 +8,7 @@ test:
 	deno test -j=3 --coverage=.cov --import-map=src/import_map.json ./src/tests/* ./src/tests/**/*
 
 server:
-	deno run --allow-net --allow-env ./src/bin/handler.ts
+	open http://localhost:8000; deno run --allow-net --allow-env ./src/bin/handler.ts
 
 start:
 	deno run --allow-net src/bin/go.ts
