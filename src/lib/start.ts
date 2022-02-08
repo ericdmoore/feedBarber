@@ -1,6 +1,7 @@
 import { fromXml } from '../mod.ts';
-import { IValidate } from '../types.ts';
+import { IValidate, ASTComputable } from '../types.ts';
 import { atom, jsonfeed, rss, sitemap } from './parsers/index.ts';
+import {computableToJson, } from './parsers/ast.ts'
 
 export type ISupportedTypeNames =
 	| 'atom'
@@ -132,7 +133,7 @@ export const start = async (url: string) => {
 	return {url, txt: await remoteData.text()};
 };
 
-export const parseAndValidate = async (txt:string, url:string) => 
+export const parseAndValidate = async (url:string, txt:string) => 
 	typedValidation(parseAndPickType({txt, url}));
 	
 export const fetchParseValidate = async (url: string) => 
@@ -140,7 +141,8 @@ export const fetchParseValidate = async (url: string) =>
 
 export const fetchAndValidateIntoAST = async (url: string) =>{
 	const r = await fetchParseValidate(url)
-	return r.parser(r.data, r.url).toAST()
+	const astC = await r.parser(r.data, r.url).toAST() as ASTComputable
+	return computableToJson(astC)
 }
 
 export default parseAndPickType;

@@ -13,6 +13,33 @@ import er from './helpers/error.ts';
 
 const { object, type, optional, array, string } = superstruct;
 
+const buildChangeFreqPicker = ()=>{
+	const HR = 1000 * 60 * 60
+	const DAY = 24 * HR
+	const WK = 7 * DAY
+	const WK4 = WK * 4
+	const YR = 365 * DAY
+
+	return (lastMod: number, today = Date.now() )=>{
+		const dif = today -  lastMod
+		if(dif < HR){
+			return 'always'
+		} else if (dif < DAY){
+			return 'hourly'
+		} else if (dif < WK){
+			return 'daily'
+		}else if (dif < WK4){
+			return 'weekly'
+		}else if (dif < YR){
+			return 'monthly'
+		}else{
+			return 'yearly'
+		}
+	}	
+}
+
+const pickChangeFreq = buildChangeFreqPicker()
+
 const UrlLoc = object({
 	loc: object({_text: string()}),
 	lastmod: optional(InnerText),
@@ -127,11 +154,11 @@ export const Sitemap: TypedValidator = ((
 			let validated: unknown;
 
 			if (typeof compactParse === 'string') {
-				return Promise.reject(er(compactParse, '', new Error().stack));
+				return Promise.reject(er(compactParse, 'Parse Before Validation', new Error().stack));
 			}
 			if (compactParse == null) {
 				return Promise.reject(
-					er(compactParse, 'got a null', new Error().stack),
+					er(compactParse, 'Data input was null', new Error().stack),
 				);
 			}
 
@@ -139,7 +166,7 @@ export const Sitemap: TypedValidator = ((
 				(compactParse as RespStruct).urlset ||
 				(compactParse as RespStruct).sitemapindex
 			) {
-				[err, validated] = SitemapKind.validate(compactParse, {
+				[err, validated] = SitemapKind.validate(compactParse, {					
 					coerce: true,
 				});
 
@@ -303,39 +330,46 @@ export const Sitemap: TypedValidator = ((
 							url: u.loc._text,
 							language: 'en-US',
 
-							title: async () => '',
-							summary: async () => '',
+							title: async () => 'null',
+							summary: async () => 'null',
 							authors: async () => {
-								return [{ name: '' }];
+								return [{ name: 'null' }];
 							},
 
 							content: {
-								html: async () => '',
-								makrdown: async () => '',
-								text: async () => '',
+								html: async () => 'null',
+								makrdown: async () => 'null',
+								text: async () => 'null',
 							},
 							dates: {
 								published: async () => -1,
-								modified: async () => -1,
+								modified: async () => u.lastmod?._text 
+									? new Date(u.lastmod?._text).getTime() 
+									: -1
 							},
 
 							images: {
-								bannerImage: async () => '',
-								indexImage: async () => '',
+								bannerImage: async () => 'null',
+								indexImage: async () => 'null',
 							},
 
 							links: {
-								nextPost: async () => '',
-								prevPost: async () => '',
-								category: async () => '',
-								tags: async () => [''],
-								externalURLs: async () => [''],
+								nextPost: async () => 'null',
+								prevPost: async () => 'null',
+								category: async () => 'null',
+								tags: async () => ['null'],
+								externalURLs: async () => ['null'],
 							},
 							attachments: async () => {
-								return [{ url: '', mimeType: '' }];
+								return [{ url: 'null', mimeType: 'null' }];
 							},
 							expires: undefined,
-							_sitemap: {},
+							_sitemap: {
+								changefreq: u.changefreq ?? ((u)=>{
+									return u.lastmod?._text ? pickChangeFreq(new Date(u.lastmod?._text).getTime()) : 'yearly'
+								})(u),
+								priority: u.priority ?? 0.5
+							},
 						};
 					}),
 				},

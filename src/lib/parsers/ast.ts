@@ -275,6 +275,7 @@ export const ASTKindJson = type({
 	})),
 
 	links: partial(type({
+		// sourceURL: string()
 		homeUrl: string(),
 		feedUrl: string(),
 	})),
