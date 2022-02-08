@@ -8,10 +8,11 @@ import { assertEquals } from 'https://deno.land/std@0.123.0/testing/asserts.ts';
 Deno.test(skip(
 	'JsonFeed -> AST -> JsonFeed',
 	async () => {
-		const c1 = await parseAndValidate(dhhAtom) as unknown as atomStruct;
-		const ast = await Atom(c1).toAST();
+		const fakeUrl = 'http://world.hey.com/dhh/sitemap.xml'
+		const c1 = await parseAndValidate(dhhAtom, fakeUrl) as unknown as atomStruct;
+		const ast = await Atom(c1, fakeUrl).toAST();
 		const astJson = await computableToJson(ast);
-		const c2 = await Atom({}).fromAST(astJson) as atomStruct;
+		const c2 = await Atom({}, fakeUrl).fromAST(astJson) as atomStruct;
 		assertEquals(c1, c2);
 	},
 ));

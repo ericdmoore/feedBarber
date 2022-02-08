@@ -151,6 +151,15 @@ export const ASTAttachment = type({
 	durationInSeconds: optional(number()),
 });
 
+export const ASTAttachmentComputable = type({
+	url: union([ StrThunk, string() ]),
+	mimeType: union([ StrThunk, string() ]),
+	title: optional(union([ StrThunk, string() ])),
+	sizeInBytes: optional(union([ Thunk<number>(), number() ])),
+	durationInSeconds: optional(union([ Thunk<number>(), number() ])),
+});
+
+
 export const ASTFeedItemJson = type({
 	id: string(), // can also be the permalink
 	url: string(), // permalink
@@ -214,14 +223,8 @@ export const ASTFeedItemThunk = type({
 		bannerImage: optional(eitherThunkOr(string())), // layout above the post
 	}),
 	dates: object({
-		published: optional(union([
-			number(),
-			Thunk<number>(),
-		])),
-		modified: optional(union([
-			number(),
-			Thunk<number>(),
-		])),
+		published: optional(union([ number(), Thunk<number>() ])),
+		modified: optional(union([ number(), Thunk<number>() ])),
 	}),
 
 	_rss: optional(union([record(string(), unknown()), Thunk<Record<string, unknown>>()])),
@@ -239,13 +242,13 @@ export const ASTFeedItemThunk = type({
 	}),
 
 	authors: optional(union([
-		nonempty(array(ASTAuthor)),
-		Thunk<typeof ASTAuthor.TYPE[]>(),
+		nonempty(array(ASTAuthorComputable)),
+		Thunk<s.Infer<typeof ASTAuthorComputable>[]>(),
 	])),
 	expires: optional(union([Thunk<number>(), number()])),
 
 	attachments: optional(union([
-		array(ASTAttachment),
+		array(ASTAttachmentComputable),
 		Thunk<typeof ASTAttachment.TYPE[]>(),
 	])),
 });

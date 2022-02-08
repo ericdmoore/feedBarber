@@ -6,7 +6,6 @@ interface TestObj {
 	fn: TestExecFunc;
 }
 type TestFnArg = unknown;
-type Skip = (...testinput: (TestObj | TestFnArg)[]) => TestObj;
 
 // #endregion interfaces
 
@@ -25,6 +24,5 @@ export const skip = (...i: (TestObj | TestFnArg)[]) => {
 		} as TestObj;
 	}
 };
-export const test = Deno.test;
 
 // #endregion helpers

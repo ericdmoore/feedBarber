@@ -1,8 +1,9 @@
 /** @jsx h */
-import { h, Handler, jsx, serve, VNode } from 'https://deno.land/x/sift@0.4.3/mod.ts';
+import type { Handler, VNode } from 'https://deno.land/x/sift@0.4.3/mod.ts';
+import { h, jsx } from 'https://deno.land/x/sift@0.4.3/mod.ts';
+import pageLayout from './layout.ts'
 
-
-export const pageLayout = (header: VNode, bod: VNode, htmlAttrs = {})=>{
+export const pageLayout = (header: VNode | h.JSX.Element, bod: VNode | h.JSX.Element, htmlAttrs = {})=>{
     const ret = jsx(
         <html lang="en" charSet='UTF-8'>
             <head>
@@ -13,15 +14,13 @@ export const pageLayout = (header: VNode, bod: VNode, htmlAttrs = {})=>{
             </body>
         </html>
     )
-    // add <!DOCTYPE html> to front
+    // @todo add <!DOCTYPE html> to front
     return ret
 }
 
 export const header:Handler = async (req, param = {})=> {
-    const header = (
-        <title>Feed Supply</title>
-    )
-    const bod = (
+    const header = (<title>Feed Supply</title>)
+    const body = (
             <div>
                 <h1>Welcome to feed supply</h1>
                 <nav>
@@ -54,7 +53,7 @@ export const header:Handler = async (req, param = {})=> {
             </div>
         )
 
-    return pageLayout(header, bod)
+    return pageLayout(header, body)
 	};
 
 export default header;
