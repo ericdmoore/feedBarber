@@ -27,16 +27,17 @@ const {
 
 export const validatedInputToAst = async (
 	preValidatecdInput: IDictValidPayloadTypes,
+	url: string
 ): Promise<AST> => {
 	switch (preValidatecdInput.kind) {
 		case 'atom':
-			return await atom.Atom(preValidatecdInput.data).toAST();
+			return await atom.Atom(preValidatecdInput.data, url).toAST();
 		case 'rss':
-			return await rss.Rss(preValidatecdInput.data).toAST();
+			return await rss.Rss(preValidatecdInput.data, url).toAST();
 		case 'jsonFeed':
-			return await jsonFeed.JsonFeed(preValidatecdInput.data).toAST();
+			return await jsonFeed.JsonFeed(preValidatecdInput.data, url).toAST();
 		case 'sitemap':
-			return await sitemap.Sitemap(preValidatecdInput.data).toAST();
+			return await sitemap.Sitemap(preValidatecdInput.data, url).toAST();
 		default:
 			return {} as never;
 	}
@@ -44,6 +45,7 @@ export const validatedInputToAst = async (
 
 export const astShell = async (
 	parser: IValidate<ISupportedTypes>,
+	url: string,
 	ast?: AST,
 	pos: { pageBy: number; cur: number } = { pageBy: 50, cur: 0 },
 ): Promise<ASTShell> => {
@@ -63,19 +65,20 @@ export const astShell = async (
 		// },
 		next: async () => {
 			const { val } = await parser.next();
-			ast = await parser.clone(val).toAST();
-			return astShell(parser, ast, pos);
+			ast = await parser.clone(val, url).toAST();
+			return astShell(parser, url, ast, pos);
 		},
 		prev: async () => {
 			const { val } = await parser.prev();
-			ast = await parser.clone(val).toAST();
-			return astShell(parser, ast, pos);
+			ast = await parser.clone(val, url).toAST();
+			return astShell(parser, url, ast, pos);
 		},
 		use: async (fns) => {
 			return fns.reduce(
 				async (p, f) => f(await p),
 				astShell(
 					parser,
+					url,
 					ast ?? await parser.toAST(),
 					pos,
 				),

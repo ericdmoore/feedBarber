@@ -1,6 +1,6 @@
 /** @jsx h */
 
-import { h, jsx, serve, serveStatic, Handler } from 'https://deno.land/x/sift@0.4.3/mod.ts';
+import { h, jsx, serve } from 'https://deno.land/x/sift@0.4.3/mod.ts';
 import configure from './pages/configure.tsx';
 import create from './pages/create.tsx';
 import logout from './pages/logout.tsx';
@@ -22,10 +22,6 @@ const NotFound = () =>
 		h('h1', {}, ['Page not found']),
 	]);
 
-const Favicon : Handler = ()=>{
-	return new Response('💈', {headers: {"Content-Type" : 'image/avif'}})
-}
-
 serve({
 	'/': header, // Home Page?
 	// '/favicon.ico:' : Favicon,
@@ -35,8 +31,8 @@ serve({
 	'/new': newForm,
 	'/user': user,
 	'/ast/:url(.*)' : echoAST,
-	'/t-:tempToken': token,
-	'/u-:userToken': token,
+	'/t-:tempToken': token("Temp"),
+	'/u-:userToken': token("User"),
 	'/(u|t)-:userOrTempToken/:outputFmt/': configure('Configure From Scratch'),
 	'/(u|t)-:userOrTempToken/:outputFmt/:composition': configure(),
 	'/(u|t)-:userOrTempToken/:outputFmt/:composition/:url': proxy,

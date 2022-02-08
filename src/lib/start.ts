@@ -17,16 +17,16 @@ export type ISupportedTypes =
 	| rss.RespStruct
 	| sitemap.RespStruct;
 
-export type TypedValidator = <T>(copmact: T | unknown) => IValidate<T>;
+export type TypedValidator = <T>(copmact: T | unknown, url:string) => IValidate<T>;
 
 export type IDictUnionOfPayloadTypes =
-	| { kind: 'atom'; data: typeof atom.AtomResponse.TYPE; parser: TypedValidator }
-	| { kind: 'jsonFeed'; data: typeof jsonfeed.JsonFeedKind.TYPE; parser: TypedValidator }
+| { kind: 'jsonFeed'; url:string, data: typeof jsonfeed.JsonFeedKind.TYPE; parser: TypedValidator }
+	| { kind: 'atom'; url:string, data: typeof atom.AtomResponse.TYPE; parser: TypedValidator }
 	// | { kind: 'jsonLD'; data: typeof jsonfeed.JsonFeedKind.TYPE }
-	| { kind: 'rss'; data: typeof rss.RssResponse.TYPE; parser: TypedValidator }
-	| { kind: 'sitemap'; data: typeof sitemap.SitemapKind.TYPE; parser: TypedValidator }
-	| { kind: 'JS_SELECTION_ERROR'; data: Error; parser: TypedValidator }
-	| { kind: 'TEXT_SELECTION_ERROR'; data: Error; parser: TypedValidator };
+	| { kind: 'rss'; url:string, data: typeof rss.RssResponse.TYPE; parser: TypedValidator }
+	| { kind: 'sitemap'; url:string, data: typeof sitemap.SitemapKind.TYPE; parser: TypedValidator }
+	| { kind: 'JS_SELECTION_ERROR'; url:string, data: Error; parser: TypedValidator }
+	| { kind: 'TEXT_SELECTION_ERROR'; url:string, data: Error; parser: TypedValidator };
 
 export type IDictValidPayloadTypes = Exclude<
 	IDictUnionOfPayloadTypes,
@@ -34,47 +34,54 @@ export type IDictValidPayloadTypes = Exclude<
 	| { kind: 'TEXT_SELECTION_ERROR' }
 >;
 
-export const parseAndPickType = (
-	responseText: string,
-): IDictUnionOfPayloadTypes => {
+export const parseAndPickType = (i:{
+	url: string
+	txt: string
+}): IDictUnionOfPayloadTypes => {
 	try {
-		const jsO = JSON.parse(responseText);
+		const jsO = JSON.parse(i.txt);
 		if ('items' in jsO) {
 			return {
+				url: i.url,
 				kind: 'jsonFeed',
 				data: jsO as typeof jsonfeed.JsonFeedKind.TYPE,
 				parser: jsonfeed.JsonFeed,
 			};
 		} else {
 			return {
+				url: i.url,
 				kind: 'JS_SELECTION_ERROR',
 				data: new Error(),
 				parser: jsonfeed.JsonFeed,
 			};
 		}
 	} catch (_) {
-		const jsO = fromXml.xml2js(responseText, { compact: true });
+		const jsO = fromXml.xml2js(i.txt, { compact: true });
 		// console.log({ jsO });
 		if (jsO?.feed) {
 			return {
+				url: i.url,
 				kind: 'atom',
 				data: jsO as typeof atom.AtomResponse.TYPE,
 				parser: atom.Atom,
 			};
 		} else if (jsO?.rss) {
 			return {
+				url: i.url,
 				kind: 'rss',
 				data: jsO as typeof rss.RssResponse.TYPE,
 				parser: rss.Rss,
 			};
 		} else if (jsO?.urlset || jsO?.sitemapindex) {
 			return {
+				url: i.url,
 				kind: 'sitemap',
 				data: jsO as typeof sitemap.SitemapKind.TYPE,
 				parser: sitemap.Sitemap,
 			};
 		} else {
 			return {
+				url: i.url,
 				kind: 'TEXT_SELECTION_ERROR',
 				data: new Error(),
 				parser: jsonfeed.JsonFeed,
@@ -90,25 +97,29 @@ export const typedValidation = async (
 		case 'rss':
 			return {
 				kind: 'rss',
-				data: await rss.Rss(input.data).validate(),
+				url: input.url,
+				data: await rss.Rss(input.data, input.url).validate(),
 				parser: rss.Rss,
 			} as IDictValidPayloadTypes;
 		case 'atom':
 			return {
 				kind: 'atom',
-				data: await atom.Atom(input.data).validate(),
+				url: input.url,
+				data: await atom.Atom(input.data, input.url).validate(),
 				parser: atom.Atom,
 			} as IDictValidPayloadTypes;
 		case 'jsonFeed':
 			return {
 				kind: 'jsonFeed',
-				data: await jsonfeed.JsonFeed(input.data).validate(),
+				url: input.url,
+				data: await jsonfeed.JsonFeed(input.data, input.url).validate(),
 				parser: jsonfeed.JsonFeed,
 			} as IDictValidPayloadTypes;
 		case 'sitemap':
 			return {
 				kind: 'sitemap',
-				data: await sitemap.Sitemap(input.data).validate(),
+				url: input.url,
+				data: await sitemap.Sitemap(input.data, input.url).validate(),
 				parser: sitemap.Sitemap,
 			} as IDictValidPayloadTypes;
 		default:
@@ -118,18 +129,18 @@ export const typedValidation = async (
 
 export const start = async (url: string) => {
 	const remoteData = await fetch(url);
-	return remoteData.text();
+	return {url, txt: await remoteData.text()};
 };
 
-export const parseAndValidate = async (txt:string) => 
-	typedValidation(parseAndPickType(txt));
+export const parseAndValidate = async (txt:string, url:string) => 
+	typedValidation(parseAndPickType({txt, url}));
 	
 export const fetchParseValidate = async (url: string) => 
 	typedValidation(parseAndPickType(await start(url)));
 
 export const fetchAndValidateIntoAST = async (url: string) =>{
 	const r = await fetchParseValidate(url)
-	return r.parser(r.data).toAST()
+	return r.parser(r.data, r.url).toAST()
 }
 
 export default parseAndPickType;

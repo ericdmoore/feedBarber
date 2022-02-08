@@ -1,4 +1,4 @@
-import type { ISupportedTypes } from './lib/start.ts';
+import type { ISupportedTypes, TypedValidator } from './lib/start.ts';
 import type { AST as _AST, ASTcomputable, ASTjson } from './lib/parsers/ast.ts';
 import type { Node as _Node } from './mods/unist.ts';
 import { vfile } from './mod.ts';
@@ -10,7 +10,7 @@ export type PaginationResp<T> = Promise<
 export interface IValidate<T> {
 	_: T;
 	inputKind: 'rss' | 'atom' | 'sitemap' | 'jsonfeed' | 'scrape';
-	clone: (i: unknown) => IValidate<T>;
+	clone: TypedValidator,
 	paginateFrom: (pos?: number, offset?: number) => PaginationResp<T>;
 	validate: () => Promise<T>;
 	prev: () => PaginationResp<T>;

@@ -14,7 +14,7 @@ import er from './helpers/error.ts';
 const { object, type, optional, array, string } = superstruct;
 
 const UrlLoc = object({
-	loc: InnerText,
+	loc: object({_text: string()}),
 	lastmod: optional(InnerText),
 	changefreq: optional(InnerText),
 	priority: optional(InnerText),
@@ -22,7 +22,7 @@ const UrlLoc = object({
 type IUrlLoc = typeof UrlLoc.TYPE;
 
 const SitemapLoc = object({
-	loc: InnerText,
+	loc: object({_text: string()}),
 	lastmod: optional(InnerText),
 });
 
@@ -30,14 +30,16 @@ type ISitemapLoc = typeof SitemapLoc.TYPE;
 
 const UrlSet = object({
 	url: array(UrlLoc),
-	_attributes: optional(object({
+	_comment: optional(string()),
+	_attributes: optional(type({
 		xmlns: string(),
 	})),
 });
 
 const IndexSet = object({
 	sitemap: array(SitemapLoc),
-	_attributes: optional(object({
+	_comment: optional(string()),
+	_attributes: optional(type({
 		xmlns: optional(string()),
 	})),
 });
@@ -56,13 +58,14 @@ export const SitemapKind = type({
 
 export type RespStruct = typeof SitemapKind.TYPE;
 
-export const expand = async (compactParse: RespStruct): Promise<RespStruct> => {
+export const expand = async (compactParse: RespStruct, url:string): Promise<RespStruct> => {
 	const allFetchedExternals = await Promise.all(
 		(compactParse?.sitemapindex?.sitemap ?? []).map(
 			async (sm) =>
-				parseAndPickType(
-					await (await fetch(sm.loc._text)).text(),
-				),
+				parseAndPickType({
+					url:sm.loc._text, 
+					txt: await (await fetch(sm.loc._text)).text()
+				}),
 		),
 	);
 
@@ -70,6 +73,8 @@ export const expand = async (compactParse: RespStruct): Promise<RespStruct> => {
 		IDictUnionOfPayloadTypes,
 		{ kind: 'sitemap' }
 	>[];
+
+	console.log({ newSitemapResp })
 
 	const newSitemaps: ISitemapLoc[] = newSitemapResp
 		.filter((sm) => !!sm.data.sitemapindex?.sitemap)
@@ -103,13 +108,14 @@ export const expand = async (compactParse: RespStruct): Promise<RespStruct> => {
 			...compactParse.urlset,
 			url: (compactParse?.urlset?.url ?? [])
 				.concat(newUrls)
-				.concat((await expand(recurseParam)).urlset?.url ?? []) as IUrlLoc[],
+				.concat((await expand(recurseParam, url)).urlset?.url ?? []) as IUrlLoc[],
 		},
 	};
 };
 
 export const Sitemap: TypedValidator = ((
 	compactParse: unknown | RespStruct,
+	url: string
 ): IValidate<RespStruct> => {
 	// let isValidated = false;
 	return {
@@ -140,7 +146,7 @@ export const Sitemap: TypedValidator = ((
 				if (!err && validated) {
 					let v = validated as RespStruct;
 					if (v.sitemapindex?.sitemap) {
-						v = await expand(v);
+						v = await expand(v, url);
 					}
 
 					[err, validated] = SitemapKind.validate(v, { coerce: true });
@@ -254,20 +260,20 @@ export const Sitemap: TypedValidator = ((
 			} as RespStruct;
 		},
 		exportAs: async (type: 'rss' | 'atom' | 'jsonfeed') => {
-			const ast: ASTcomputable = await Sitemap(compactParse).toAST();
+			const ast: ASTcomputable = await Sitemap(compactParse, url).toAST();
 			switch (type) {
 				case 'rss':
-					return rss.Rss(await rss.Rss({}).fromAST(ast)).toXML();
+					return rss.Rss(await rss.Rss({},url).fromAST(ast),url).toXML();
 				case 'atom':
-					return atom.Atom(await atom.Atom({}).fromAST(ast)).toXML();
+					return atom.Atom(await atom.Atom({},url).fromAST(ast),url).toXML();
 				case 'jsonfeed':
-					return jf.JsonFeed(await jf.JsonFeed({}).fromAST(ast)).toXML();
+					return jf.JsonFeed(await jf.JsonFeed({},url).fromAST(ast),url).toXML();
 			}
 		},
 		toAST: async (): Promise<ASTcomputable> => {
 			const c = compactParse as RespStruct;
 			return {
-				title: 'feed from ...',
+				title: url,
 				description: 'this feed is generated from a sitemap',
 				language: 'en-US',
 
@@ -337,4 +343,5 @@ export const Sitemap: TypedValidator = ((
 		},
 	};
 }) as TypedValidator;
+
 export default Sitemap;

@@ -144,8 +144,16 @@ type ValidationError = s.StructError | undefined;
 export type RespStruct = typeof AtomResponse.TYPE;
 // export type AtomValidator = IValidate<RespStruct> extends IValidate
 
+
+const pickURL = (fallback:string, link: typeof LinkOrLinkSet.TYPE )=>{
+	return Array.isArray(link)
+		? link.filter((l: s.Infer<typeof Link>) => l._attributes.rel === 'self')[0]._attributes.href ?? fallback
+		: link._attributes.href ?? fallback
+}
+
 export const Atom = ((
 	compactParse: RespStruct | unknown,
+	url:string
 ): IValidate<RespStruct> => {
 	const structs = {
 		feed: AtomFeedKind,
@@ -295,15 +303,15 @@ export const Atom = ((
 			} as RespStruct;
 		},
 		exportAs: async (type: 'rss' | 'atom' | 'jsonfeed'): Promise<string> => {
-			const ast = await Rss(compactParse).toAST() as ASTcomputable;
+			const ast = await Rss(compactParse, url).toAST() as ASTcomputable;
 
 			switch (type) {
 				case 'rss':
-					return Rss(await Rss({}).fromAST(ast)).toXML();
+					return Rss(await Rss({}, url).fromAST(ast), url).toXML();
 				case 'atom':
-					return Atom(await Atom({}).fromAST(ast)).toXML();
+					return Atom(await Atom({}, url).fromAST(ast), url).toXML();
 				case 'jsonfeed':
-					return JsonFeed(await JsonFeed({}).fromAST(ast)).toXML();
+					return JsonFeed(await JsonFeed({}, url).fromAST(ast), url).toXML();
 			}
 			return '';
 		},
@@ -347,12 +355,9 @@ export const Atom = ((
 				item: {
 					next: async () => [],
 					list: (c.feed.entry ?? []).map((i: s.Infer<typeof EntryKind>) => ({
-						id: i.id._text,
-						url: Array.isArray(i.link)
-							? i.link.filter((l: s.Infer<typeof Link>) => l._attributes.rel === 'self')[0]
-								._attributes.href ?? ''
-							: i.link._attributes.href ?? '',
-						title: i.title._text ?? i.title._cdata ?? '',
+						id: i.id?._text ?? pickURL('>> no link provided', i.link),
+						url: pickURL('>> no link provided',i.link),
+						title: txtorCData('', i.title),
 						summary: i.summary?._cdata ?? i.summary?._text ?? '>> no summary <<',
 						language: i._attributes?.['xml:lang'] ?? 'en-US',
 						authors: [{
@@ -373,8 +378,8 @@ export const Atom = ((
 							text: i.content?._text,
 						},
 						dates: {
-							modified: i.updated ? new Date(i.updated._text).getTime() : Date.now(),
-							published: i.published ? new Date(i.published._text).getTime() : Date.now(),
+							modified: i.updated?._text ? new Date(i.updated._text).getTime() : Date.now(),
+							published: i.published?._text ? new Date(i.published._text).getTime() : Date.now(),
 						},
 						images: {
 							bannerImage: '',
@@ -389,3 +394,5 @@ export const Atom = ((
 		},
 	};
 }) as TypedValidator;
+
+
