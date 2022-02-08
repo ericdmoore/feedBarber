@@ -1,8 +1,27 @@
 /** @jsx h */
-import { h, Handler, jsx, serve } from 'https://deno.land/x/sift@0.4.3/mod.ts';
+import { h, Handler, jsx, serve, VNode } from 'https://deno.land/x/sift@0.4.3/mod.ts';
+
+
+export const pageLayout = (header: VNode, bod: VNode, htmlAttrs = {})=>{
+    const ret = jsx(
+        <html lang="en" charSet='UTF-8'>
+            <head>
+                {header}
+            </head>
+            <body>
+                {bod}
+            </body>
+        </html>
+    )
+    // add <!DOCTYPE html> to front
+    return ret
+}
 
 export const header:Handler = async (req, param = {})=> {
-		return jsx(
+    const header = (
+        <title>Feed Supply</title>
+    )
+    const bod = (
             <div>
                 <h1>Welcome to feed supply</h1>
                 <nav>
@@ -34,6 +53,8 @@ export const header:Handler = async (req, param = {})=> {
                 </nav>
             </div>
         )
+
+    return pageLayout(header, bod)
 	};
 
 export default header;
