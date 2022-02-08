@@ -270,6 +270,9 @@ export const Rss = ((
 		toAST: async (): Promise<ASTcomputable> => {
 			const c = compactParse as RespStruct;
 			return {
+				_meta:{
+					sourceURL: url
+				},
 				title: c.rss.channel?.title?._text ?? c.rss.channel.link?._text ?? '>> no title given',
 				description: c.rss.channel.description?._text ?? '>> no description',
 				authors: [],

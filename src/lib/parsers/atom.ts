@@ -322,6 +322,9 @@ export const Atom = ((
 		toAST: async (): Promise<ASTcomputable> => {
 			const c = await compactParse as RespStruct;
 			return {
+				_meta:{
+					sourceURL: url
+				},
 				title: txtorCData('>> no title << ', c.feed.title),
 				description: txtorCData('>> no description <<', c.feed.subtitle),
 				language: c.feed._attributes?.['xml:lang'] ?? 'en-US',

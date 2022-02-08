@@ -254,10 +254,11 @@ export const ASTFeedItemThunk = type({
 });
 
 export const ASTKindJson = type({
-	_meta: type({
+	_meta: object({
 		version: string(),
 		reference: string(),
 		comment: string(),
+		sourceURL: string()
 	}),
 
 	title: string(),
@@ -314,6 +315,13 @@ const ASTlinks = type({
 });
 
 export const ASTKindComputable = type({
+	_meta: optional(partial(object({
+		version: eitherThunkOr(string()),
+		reference: eitherThunkOr(string()),
+		comment: eitherThunkOr(string()),
+		sourceURL: eitherThunkOr(string()),
+	}))),
+
 	title: eitherThunkOr(string()),
 	description: eitherThunkOr(string()),
 	language: eitherThunkOr(string()),
@@ -363,22 +371,30 @@ export const computableToJson = async (
 	ast: ASTcomputable | ASTjson,
 	comment = '',
 	ref = '',
-	v = '',
+	v = ''
 ): Promise<ASTjson> => {
 	if('_meta' in ast){
 		return ast as ASTjson
 	}else{
-		const _images = await rezVal(ast.images);
-		const _links = await rezVal(ast.links);
-		const _paging = await rezVal(ast.paging);
-		const _item = await rezVal(ast?.item);
-		const _list = await rezVal(_item.list);
+
+		const [
+			_meta   
+			,_images       
+			,_links     
+			,_paging       
+			,_item ] = await Promise.all([	rezVal(ast._meta),
+											rezVal(ast.images),
+											rezVal(ast.links),
+											rezVal(ast.paging),
+											rezVal(ast?.item) ])
+		const _list = await rezVal(_item.list)
 	
 		return {
 			_meta: {
-				comment,
-				reference: ref,
-				version: v,
+				comment: await rezVal(_meta?.comment) ?? comment,
+				reference: await rezVal(_meta?.reference) ?? ref,
+				version: await rezVal(_meta?.version) ?? v,
+				sourceURL: await rezVal(_meta?.sourceURL) ?? ''
 			},
 			title: await rezVal(ast.title),
 			description: await rezVal(ast.description),

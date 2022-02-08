@@ -300,6 +300,9 @@ export const Sitemap: TypedValidator = ((
 		toAST: async (): Promise<ASTcomputable> => {
 			const c = compactParse as RespStruct;
 			return {
+				_meta:{
+					sourceURL: url
+				},
 				title: url,
 				description: 'this feed is generated from a sitemap',
 				language: 'en-US',
