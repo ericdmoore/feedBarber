@@ -99,11 +99,15 @@ export type RespStruct = typeof JsonFeedKind.TYPE;
 
 export const JsonFeed = ((
 	compactParse: RespStruct | unknown,
+	url: string
 ): IValidate<RespStruct> => {
 	const structs = { response: JsonFeedKind };
 
 	return {
+		url,
 		inputKind: 'jsonfeed',
+		_: compactParse as RespStruct,
+		clone: JsonFeed,
 		validate: (): Promise<RespStruct> => {
 			let err: s.StructError | undefined;
 			let validated: unknown;
@@ -161,8 +165,6 @@ export const JsonFeed = ((
 				);
 			}
 		},
-		clone: JsonFeed,
-		_: compactParse as RespStruct,
 		/**
 		 * @param pos - starting positi0on
 		 * @param pageBy - intteger value (pos|neg) indicating the page size and direction from the starting position

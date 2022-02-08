@@ -46,7 +46,7 @@ export const validatedInputToAst = async (
 export const astShell = async (
 	parser: IValidate<ISupportedTypes>,
 	url: string,
-	ast?: AST,
+	ast?: ASTcomputable,
 	pos: { pageBy: number; cur: number } = { pageBy: 50, cur: 0 },
 ): Promise<ASTShell> => {
 	return {
@@ -58,20 +58,35 @@ export const astShell = async (
 			cur: 2,
 			remaining: 234 - 2,
 		},
-		// items: {
-		// 	stream: () => {},
-		// 	iter: () => {},
-		//  all: () => {}
-		// },
-		next: async () => {
-			const { val } = await parser.next();
-			ast = await parser.clone(val, url).toAST();
-			return astShell(parser, url, ast, pos);
+		items: {
+			stream: ():ReadableStream<typeof ASTFeedItemJson.TYPE[]> => {
+				return new ReadableStream<typeof ASTFeedItemJson.TYPE[]>()
+			},
+			iter: async function * ():AsyncGenerator<typeof ASTFeedItemJson.TYPE[]>{
+				let nextP = await parser.next()
+				let ast = await parser.clone(nextP.val , parser.url).toAST()
+				while (nextP.canNext){
+					yield ast.item.list as typeof ASTFeedItemJson.TYPE[]
+					nextP = await parser.next()
+					ast = await parser.clone(nextP.val , parser.url).toAST()
+				}
+				return ast.item.list
+			},
+			all: async () => {
+				return [] as typeof ASTFeedItemJson.TYPE[]
+			}
 		},
-		prev: async () => {
-			const { val } = await parser.prev();
-			ast = await parser.clone(val, url).toAST();
-			return astShell(parser, url, ast, pos);
+		changeState:{
+			next: async () => {
+				const { val } = await parser.next();
+				ast = await parser.clone(val, url).toAST();
+				return astShell(parser, url, ast, pos);
+			},
+			prev: async () => {
+				const { val } = await parser.prev();
+				ast = await parser.clone(val, url).toAST();
+				return astShell(parser, url, ast, pos);
+			},
 		},
 		use: async (fns) => {
 			return fns.reduce(

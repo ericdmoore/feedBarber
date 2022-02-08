@@ -146,9 +146,11 @@ export const Sitemap: TypedValidator = ((
 ): IValidate<RespStruct> => {
 	// let isValidated = false;
 	return {
-		_: {} as RespStruct,
+		url,
 		inputKind: 'sitemap',
 		clone: Sitemap,
+		_: compactParse as RespStruct,
+
 		validate: async (): Promise<RespStruct> => {
 			let err: superstruct.StructError | undefined;
 			let validated: unknown;

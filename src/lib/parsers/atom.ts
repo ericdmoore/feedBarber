@@ -161,9 +161,10 @@ export const Atom = ((
 	};
 
 	return {
-		_: compactParse as RespStruct,
+		url,
 		inputKind: 'atom',
 		clone: Atom,
+		_: compactParse as RespStruct,
 		paginateFrom: (pos: number = 0, offset: number = 50) => {
 			return Promise.resolve({
 				val: compactParse as RespStruct,

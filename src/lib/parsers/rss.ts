@@ -113,7 +113,10 @@ export const Rss = ((
 		item: RssItem,
 	};
 	return {
+		url,
 		inputKind: 'rss',
+		clone: Rss,
+		_: compactParse as RespStruct,
 		validate: (): Promise<RespStruct> => {
 			let err: superstruct.StructError | undefined;
 			let validated: unknown;
@@ -161,8 +164,6 @@ export const Rss = ((
 				);
 			}
 		},
-		clone: Rss,
-		_: compactParse as RespStruct,
 		paginateFrom: (pos: number = 0, pageBy: number = 50) => {
 			return Promise.resolve({
 				val: compactParse as RespStruct,
