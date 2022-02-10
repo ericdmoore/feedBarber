@@ -1,4 +1,4 @@
-.PHONY: start fmt test list cli server
+.PHONY: start fmt test list cli server scratch
 
 list:
 	@echo "\nAvailable make commands:\n"
@@ -18,3 +18,6 @@ cli:
 
 fmt:
 	deno fmtmake 
+
+scratch:
+	deno run --allow-net _sratch/discover.ts

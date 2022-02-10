@@ -10,15 +10,15 @@ export * as unified from 'https://cdn.skypack.dev/unified@10.1.1';
 // parse
 export * as rehypeParse from 'https://cdn.skypack.dev/rehype-parse@8.0.4';
 export * as retextparse from 'https://cdn.skypack.dev/retext-english';
-// export * as remarkParse from 'https://cdn.skypack.dev/remark-parse@10.0.1'; // import problem
+export * as remarkParse from 'https://cdn.skypack.dev/remark-parse@10.0.1'; // import problem
 
 // stringify
-// export * as remarkStringify from 'https://cdn.skypack.dev/remark-stringify@10.0.2'; // import problem
+export * as remarkStringify from 'https://cdn.skypack.dev/remark-stringify@10.0.2'; // import problem
 export * as rehypeStringify from 'https://cdn.skypack.dev/rehype-stringify@9.0.3';
 export * as retextStringify from 'https://cdn.skypack.dev/retext-stringify';
 
 // bridges
-// export * as rehypeRemark from 'https://cdn.skypack.dev/rehype-remark@9.1.2'; // import problem
+export * as rehypeRemark from 'https://cdn.skypack.dev/rehype-remark@9.1.2'; // import problem
 export * as remarkRetext from 'https://cdn.skypack.dev/remark-retext';
 
 // RETEXT-middlewares
