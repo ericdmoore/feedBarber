@@ -1,0 +1,37 @@
+activityDiagram
+  start
+  while (1. Parse-URL including function composition)
+    :show errors to user;
+  endwhile
+  while (2. Check-Expansion-Availability Has Errors)
+    :show errors to user;
+  endwhile
+  while (3. Inputs Given are invalid for all used functions)
+    :show errors to user;
+  endwhile
+  partition 4.Discover {
+    :5. Fetch the given URL;
+    group "Strategy" {
+      :5a. check for discovery links;
+      -> None found;
+      :5b. check for discovery links @index;
+      -> None Found;
+      :5c try normal feed locaitons;
+      -> None found;
+      :5d fallback to sitemap;
+      -> None found;
+      :Show Errors;  
+    }
+  }
+  partition WithValidURL {
+    :with a valid feed URL;
+    :6. rewrite the url to be the explict URL based on discovery;
+    group "HOTPATH" {
+      :7a. To CityFeed AST;
+      :7b. Apply Transforms;
+      :7c. From CityFeed AST to Output Fmt;
+      -> '';
+    }
+  }
+  :8. respond with feed data;
+  end
