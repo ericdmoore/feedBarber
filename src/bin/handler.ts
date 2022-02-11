@@ -10,7 +10,7 @@ import proxy from './pages/proxy.ts';
 import signin from './pages/signin.tsx';
 import token from './pages/token.tsx';
 import user from './pages/user.tsx';
-import header from './pages/header.tsx'
+import header from './pages/header.tsx';
 import echoAST from './pages/ast.tsx';
 
 // @see  NOTES from '../../notes/accounts.md'
@@ -29,9 +29,9 @@ serve({
 	'/signin': signin,
 	'/logout': logout,
 	'/new': newCompositionForm,
-	'/ast/:url(.*)' : echoAST,
-	'/t-:tempToken': token("Temp"),
-	'/u-:userToken': token("User"),
+	'/ast/:url(.*)': echoAST,
+	'/t-:tempToken': token('Temp'),
+	'/u-:userToken': token('User'),
 	'/(u|t)-:userOrTempToken/:outputFmt/': configure('Configure From Scratch'),
 	'/(u|t)-:userOrTempToken/:outputFmt/:composition': configure(),
 	'/(u|t)-:userOrTempToken/:outputFmt/:composition/:url': proxy,

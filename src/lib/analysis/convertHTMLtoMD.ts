@@ -1,38 +1,30 @@
-import type { AST, UnifiedAttacher } from '../../types.ts';
+import type { UnifiedAttacher } from '../../types.ts';
 import { rehypeParse, rehypeRemark, remarkStringify, unified } from '../../mod.ts';
 
-export const applyRehypePlugins = (...rehypePlugins: UnifiedAttacher[]) =>
-	async (input: AST): Promise<AST> => {
-		const _items = Array.isArray(input.item.list) ? input.item.list : await input.item.list();
-
-		return {
-			...input,
-			item: {
-				next: async () => {
-					return [];
-				},
-				list: await Promise.all(_items.map(async (i) => {
-					if (!i.content.html) {
-						return i;
-					} else {
-						return {
-							...i,
-							content: {
-								...i.content,
-								markdown: await unified.unified()
-									.use(rehypeParse.default)
-									.use(rehypeRemark.default)
-									.use(rehypePlugins)
-									.use(remarkStringify.default)
-									.process(
-										typeof i.content.html === 'string' ? i.content.html : await i.content.html(),
-									),
-							},
-						};
-					}
-				})),
-			},
-		};
+export const applyRemarkRetextPlugins = (
+	parserOPts?: unknown,
+	bridgeOpts?: unknown,
+	stringifyOpts?: unknown,
+	cfg: { rehypePlugins: UnifiedAttacher[]; remarkPlugins: UnifiedAttacher[] } = {
+		rehypePlugins: [],
+		remarkPlugins: [],
+	},
+) =>
+	async <T extends string | undefined>(
+		input: T,
+	): Promise<T extends string ? string : undefined> => {
+		if (input) {
+			const vf = await unified.unified()
+				.use(rehypeParse.default, parserOPts)
+				.use(cfg.rehypePlugins)
+				.use(rehypeRemark.default, bridgeOpts)
+				.use(cfg.remarkPlugins)
+				.use(remarkStringify.default, stringifyOpts)
+				.process(input);
+			return vf.toString() as T extends string ? string : undefined;
+		} else {
+			return undefined as T extends string ? string : undefined;
+		}
 	};
 
-export default applyRehypePlugins();
+export default applyRemarkRetextPlugins();

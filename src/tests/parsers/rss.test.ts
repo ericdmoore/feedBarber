@@ -1,14 +1,14 @@
-import { skip } from './helpers.ts';
-import { atom as dhhAtom } from './mocks/dhh_hey.ts';
-import { parseAndValidate } from '../lib/start.ts';
-import { computableToJson } from '../lib/parsers/ast.ts';
-import { Atom, RespStruct as atomStruct } from '../lib/parsers/atom.ts';
+import { skip } from '../helpers.ts';
+import { atom as dhhAtom } from '../mocks/dhh_hey.ts';
+import { parseAndValidate } from '../../lib/start.ts';
+import { computableToJson } from '../../lib/parsers/ast.ts';
+import { Atom, RespStruct as atomStruct } from '../../lib/parsers/atom.ts';
 import { assertEquals } from 'https://deno.land/std@0.123.0/testing/asserts.ts';
 
 Deno.test(skip(
-	'JsonFeed -> AST -> JsonFeed',
+	'Rss -> AST -> Rss',
 	async () => {
-		const fakeUrl = 'http://world.hey.com/dhh/sitemap.xml'
+		const fakeUrl = 'https://world.hey.com/dhh/atom.xml';
 		const c1 = await parseAndValidate(dhhAtom, fakeUrl) as unknown as atomStruct;
 		const ast = await Atom(c1, fakeUrl).toAST();
 		const astJson = await computableToJson(ast);
@@ -18,13 +18,13 @@ Deno.test(skip(
 ));
 
 Deno.test(skip(
-	'JsonFeed -> AST -> Rss',
+	'Rss -> AST -> Atom',
 	async () => {
 	},
 ));
 
 Deno.test(skip(
-	'JsonFeed -> AST -> Atom',
+	'Rss -> AST -> JsonFeed',
 	async () => {
 	},
 ));

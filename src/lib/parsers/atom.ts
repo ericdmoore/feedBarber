@@ -15,7 +15,7 @@
 // _cdata
 
 import type { TypedValidator } from '../start.ts';
-import type{ IValidate } from '../../types.ts';
+import type { IValidate } from '../../types.ts';
 import { ASTcomputable, ASTjson, computableToJson } from '../parsers/ast.ts';
 import { superstruct as s, toXml } from '../../mod.ts';
 import { Rss } from './rss.ts';
@@ -144,16 +144,16 @@ type ValidationError = s.StructError | undefined;
 export type RespStruct = typeof AtomResponse.TYPE;
 // export type AtomValidator = IValidate<RespStruct> extends IValidate
 
-
-const pickURL = (fallback:string, link: typeof LinkOrLinkSet.TYPE )=>{
+const pickURL = (fallback: string, link: typeof LinkOrLinkSet.TYPE) => {
 	return Array.isArray(link)
-		? link.filter((l: s.Infer<typeof Link>) => l._attributes.rel === 'self')[0]._attributes.href ?? fallback
-		: link._attributes.href ?? fallback
-}
+		? link.filter((l: s.Infer<typeof Link>) => l._attributes.rel === 'self')[0]._attributes.href ??
+			fallback
+		: link._attributes.href ?? fallback;
+};
 
 export const Atom = ((
 	compactParse: RespStruct | unknown,
-	url:string
+	url: string,
 ): IValidate<RespStruct> => {
 	const structs = {
 		feed: AtomFeedKind,
@@ -234,73 +234,72 @@ export const Atom = ((
 			});
 		},
 		fromAST: async (_ast: ASTcomputable | ASTjson): Promise<RespStruct> => {
-			const ast = await computableToJson(_ast)
-			const version = (ast?._atom?._declaration as any)?._attributes?.version as string | undefined
-			const xmlLang = (ast?._atom?.feed as any)._attributes['xml:lang'] ?? 'en-US' as string
-			
-			const typedText = (s = '')=>{
-				if(/<\/?[a-z][\s\S]*>/i.test(s)){
+			const ast = await computableToJson(_ast);
+			const version = (ast?._atom?._declaration as any)?._attributes?.version as string | undefined;
+			const xmlLang = (ast?._atom?.feed as any)._attributes['xml:lang'] ?? 'en-US' as string;
+
+			const typedText = (s = '') => {
+				if (/<\/?[a-z][\s\S]*>/i.test(s)) {
 					return {
-						_attributes:{type:'html'},
-						_cdata:s
-					}
-				}
-				else{
+						_attributes: { type: 'html' },
+						_cdata: s,
+					};
+				} else {
 					return {
-						_attributes:{type:'text'},
-						_text:s, 
-					}
+						_attributes: { type: 'text' },
+						_text: s,
+					};
 				}
-			}
-			
+			};
+
 			return {
-				_declaration:{
-					_attributes:{ encoding:'utf-8', version: version},	
+				_declaration: {
+					_attributes: { encoding: 'utf-8', version: version },
 				},
-				feed:{
-					_attributes:{
-						xmlns:'http://www.w3.org/2005/Atom',
-						"xml:lang": xmlLang,
+				feed: {
+					_attributes: {
+						xmlns: 'http://www.w3.org/2005/Atom',
+						'xml:lang': xmlLang,
 					},
 					title: typedText(''),
 					subtitle: typedText(''),
-					link:[{
-						_attributes:{
-							href:'',
-							hreflang:'',
-							rel:'',
-							type:''
-						}
+					link: [{
+						_attributes: {
+							href: '',
+							hreflang: '',
+							rel: '',
+							type: '',
+						},
 					}],
-					updated:{_text:''},
+					updated: { _text: '' },
 					author: {
-						email:{_text:''},
-						name:{_text:''}, 
-						uri:{_text:''}
+						email: { _text: '' },
+						name: { _text: '' },
+						uri: { _text: '' },
 					},
-					contributor:[{
-						email:{_text:''},
-						name:{_text:''}, 
-						uri:{_text:''}
+					contributor: [{
+						email: { _text: '' },
+						name: { _text: '' },
+						uri: { _text: '' },
 					}],
-					category:[] as string[],
-					icon:{_text:''},
-					logo:{_text:''},
-					generator:{_attributes:{uri:'', version:''}, _cdata:'', _text:''},
-					id:{_text:''},
-					rights:{_text:''},
-					entry:[{
-						_attributes:{"xml:lang":'en-US'},
+					category: [] as string[],
+					icon: { _text: '' },
+					logo: { _text: '' },
+					generator: { _attributes: { uri: '', version: '' }, _cdata: '', _text: '' },
+					id: { _text: '' },
+					rights: { _text: '' },
+					entry: [{
+						_attributes: { 'xml:lang': 'en-US' },
 						title: typedText(''),
 						summary: typedText(''),
-						id:{_text:''},
-						link:{_attributes:{href:'',hreflang:'',rel:'',type:''}},
-						author:{email:{_text:''},name:{_text:''},uri:{_text:''}},
-						content:{_attributes:{type:'html'},_text:'',_cdata:''},
-						published:{_text:''},
-						updated:{_text:''}
-					}]
-				}
+						id: { _text: '' },
+						link: { _attributes: { href: '', hreflang: '', rel: '', type: '' } },
+						author: { email: { _text: '' }, name: { _text: '' }, uri: { _text: '' } },
+						content: { _attributes: { type: 'html' }, _text: '', _cdata: '' },
+						published: { _text: '' },
+						updated: { _text: '' },
+					}],
+				},
 			} as RespStruct;
 		},
 		exportAs: async (type: 'rss' | 'atom' | 'jsonfeed'): Promise<string> => {
@@ -323,8 +322,8 @@ export const Atom = ((
 		toAST: async (): Promise<ASTcomputable> => {
 			const c = await compactParse as RespStruct;
 			return {
-				_meta:{
-					sourceURL: url
+				_meta: {
+					sourceURL: url,
 				},
 				title: txtorCData('>> no title << ', c.feed.title),
 				description: txtorCData('>> no description <<', c.feed.subtitle),
@@ -360,7 +359,7 @@ export const Atom = ((
 					next: async () => [],
 					list: (c.feed.entry ?? []).map((i: s.Infer<typeof EntryKind>) => ({
 						id: i.id?._text ?? pickURL('>> no link provided', i.link),
-						url: pickURL('>> no link provided',i.link),
+						url: pickURL('>> no link provided', i.link),
 						title: txtorCData('', i.title),
 						summary: i.summary?._cdata ?? i.summary?._text ?? '>> no summary <<',
 						language: i._attributes?.['xml:lang'] ?? 'en-US',
@@ -398,5 +397,3 @@ export const Atom = ((
 		},
 	};
 }) as TypedValidator;
-
-

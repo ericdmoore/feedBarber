@@ -1,5 +1,5 @@
 import type { ISupportedTypes, TypedValidator } from './lib/start.ts';
-import type { AST as _AST, ASTcomputable, ASTjson, ASTFeedItemJson } from './lib/parsers/ast.ts';
+import type { AST as _AST, ASTcomputable, ASTFeedItemJson, ASTjson } from './lib/parsers/ast.ts';
 import type { Node as _Node } from './mods/unist.ts';
 import { vfile } from './mod.ts';
 
@@ -9,9 +9,9 @@ export type PaginationResp<T> = Promise<
 
 export interface IValidate<T> {
 	_: T;
-	url: string
+	url: string;
 	inputKind: 'rss' | 'atom' | 'sitemap' | 'jsonfeed' | 'scrape';
-	clone: TypedValidator,
+	clone: TypedValidator;
 	paginateFrom: (pos?: number, offset?: number) => PaginationResp<T>;
 	validate: () => Promise<T>;
 	prev: () => PaginationResp<T>;
@@ -30,15 +30,15 @@ export interface ASTShell {
 		cur: number;
 		remaining: number;
 	};
-	changeState:{
+	changeState: {
 		next: () => Promise<ASTShell>;
 		prev: () => Promise<ASTShell>;
-	}
+	};
 	items: {
-		stream: ()=> ReadableStream<typeof ASTFeedItemJson.TYPE[]>
-		iter: () => AsyncGenerator<typeof ASTFeedItemJson.TYPE[]>
-		all: () => Promise<typeof ASTFeedItemJson.TYPE[]>
-	},
+		stream: () => ReadableStream<typeof ASTFeedItemJson.TYPE[]>;
+		iter: () => AsyncGenerator<typeof ASTFeedItemJson.TYPE[]>;
+		all: () => Promise<typeof ASTFeedItemJson.TYPE[]>;
+	};
 	parserData: ISupportedTypes;
 	use: (Fns: MapperFn[]) => Promise<ASTShell>;
 	toXML: () => string;

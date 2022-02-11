@@ -67,7 +67,7 @@ export const flags = {
 		flag: '-v --verbose',
 		msg: `## Verbose
 
-		To show more info `
+		To show more info `,
 	},
 	composition: {
 		start: 'preview()',

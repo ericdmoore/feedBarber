@@ -11,7 +11,7 @@ $> pintora render -i ./notes/pipeline.pintora -o ./notes/pipeline.svg`
 -->
 ![Pipeline Diagram](./pipeline.svg)
 
-## 1.Parse-URL
+## 1. Parse-URL
 
 URLs are route specific, however PARSING in this context usually means the funciton compositions.
 

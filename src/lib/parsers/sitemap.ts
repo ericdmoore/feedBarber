@@ -13,35 +13,35 @@ import er from './helpers/error.ts';
 
 const { object, type, optional, array, string } = superstruct;
 
-const buildChangeFreqPicker = ()=>{
-	const HR = 1000 * 60 * 60
-	const DAY = 24 * HR
-	const WK = 7 * DAY
-	const WK4 = WK * 4
-	const YR = 365 * DAY
+const buildChangeFreqPicker = () => {
+	const HR = 1000 * 60 * 60;
+	const DAY = 24 * HR;
+	const WK = 7 * DAY;
+	const WK4 = WK * 4;
+	const YR = 365 * DAY;
 
-	return (lastMod: number, today = Date.now() )=>{
-		const dif = today -  lastMod
-		if(dif < HR){
-			return 'always'
-		} else if (dif < DAY){
-			return 'hourly'
-		} else if (dif < WK){
-			return 'daily'
-		}else if (dif < WK4){
-			return 'weekly'
-		}else if (dif < YR){
-			return 'monthly'
-		}else{
-			return 'yearly'
+	return (lastMod: number, today = Date.now()) => {
+		const dif = today - lastMod;
+		if (dif < HR) {
+			return 'always';
+		} else if (dif < DAY) {
+			return 'hourly';
+		} else if (dif < WK) {
+			return 'daily';
+		} else if (dif < WK4) {
+			return 'weekly';
+		} else if (dif < YR) {
+			return 'monthly';
+		} else {
+			return 'yearly';
 		}
-	}	
-}
+	};
+};
 
-const pickChangeFreq = buildChangeFreqPicker()
+const pickChangeFreq = buildChangeFreqPicker();
 
 const UrlLoc = object({
-	loc: object({_text: string()}),
+	loc: object({ _text: string() }),
 	lastmod: optional(InnerText),
 	changefreq: optional(InnerText),
 	priority: optional(InnerText),
@@ -49,7 +49,7 @@ const UrlLoc = object({
 type IUrlLoc = typeof UrlLoc.TYPE;
 
 const SitemapLoc = object({
-	loc: object({_text: string()}),
+	loc: object({ _text: string() }),
 	lastmod: optional(InnerText),
 });
 
@@ -85,13 +85,13 @@ export const SitemapKind = type({
 
 export type RespStruct = typeof SitemapKind.TYPE;
 
-export const expand = async (compactParse: RespStruct, url:string): Promise<RespStruct> => {
+export const expand = async (compactParse: RespStruct, url: string): Promise<RespStruct> => {
 	const allFetchedExternals = await Promise.all(
 		(compactParse?.sitemapindex?.sitemap ?? []).map(
 			async (sm) =>
 				parseAndPickType({
-					url:sm.loc._text, 
-					txt: await (await fetch(sm.loc._text)).text()
+					url: sm.loc._text,
+					txt: await (await fetch(sm.loc._text)).text(),
 				}),
 		),
 	);
@@ -101,7 +101,7 @@ export const expand = async (compactParse: RespStruct, url:string): Promise<Resp
 		{ kind: 'sitemap' }
 	>[];
 
-	console.log({ newSitemapResp })
+	console.log({ newSitemapResp });
 
 	const newSitemaps: ISitemapLoc[] = newSitemapResp
 		.filter((sm) => !!sm.data.sitemapindex?.sitemap)
@@ -142,7 +142,7 @@ export const expand = async (compactParse: RespStruct, url:string): Promise<Resp
 
 export const Sitemap: TypedValidator = ((
 	compactParse: unknown | RespStruct,
-	url: string
+	url: string,
 ): IValidate<RespStruct> => {
 	// let isValidated = false;
 	return {
@@ -168,7 +168,7 @@ export const Sitemap: TypedValidator = ((
 				(compactParse as RespStruct).urlset ||
 				(compactParse as RespStruct).sitemapindex
 			) {
-				[err, validated] = SitemapKind.validate(compactParse, {					
+				[err, validated] = SitemapKind.validate(compactParse, {
 					coerce: true,
 				});
 
@@ -254,12 +254,11 @@ export const Sitemap: TypedValidator = ((
 		fromAST: async (
 			_ast: ASTjson | ASTcomputable,
 		): Promise<RespStruct> => {
-
 			const opts = {
 				lastmod: '',
 				priority: '',
-				changefreq: ''
-			}
+				changefreq: '',
+			};
 
 			const ast = await computableToJson(_ast);
 			const asInnerText = (s?: string) => {
@@ -292,18 +291,18 @@ export const Sitemap: TypedValidator = ((
 			const ast: ASTcomputable = await Sitemap(compactParse, url).toAST();
 			switch (type) {
 				case 'rss':
-					return rss.Rss(await rss.Rss({},url).fromAST(ast),url).toXML();
+					return rss.Rss(await rss.Rss({}, url).fromAST(ast), url).toXML();
 				case 'atom':
-					return atom.Atom(await atom.Atom({},url).fromAST(ast),url).toXML();
+					return atom.Atom(await atom.Atom({}, url).fromAST(ast), url).toXML();
 				case 'jsonfeed':
-					return jf.JsonFeed(await jf.JsonFeed({},url).fromAST(ast),url).toXML();
+					return jf.JsonFeed(await jf.JsonFeed({}, url).fromAST(ast), url).toXML();
 			}
 		},
 		toAST: async (): Promise<ASTcomputable> => {
 			const c = compactParse as RespStruct;
 			return {
-				_meta:{
-					sourceURL: url
+				_meta: {
+					sourceURL: url,
 				},
 				title: url,
 				description: 'this feed is generated from a sitemap',
@@ -348,9 +347,7 @@ export const Sitemap: TypedValidator = ((
 							},
 							dates: {
 								published: async () => -1,
-								modified: async () => u.lastmod?._text 
-									? new Date(u.lastmod?._text).getTime() 
-									: -1
+								modified: async () => u.lastmod?._text ? new Date(u.lastmod?._text).getTime() : -1,
 							},
 
 							images: {
@@ -370,10 +367,12 @@ export const Sitemap: TypedValidator = ((
 							},
 							expires: undefined,
 							_sitemap: {
-								changefreq: u.changefreq ?? ((u)=>{
-									return u.lastmod?._text ? pickChangeFreq(new Date(u.lastmod?._text).getTime()) : 'yearly'
+								changefreq: u.changefreq ?? ((u) => {
+									return u.lastmod?._text
+										? pickChangeFreq(new Date(u.lastmod?._text).getTime())
+										: 'yearly';
 								})(u),
-								priority: u.priority ?? 0.5
+								priority: u.priority ?? 0.5,
 							},
 						};
 					}),

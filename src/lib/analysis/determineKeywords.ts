@@ -1,38 +1,43 @@
-import type { AST, Node, VFile } from '../../types.ts';
+import type { Node, VFile } from '../../types.ts';
 import { remarkParse, remarkRetext, retextKeywords, retextStringify, unified } from '../../mod.ts';
 
-export const applyRetextKeywordss = (
+export const determineKeywords = (
 	parseOpts?: unknown,
 	bridgeOps?: unknown,
 	kwOpts?: unknown,
 	stringOpts?: unknown,
 ) =>
-	async (input: AST): Promise<AST> => {
-		const _itemList = Array.isArray(input.item.list) ? input.item.list : await input.item.list();
-
-		const vfileFromTextAttr = async (s?: string | (() => Promise<string>)) =>
-			!s ? null : await unified.unified()
+	/**
+	 * @param input expdeects a text or markdown?
+	 * @returns
+	 */
+	async (input?: string | (() => Promise<string>)) => {
+		if (!input) {
+			return {
+				input: undefined,
+				bodyTextVersion: undefined,
+				keywords: undefined,
+				keyphrases: undefined,
+			};
+		}
+		const vfileWithKW = async (s: string | (() => Promise<string>)) => {
+			const vf = await unified.unified()
 				.use(remarkParse.default, parseOpts)
 				.use(remarkRetext.default, bridgeOps)
 				.use(retextKeywords.default, kwOpts)
 				.use(retextStringify.default, stringOpts)
 				.process(typeof s === 'string' ? s : await s()) as VFile;
+			return vf;
+		};
+
+		const vf = await vfileWithKW(input);
+		const d = vf.data as { keywords?: IKeyword[]; keyphrases?: IKeyPhrase[] } | undefined;
 
 		return {
-			...input,
-			item: {
-				...input.item,
-				list: await Promise.all(_itemList.map(async (i) => {
-					const vf = await vfileFromTextAttr(i.content.text);
-					return {
-						...i,
-						__analysis: {
-							keywords: (vf?.data as { keywords: IKeyword[] | undefined })?.keywords,
-							keyphrases: (vf?.data as { keyphrase: IKeyPhrase[] | undefined })?.keyphrase,
-						},
-					};
-				})),
-			},
+			input,
+			bodyTextVersion: vf.toString(),
+			keywords: d?.keywords,
+			keyphrases: d?.keyphrases,
 		};
 	};
 
@@ -53,4 +58,4 @@ export interface IKeyPhrase {
 	matches: { parent: Node; nodes: [Node, Node, Node] }[];
 }
 
-export default applyRetextKeywordss();
+export default determineKeywords();

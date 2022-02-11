@@ -27,7 +27,7 @@ const {
 
 export const validatedInputToAst = async (
 	preValidatecdInput: IDictValidPayloadTypes,
-	url: string
+	url: string,
 ): Promise<AST> => {
 	switch (preValidatecdInput.kind) {
 		case 'atom':
@@ -59,24 +59,24 @@ export const astShell = async (
 			remaining: 234 - 2,
 		},
 		items: {
-			stream: ():ReadableStream<typeof ASTFeedItemJson.TYPE[]> => {
-				return new ReadableStream<typeof ASTFeedItemJson.TYPE[]>()
+			stream: (): ReadableStream<typeof ASTFeedItemJson.TYPE[]> => {
+				return new ReadableStream<typeof ASTFeedItemJson.TYPE[]>();
 			},
-			iter: async function * ():AsyncGenerator<typeof ASTFeedItemJson.TYPE[]>{
-				let nextP = await parser.next()
-				let ast = await parser.clone(nextP.val , parser.url).toAST()
-				while (nextP.canNext){
-					yield ast.item.list as typeof ASTFeedItemJson.TYPE[]
-					nextP = await parser.next()
-					ast = await parser.clone(nextP.val , parser.url).toAST()
+			iter: async function* (): AsyncGenerator<typeof ASTFeedItemJson.TYPE[]> {
+				let nextP = await parser.next();
+				let ast = await parser.clone(nextP.val, parser.url).toAST();
+				while (nextP.canNext) {
+					yield ast.item.list as typeof ASTFeedItemJson.TYPE[];
+					nextP = await parser.next();
+					ast = await parser.clone(nextP.val, parser.url).toAST();
 				}
-				return ast.item.list
+				return ast.item.list;
 			},
 			all: async () => {
-				return [] as typeof ASTFeedItemJson.TYPE[]
-			}
+				return [] as typeof ASTFeedItemJson.TYPE[];
+			},
 		},
-		changeState:{
+		changeState: {
 			next: async () => {
 				const { val } = await parser.next();
 				ast = await parser.clone(val, url).toAST();
@@ -167,13 +167,12 @@ export const ASTAttachment = type({
 });
 
 export const ASTAttachmentComputable = type({
-	url: union([ StrThunk, string() ]),
-	mimeType: union([ StrThunk, string() ]),
-	title: optional(union([ StrThunk, string() ])),
-	sizeInBytes: optional(union([ Thunk<number>(), number() ])),
-	durationInSeconds: optional(union([ Thunk<number>(), number() ])),
+	url: union([StrThunk, string()]),
+	mimeType: union([StrThunk, string()]),
+	title: optional(union([StrThunk, string()])),
+	sizeInBytes: optional(union([Thunk<number>(), number()])),
+	durationInSeconds: optional(union([Thunk<number>(), number()])),
 });
-
 
 export const ASTFeedItemJson = type({
 	id: string(), // can also be the permalink
@@ -238,8 +237,8 @@ export const ASTFeedItemThunk = type({
 		bannerImage: optional(eitherThunkOr(string())), // layout above the post
 	}),
 	dates: object({
-		published: optional(union([ number(), Thunk<number>() ])),
-		modified: optional(union([ number(), Thunk<number>() ])),
+		published: optional(union([number(), Thunk<number>()])),
+		modified: optional(union([number(), Thunk<number>()])),
 	}),
 
 	_rss: optional(union([record(string(), unknown()), Thunk<Record<string, unknown>>()])),
@@ -273,7 +272,7 @@ export const ASTKindJson = type({
 		version: string(),
 		reference: string(),
 		comment: string(),
-		sourceURL: string()
+		sourceURL: string(),
 	}),
 
 	title: string(),
@@ -386,30 +385,32 @@ export const computableToJson = async (
 	ast: ASTcomputable | ASTjson,
 	comment = '',
 	ref = '',
-	v = ''
+	v = '',
 ): Promise<ASTjson> => {
-	if('_meta' in ast){
-		return ast as ASTjson
-	}else{
-
+	if ('_meta' in ast) {
+		return ast as ASTjson;
+	} else {
 		const [
-			_meta   
-			,_images       
-			,_links     
-			,_paging       
-			,_item ] = await Promise.all([	rezVal(ast._meta),
-											rezVal(ast.images),
-											rezVal(ast.links),
-											rezVal(ast.paging),
-											rezVal(ast?.item) ])
-		const _list = await rezVal(_item.list)
-	
+			_meta,
+			_images,
+			_links,
+			_paging,
+			_item,
+		] = await Promise.all([
+			rezVal(ast._meta),
+			rezVal(ast.images),
+			rezVal(ast.links),
+			rezVal(ast.paging),
+			rezVal(ast?.item),
+		]);
+		const _list = await rezVal(_item.list);
+
 		return {
 			_meta: {
 				comment: await rezVal(_meta?.comment) ?? comment,
 				reference: await rezVal(_meta?.reference) ?? ref,
 				version: await rezVal(_meta?.version) ?? v,
-				sourceURL: await rezVal(_meta?.sourceURL) ?? ''
+				sourceURL: await rezVal(_meta?.sourceURL) ?? '',
 			},
 			title: await rezVal(ast.title),
 			description: await rezVal(ast.description),

@@ -5,7 +5,7 @@
 import type { IValidate } from '../../types.ts';
 import type { ISupportedTypes, TypedValidator } from '../start.ts';
 import { superstruct as s, toXml } from '../../mod.ts';
-import type { ASTcomputable, ASTjson} from './ast.ts';
+import type { ASTcomputable, ASTjson } from './ast.ts';
 import er from './helpers/error.ts';
 
 const {
@@ -99,7 +99,7 @@ export type RespStruct = typeof JsonFeedKind.TYPE;
 
 export const JsonFeed = ((
 	compactParse: RespStruct | unknown,
-	url: string
+	url: string,
 ): IValidate<RespStruct> => {
 	const structs = { response: JsonFeedKind };
 

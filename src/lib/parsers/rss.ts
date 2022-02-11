@@ -13,6 +13,7 @@ import { Atom } from './atom.ts';
 
 import er from './helpers/error.ts';
 import {
+	CDataInnerText,
 	Enclosure,
 	Generator,
 	GUID,
@@ -21,7 +22,6 @@ import {
 	OptInnerText,
 	txtorCData,
 	TypedInnerText,
-	CDataInnerText
 } from './helpers/composedPrimitives.ts';
 
 const {
@@ -30,14 +30,14 @@ const {
 	string,
 	array,
 	optional,
-	type
+	type,
 } = superstruct;
 
 const Category = type({
 	_attributes: type({ domain: string() }),
 	_cdata: string(),
-	_text: string()
-})
+	_text: string(),
+});
 
 export const RssItem = type({
 	title: optional(CDataInnerText),
@@ -46,7 +46,7 @@ export const RssItem = type({
 	comments: optional(InnerText),
 	'dc:creator': optional(TypedInnerText),
 	pubDate: optional(InnerText),
-	category: optional( union([ TypedInnerText, array(TypedInnerText) ])),
+	category: optional(union([TypedInnerText, array(TypedInnerText)])),
 	description: optional(TypedInnerText),
 	'content:encoded': optional(TypedInnerText),
 	'wfw:commentRss': optional(InnerText),
@@ -57,8 +57,8 @@ export const RssItem = type({
 
 export const RssResponse = type({
 	_instruction: optional(union([
-		type({ "xml-stylesheet": string() }),
-		array(type({ "xml-stylesheet": string() }))
+		type({ 'xml-stylesheet': string() }),
+		array(type({ 'xml-stylesheet': string() })),
 	])),
 	_declaration: object({
 		_attributes: object({
@@ -71,8 +71,8 @@ export const RssResponse = type({
 		meta: optional(type({
 			_attributes: type({
 				content: string(),
-				name: string()
-			})
+				name: string(),
+			}),
 		})),
 		_attributes: type({
 			version: optional(string()),
@@ -88,8 +88,8 @@ export const RssResponse = type({
 		channel: type({
 			title: optional(InnerText),
 			link: InnerText,
-			image: optional(type({url: OptInnerText, title: OptInnerText, link: OptInnerText})),
-			description: optional( union([ OptInnerText, CDataInnerText ])),
+			image: optional(type({ url: OptInnerText, title: OptInnerText, link: OptInnerText })),
+			description: optional(union([OptInnerText, CDataInnerText])),
 			generator: optional(Generator),
 			language: optional(OptInnerText),
 			copyright: optional(OptInnerText),
@@ -106,7 +106,7 @@ export type RespStruct = typeof RssResponse.TYPE;
 
 export const Rss = ((
 	compactParse: RespStruct | unknown,
-	url: string
+	url: string,
 ): IValidate<RespStruct> => {
 	const structs = {
 		response: RssResponse,
@@ -201,7 +201,7 @@ export const Rss = ((
 					return JsonFeed(await JsonFeed({}, url).fromAST(ast), url).toXML();
 			}
 		},
-		fromAST: async (_ast: ASTcomputable |ASTjson): Promise<RespStruct> => {
+		fromAST: async (_ast: ASTcomputable | ASTjson): Promise<RespStruct> => {
 			const ast = await computableToJson(_ast);
 			const g = ast?._rss?.generator as {
 				_attributes: { uri?: string; version?: string };
@@ -271,8 +271,8 @@ export const Rss = ((
 		toAST: async (): Promise<ASTcomputable> => {
 			const c = compactParse as RespStruct;
 			return {
-				_meta:{
-					sourceURL: url
+				_meta: {
+					sourceURL: url,
 				},
 				title: c.rss.channel?.title?._text ?? c.rss.channel.link?._text ?? '>> no title given',
 				description: c.rss.channel.description?._text ?? '>> no description',
@@ -321,14 +321,16 @@ export const Rss = ((
 							},
 							dates: { published: 0, modified: 0 },
 							links: {
-								category: Array.isArray(i.category) ? txtorCData('', i.category[0]) : txtorCData('', i.category),
+								category: Array.isArray(i.category)
+									? txtorCData('', i.category[0])
+									: txtorCData('', i.category),
 								nextPost: undefined,
 								prevPost: undefined,
-								tags: Array.isArray(i.category) 
-									? i.category.map((c)=>txtorCData('>> couldNotFindTagInfo', c)) 
-									: i.category 
-										? [ txtorCData('', i.category)] 
-										: [],
+								tags: Array.isArray(i.category)
+									? i.category.map((c) => txtorCData('>> couldNotFindTagInfo', c))
+									: i.category
+									? [txtorCData('', i.category)]
+									: [],
 								externalURLs: [],
 							},
 							_rss: {},

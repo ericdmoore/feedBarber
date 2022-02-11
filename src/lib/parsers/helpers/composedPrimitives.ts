@@ -67,7 +67,7 @@ export const LinkedVersionedTextOrCData = partial(object({
 		type({
 			uri: string(),
 			version: string(),
-		})
+		}),
 	),
 	_text: string(),
 	_cdata: string(),

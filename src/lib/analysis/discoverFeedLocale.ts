@@ -1,29 +1,44 @@
-import { join } from "https://deno.land/std@0.125.0/path/mod.ts";
-import { DOMParser } from "https://deno.land/x/deno_dom/deno-dom-wasm.ts";
+import { join } from 'https://deno.land/std@0.125.0/path/mod.ts';
+import { DOMParser } from 'https://deno.land/x/deno_dom/deno-dom-wasm.ts';
 // import puppeteer from "https://deno.land/x/puppeteer@9.0.2/mod.ts";
 
-const nodeToPath = (initURL:URL) => (n : any) => {
-    return (n.attributes?.href ?? '').startsWith('http') 
-    ? n.attributes?.href
-    : join(initURL.href, n.attributes?.href)
-}
+const grabFromNode = (initURL: URL, propName: string) =>
+	(n: unknown): string => {
+		const _n = n as { attributes: { [key: string]: string } };
+		return (_n.attributes?.[propName] ?? '').startsWith('http')
+			? _n.attributes?.[propName]
+			: join(initURL.href, _n.attributes?.[propName]);
+	};
 
-export const discover = async (inputUrl:string | URL) =>{
-    const url = typeof inputUrl === 'string' ? new URL(inputUrl) : inputUrl
-    const inputPageText = await (await fetch(url)).text()
+type IDiscoverInputType = { url: string | URL; body?: PromiseLike<string> };
 
-    const doc = new DOMParser().parseFromString(inputPageText, "text/html")!;
+/**
+ * @param inputUrl
+ * @returns
+ */
+export const discoverSelfFeed = async (input: IDiscoverInputType) => {
+	let inputPageText: string;
+	const url = typeof input.url === 'string' ? new URL(input.url) : input.url;
 
-    const rssAlts = doc.querySelectorAll('link[type="application/rss+xml" i]');
-    const atomAlts = doc.querySelectorAll('link[type="application/atom+xml" i]');
-    // const feedLinks = doc.querySelectorAll('link[type="application/atom+xml" i]');
-    const clickableRss = doc.querySelectorAll('a[href*="rss.xml" i]');
-    const clickableAtom = doc.querySelectorAll('a[href*="atom.xml" i]');
+	if (input.body) {
+		inputPageText = await input.body;
+	} else {
+		inputPageText = await (await fetch(url)).text();
+	}
 
-    const atomAltPaths = [...atomAlts].map(nodeToPath(url))
-    const rssAltPaths = [...rssAlts].map(nodeToPath(url))
-    const atomPaths = [...clickableAtom].map(nodeToPath(url))
-    const rssPaths = [...clickableRss].map(nodeToPath(url))
+	const doc = new DOMParser().parseFromString(inputPageText, 'text/html')!;
 
-    return [ ...atomAltPaths, ...rssAltPaths, ...atomPaths, ...rssPaths ]
-}
+	const rssAlts = doc.querySelectorAll('link[type="application/rss+xml" i]');
+	const atomAlts = doc.querySelectorAll('link[type="application/atom+xml" i]');
+	const clickableRss = doc.querySelectorAll('a[href*="rss.xml" i]');
+	const clickableAtom = doc.querySelectorAll('a[href*="atom.xml" i]');
+
+	const atomAltPaths = [...atomAlts].map(grabFromNode(url, 'href'));
+	const rssAltPaths = [...rssAlts].map(grabFromNode(url, 'href'));
+	const atomPaths = [...clickableAtom].map(grabFromNode(url, 'href'));
+	const rssPaths = [...clickableRss].map(grabFromNode(url, 'href'));
+
+	return [...atomAltPaths, ...rssAltPaths, ...atomPaths, ...rssPaths];
+};
+
+export default discoverSelfFeed;
