@@ -4,8 +4,8 @@ import { h, Handler, jsx } from 'https://deno.land/x/sift@0.4.3/mod.ts';
 
 /**
  * STATE LOOK UP
- * - for user or state 
- * @param tokenType 
+ * - for user or state
+ * @param tokenType
  */
 export const ListFeedsFortoken = (tokenType: 'User' | 'Temp'): Handler =>
 	async (req, pathParam) => {

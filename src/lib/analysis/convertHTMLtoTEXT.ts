@@ -1,24 +1,30 @@
-import type { UnifiedAttacher } from '../../types.ts';
-import { remarkParse, remarkRetext, retextStringify, unified } from '../../mod.ts';
+import { unified, remarkParse, remarkRetext, retextStringify } from '../../mod.ts';
+import retextEnglish from 'https://cdn.skypack.dev/retext-english@4?dts'; 
+
+export type UnifiedPlugin = unified.Pluggable;
+export type ParseOpts = remarkParse.Options;
+export type BridgeOpts = remarkRetext.Options;
 
 export const applyRetextPlugins = (
-	parseOpts?: unknown,
-	bridgeOps?: unknown,
-	stringOpts?: unknown,
-	cfg: { retextPlugins: UnifiedAttacher[]; remarkPlugins: UnifiedAttacher[] } = {
+	parseOpts?: ParseOpts,
+	cfg: { retextPlugins: UnifiedPlugin[]; remarkPlugins: UnifiedPlugin[] } = {
 		retextPlugins: [],
 		remarkPlugins: [],
 	},
 ) =>
 	async (input: string[]): Promise<string[]> => {
 		return Promise.all(input.map(async (s) => {
-			return unified.unified()
+			const vf = await unified.unified()
 				.use(remarkParse.default, parseOpts)
 				.use(cfg.remarkPlugins)
-				.use(remarkRetext.default, bridgeOps)
+				.use(
+					remarkRetext.default,
+					unified.unified().use(retextEnglish as any).use(cfg.retextPlugins),
+				)
 				.use(cfg.retextPlugins)
-				.use(retextStringify.default, stringOpts)
+				.use(retextStringify.default)
 				.process(s);
+			return vf.toString();
 		}));
 	};
 

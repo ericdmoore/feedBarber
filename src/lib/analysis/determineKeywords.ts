@@ -1,11 +1,22 @@
-import type { Node, VFile } from '../../types.ts';
-import { remarkParse, remarkRetext, retextKeywords, retextStringify, unified } from '../../mod.ts';
+import {
+	unified,
+	remarkParse,
+	remarkRetext,
+	retextEnglish,
+	retextKeywords,
+	retextStringify,
+} from '../../mod.ts';
+
+export type UnifiedPlugin = unified.Pluggable;
+export type ParseOpts = remarkParse.Options;
+export type BridgeOpts = remarkRetext.Options;
+export type KWOpts = retextKeywords.Options
+export type Keyphrase = retextKeywords.Keyphrase;
+export type Keyword = retextKeywords.Keyword;
 
 export const determineKeywords = (
-	parseOpts?: unknown,
-	bridgeOps?: unknown,
-	kwOpts?: unknown,
-	stringOpts?: unknown,
+	parseOpts?: ParseOpts,
+	kwOpts?: KWOpts,
 ) =>
 	/**
 	 * @param input expdeects a text or markdown?
@@ -23,15 +34,17 @@ export const determineKeywords = (
 		const vfileWithKW = async (s: string | (() => Promise<string>)) => {
 			const vf = await unified.unified()
 				.use(remarkParse.default, parseOpts)
-				.use(remarkRetext.default, bridgeOps)
-				.use(retextKeywords.default, kwOpts)
-				.use(retextStringify.default, stringOpts)
-				.process(typeof s === 'string' ? s : await s()) as VFile;
+				.use(
+					remarkRetext.default, 
+					unified.unified().use(retextEnglish as any).use(retextKeywords.default, kwOpts) 
+				)
+				.use(retextStringify.default)
+				.process(typeof s === 'string' ? s : await s()) as unified.VFileWithOutput<null>;
 			return vf;
 		};
 
 		const vf = await vfileWithKW(input);
-		const d = vf.data as { keywords?: IKeyword[]; keyphrases?: IKeyPhrase[] } | undefined;
+		const d = vf.data as { keywords?: Keyword[]; keyphrases?: Keyphrase[] } | undefined;
 
 		return {
 			input,
@@ -40,22 +53,5 @@ export const determineKeywords = (
 			keyphrases: d?.keyphrases,
 		};
 	};
-
-export interface IKeyword {
-	stem: string;
-	score: number;
-	matches: {
-		node: Node;
-		index: number;
-		parent: Node;
-	}[];
-}
-export interface IKeyPhrase {
-	score: number;
-	weight: number;
-	stems: string[];
-	value: string;
-	matches: { parent: Node; nodes: [Node, Node, Node] }[];
-}
 
 export default determineKeywords();

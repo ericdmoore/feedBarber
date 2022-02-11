@@ -1,13 +1,12 @@
-import { json, Handler} from 'https://deno.land/x/sift@0.4.3/mod.ts';
+import { Handler, json } from 'https://deno.land/x/sift@0.4.3/mod.ts';
 
-export const proxy:Handler = async (req, params): Promise<Response> => {
-	
+export const proxy: Handler = async (req, params): Promise<Response> => {
 	return json({
 		title: 'PROXY URL',
-		_reflect:{
+		_reflect: {
 			params,
-			req: {...req}
-		}
+			req: { ...req },
+		},
 	}, { status: 200 });
 };
 export default proxy;

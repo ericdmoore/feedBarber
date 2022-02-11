@@ -1,11 +1,15 @@
-import type { UnifiedAttacher } from '../../types.ts';
-import { rehypeParse, rehypeRemark, remarkStringify, unified } from '../../mod.ts';
+import { unified, rehypeParse, rehypeRemark, remarkStringify } from '../../mod.ts';
+
+export type UnifiedPlugin = unified.Pluggable;
+export type ParseOpts = rehypeParse.Options;
+export type StringifyOpts = remarkStringify.Options;
+export type BridgeOpts = rehypeRemark.Options;
 
 export const applyRemarkRetextPlugins = (
-	parserOPts?: unknown,
+	parserOPts?: ParseOpts,
 	bridgeOpts?: unknown,
-	stringifyOpts?: unknown,
-	cfg: { rehypePlugins: UnifiedAttacher[]; remarkPlugins: UnifiedAttacher[] } = {
+	stringifyOpts?: StringifyOpts,
+	cfg: { rehypePlugins: UnifiedPlugin[]; remarkPlugins: UnifiedPlugin[] } = {
 		rehypePlugins: [],
 		remarkPlugins: [],
 	},
