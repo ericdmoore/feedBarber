@@ -1,5 +1,5 @@
 import { skip } from '../helpers.ts';
-import { atom as dhhAtom } from '../mocks/dhh_hey.ts';
+import { atom as dhhAtom } from './mocks/dhh_hey.ts';
 import { parseAndValidate } from '../../lib/start.ts';
 import { computableToJson } from '../../lib/parsers/ast.ts';
 import { Atom, RespStruct as atomStruct } from '../../lib/parsers/atom.ts';
