@@ -3,9 +3,9 @@
 // validate the response
 
 import type { IValidate } from '../../types.ts';
-import type { ISupportedTypes, TypedValidator } from '../start.ts';
-import { superstruct as s, toXml } from '../../mod.ts';
-import type { ASTcomputable, ASTjson } from './ast.ts';
+import type { TypedValidator } from '../start.ts';
+import { ASTcomputable, ASTjson, computableToJson } from './ast.ts';
+import { superstruct as s } from '../../mod.ts';
 import er from './helpers/error.ts';
 
 const {
@@ -191,30 +191,56 @@ export const JsonFeed = ((
 				canNext: false,
 			});
 		},
-		toXML: () => {
-			return toXml.js2xml(compactParse as RespStruct, { compact: true });
-		},
 		fromAST: async (input: ASTcomputable | ASTjson): Promise<RespStruct> => {
-			return compactParse as RespStruct;
+			const ast = await computableToJson(input);
+
+			const ret: RespStruct = {
+				version: 'https://jsonfeed.org/version/1.1',
+
+				title: ast.title,
+				description: ast.description,
+
+				language: ast.language,
+				icon: ast.images.icon,
+				favicon: ast.images.favicon,
+
+				authors: ast.authors,
+				user_comment: ast._meta.comment,
+
+				feed_url: ast.links.feedUrl,
+				home_page_url: ast.links.homeUrl,
+
+				items: ast.items,
+			} as RespStruct;
+			return ret;
 		},
-		exportAs: async (type: 'atom' | 'rss' | 'jsonfeed') => {
-			return type;
+		toString: () => {
+			return JSON.stringify(compactParse);
 		},
 		toAST: async (): Promise<ASTcomputable> => {
 			const c = await compactParse as RespStruct;
 			return {
+				_meta: {
+					_type: 'computable',
+					sourceURL: url,
+				},
 				title: c.title,
 				description: c.description ?? '>> no description <<',
 				language: c.language ?? 'en-US',
-				links: {
-					feedUrl: async () => c.feed_url,
-					homeUrl: c.home_page_url,
+				links: async () => {
+					return {
+						feedUrl: c.feed_url,
+						homeUrl: c.home_page_url,
+						sourceURL: c.feed_url,
+						list: [],
+					};
 				},
-				images: {
-					favicon: async () => c.favicon ?? '',
-					icon: async () => c.icon ?? '',
-					bannerImage: async () => c.icon ?? '',
-				},
+				images: async () => ({
+					favicon: c.favicon ?? '',
+					icon: c.icon ?? '',
+					bannerImage: c.icon ?? '',
+				}),
+				entitlements: [],
 				paging: {
 					nextUrl: async () => '',
 					prevUrl: async () => '',
@@ -229,21 +255,7 @@ export const JsonFeed = ((
 							`https://randomuser.me/api/portraits/lego/${Math.random() * 9}.jpg`,
 					},
 				],
-				eventStreamFromViewer: {
-					tokenData: (Math.random() * 2 ** 128).toString(),
-					feedEvents: [
-						{
-							event: 'read',
-							jsonSchemaUrl: '',
-							refUrl: '',
-							status: {
-								name: 'active',
-								start: 0,
-								end: undefined,
-							},
-						},
-					],
-				},
+				sourceFeedMeta: {},
 				item: {
 					next: async () => [],
 					list: c.items.map((i: typeof JsonFeedItem.TYPE) => ({

@@ -689,9 +689,7 @@ export const jsonFeed = `{
   "home_page_url": "http://flyingmeat.com/blog/",
   "feed_url": "http://flyingmeat.com/blog/feed.json",
   "description": "News from your friends at Flying Meat.",
-  "author": {
-      "name": "Gus Mueller"
-  },
+  "author": { "name": "Gus Mueller" },
   "items": [
       {
           "id": "http://flyingmeat.com/blog/archives/2018/9/acorn_6.2_with_mojave_dark_mode_is_out.html",

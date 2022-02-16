@@ -245,7 +245,7 @@ export const Sitemap: TypedValidator = ((
 				canPrev: false,
 				canNext: false,
 			}),
-		toXML: () => {
+		toString: () => {
 			return toXml.js2xml(
 				compactParse as RespStruct,
 				{ compact: true },
@@ -287,30 +287,23 @@ export const Sitemap: TypedValidator = ((
 				},
 			} as RespStruct;
 		},
-		exportAs: async (type: 'rss' | 'atom' | 'jsonfeed') => {
-			const ast: ASTcomputable = await Sitemap(compactParse, url).toAST();
-			switch (type) {
-				case 'rss':
-					return rss.Rss(await rss.Rss({}, url).fromAST(ast), url).toXML();
-				case 'atom':
-					return atom.Atom(await atom.Atom({}, url).fromAST(ast), url).toXML();
-				case 'jsonfeed':
-					return jf.JsonFeed(await jf.JsonFeed({}, url).fromAST(ast), url).toXML();
-			}
-		},
 		toAST: async (): Promise<ASTcomputable> => {
 			const c = compactParse as RespStruct;
 			return {
 				_meta: {
+					_type: 'computable',
 					sourceURL: url,
 				},
 				title: url,
 				description: 'this feed is generated from a sitemap',
 				language: 'en-US',
-
-				links: {
-					homeUrl: '',
-					feedUrl: '',
+				links: async () => {
+					return {
+						homeUrl: '',
+						feedUrl: '',
+						sourceURL: '',
+						list: [],
+					};
 				},
 				images: {
 					icon: '',
@@ -325,6 +318,8 @@ export const Sitemap: TypedValidator = ((
 				authors: async () => {
 					return [{ name: '' }];
 				},
+				entitlements: [],
+				sourceFeedMeta: {},
 				_sitemap: {},
 				item: {
 					next: async () => [],

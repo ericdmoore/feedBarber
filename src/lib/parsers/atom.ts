@@ -1,34 +1,18 @@
-// define the expected atom shape
-// perform the fetch
-// validate the response
-
-// input types - super loose
-// output type - as tight as we can make it
-//
-//
-// Output Fix NUmber1...
-//
-// Content:
-// _attributes
-//   type: "html"
-// _text: () => 'move to _cdata'
-// _cdata
-
 import type { TypedValidator } from '../start.ts';
 import type { IValidate } from '../../types.ts';
 import { ASTcomputable, ASTjson, computableToJson } from '../parsers/ast.ts';
 import { superstruct as s, toXml } from '../../mod.ts';
-import { Rss } from './rss.ts';
-import { JsonFeed } from './jsonFeed.ts';
 
 import {
+	_text,
+	_typedText,
 	Generator,
 	InnerText,
 	TextOrHTML,
 	txtorCData,
 	TypedInnerText,
 } from './helpers/composedPrimitives.ts';
-// number, is
+
 const { union, define, partial, object, string, array, literal, optional } = s;
 
 const Encoding = define<'utf-8'>(
@@ -38,9 +22,7 @@ const Encoding = define<'utf-8'>(
 
 const Title = TypedInnerText;
 const Subitle = TypedInnerText;
-
 const ID = InnerText;
-// const Updated = InnerText;
 
 const Author = partial(object({
 	name: partial(object({
@@ -228,29 +210,10 @@ export const Atom = ((
 				});
 			}
 		},
-		toXML: () => {
-			return toXml.js2xml(compactParse as typeof AtomResponse.TYPE, {
-				compact: true,
-			});
-		},
 		fromAST: async (_ast: ASTcomputable | ASTjson): Promise<RespStruct> => {
 			const ast = await computableToJson(_ast);
 			const version = (ast?._atom?._declaration as any)?._attributes?.version as string | undefined;
 			const xmlLang = (ast?._atom?.feed as any)._attributes['xml:lang'] ?? 'en-US' as string;
-
-			const typedText = (s = '') => {
-				if (/<\/?[a-z][\s\S]*>/i.test(s)) {
-					return {
-						_attributes: { type: 'html' },
-						_cdata: s,
-					};
-				} else {
-					return {
-						_attributes: { type: 'text' },
-						_text: s,
-					};
-				}
-			};
 
 			return {
 				_declaration: {
@@ -261,8 +224,8 @@ export const Atom = ((
 						xmlns: 'http://www.w3.org/2005/Atom',
 						'xml:lang': xmlLang,
 					},
-					title: typedText(''),
-					subtitle: typedText(''),
+					title: _typedText(ast.title),
+					subtitle: _typedText(ast.description),
 					link: [{
 						_attributes: {
 							href: '',
@@ -271,49 +234,63 @@ export const Atom = ((
 							type: '',
 						},
 					}],
-					updated: { _text: '' },
-					author: {
-						email: { _text: '' },
-						name: { _text: '' },
-						uri: { _text: '' },
-					},
-					contributor: [{
-						email: { _text: '' },
-						name: { _text: '' },
-						uri: { _text: '' },
-					}],
+					updated: _text(
+						Math.max(
+							...ast.items.map((i) => {
+								const p = i.dates?.published ?? 0;
+								const m = i.dates?.modified ?? 0;
+								return m > p ? m : p;
+							}),
+						).toString(),
+					),
+					...(ast.authors?.[0]
+						? {
+							author: {
+								email: _typedText(ast.authors[0].email),
+								name: _typedText(ast.authors[0].name),
+								uri: _typedText(ast.authors[0].url),
+							},
+						}
+						: {}),
+					...(ast._atom?.contributors
+						? {
+							contributor: (ast._atom?.contributors as (typeof Author.TYPE)[])?.map((c) => {
+								return {
+									email: _typedText(c.email?._text ?? c.email?._cdata),
+									name: _typedText(c.name?._text ?? c.name?._cdata),
+									uri: _typedText(c.uri?._text ?? c.uri?._cdata),
+								};
+							}),
+						}
+						: {}),
 					category: [] as string[],
-					icon: { _text: '' },
-					logo: { _text: '' },
-					generator: { _attributes: { uri: '', version: '' }, _cdata: '', _text: '' },
-					id: { _text: '' },
-					rights: { _text: '' },
-					entry: [{
-						_attributes: { 'xml:lang': 'en-US' },
-						title: typedText(''),
-						summary: typedText(''),
-						id: { _text: '' },
-						link: { _attributes: { href: '', hreflang: '', rel: '', type: '' } },
-						author: { email: { _text: '' }, name: { _text: '' }, uri: { _text: '' } },
-						content: { _attributes: { type: 'html' }, _text: '', _cdata: '' },
-						published: { _text: '' },
-						updated: { _text: '' },
-					}],
+					icon: _text(ast.images.favicon),
+					logo: _text(ast.images.icon),
+					// generator: { _attributes: { uri: '', version: '' }, _cdata: '', _text: '' },
+					id: _text(ast.links.feedUrl),
+					...(
+						ast._rss?.rights ? { rights: _text(ast._rss?.rights as string | undefined) } : {}
+					),
+					entry: ast.items.map((i) => {
+						return {
+							_attributes: { 'xml:lang': 'en-US' },
+							title: _typedText(i.title),
+							summary: _typedText(i.summary),
+
+							link: { _attributes: { href: '', hreflang: '', rel: '', type: '' } },
+							updated: _text(new Date(i.dates?.modified ?? 0).toISOString()),
+							id: _text(i.id),
+
+							author: { email: _text(), name: { _text: '' }, uri: { _text: '' } },
+							content: { _attributes: { type: 'html' }, _text: '', _cdata: '' },
+							published: { _text: '' },
+						};
+					}),
 				},
 			} as RespStruct;
 		},
-		exportAs: async (type: 'rss' | 'atom' | 'jsonfeed'): Promise<string> => {
-			const ast = await Rss(compactParse, url).toAST() as ASTcomputable;
-
-			switch (type) {
-				case 'rss':
-					return Rss(await Rss({}, url).fromAST(ast), url).toXML();
-				case 'atom':
-					return Atom(await Atom({}, url).fromAST(ast), url).toXML();
-				case 'jsonfeed':
-					return JsonFeed(await JsonFeed({}, url).fromAST(ast), url).toXML();
-			}
-			return '';
+		toString: () => {
+			return toXml.js2xml(compactParse as RespStruct, { compact: true });
 		},
 		/**
 		 * Contains logic to get the Syntax to an AST repr
@@ -323,6 +300,7 @@ export const Atom = ((
 			const c = await compactParse as RespStruct;
 			return {
 				_meta: {
+					_type: 'computable',
 					sourceURL: url,
 				},
 				title: txtorCData('>> no title << ', c.feed.title),
@@ -338,16 +316,28 @@ export const Atom = ((
 					icon: typeof c.feed.logo === 'string' ? c.feed.logo : c.feed.logo?._text ?? '',
 					bannerImage: typeof c.feed.logo === 'string' ? c.feed.logo : c.feed.logo?._text ?? '',
 				},
-				links: {
-					feedUrl: async (): Promise<string> => {
-						return '';
-					},
-					homeUrl: Array.isArray(c.feed.link)
-						? c.feed.link.filter(
-							(l: s.Infer<typeof Link>) => l._attributes.rel === 'self',
-						)[0]
-							._attributes.href ?? ''
-						: c.feed.link._attributes.href ?? '',
+				links: async () => {
+					const links = Array.isArray(c.feed.link) ? c.feed.link : [c.feed.link];
+					const homeUrl = links.filter((l) =>
+						l._attributes.rel === 'alternate'
+					)[0]._attributes.href ?? '';
+					const sourceURL = links.filter((l) => l._attributes.rel === 'self')[0]._attributes.href ??
+						'';
+					const feedUrl = links.filter((l) => l._attributes.rel === 'self')[0]._attributes.href ??
+						'';
+					return {
+						feedUrl,
+						homeUrl,
+						sourceURL,
+						list: links.map((l) => {
+							return {
+								href: l._attributes.href ?? '',
+								hreflang: l._attributes.hreflang ?? '',
+								rel: l._attributes.rel ?? '',
+								type: l._attributes.type ?? '',
+							};
+						}),
+					};
 				},
 				paging: {
 					itemCount: c.feed.entry.length,
@@ -355,6 +345,14 @@ export const Atom = ((
 					prevUrl: async () => '',
 				},
 				_atom: {},
+				entitlements: [],
+				sourceFeedMeta: async () => {
+					return {
+						generator: {
+							name: c.feed.generator?._text,
+						},
+					};
+				},
 				item: {
 					next: async () => [],
 					list: (c.feed.entry ?? []).map((i: s.Infer<typeof EntryKind>) => ({

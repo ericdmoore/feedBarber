@@ -25,4 +25,5 @@ export const skip = (...i: (TestObj | TestFnArg)[]) => {
 	}
 };
 
+export default skip;
 // #endregion helpers

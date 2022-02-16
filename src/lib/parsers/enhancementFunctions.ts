@@ -3,7 +3,7 @@ export const parseFunctions = (compositinPath: string) => {
 	const removedEndSlash = unencoded.endsWith('/') ? unencoded.slice(0, -1) : unencoded;
 
 	const tokens = removedEndSlash
-		.split('||')
+		.split('|>')
 		.map((fc) => {
 			const [f, pStr] = fc.split('(');
 			return { fname: f, paramStr: !pStr ? null : pStr.slice(0, -1) };
@@ -48,9 +48,11 @@ export const parseFunctions = (compositinPath: string) => {
 	return objectToUndef;
 };
 
-const happyTest = `preview()||addBody(css='a'|root='#main')||rmAds(list='')||addsubs/`;
-const percent20Test =
-	`preview(show=false)||%20addBody(css%20='a'|%20root='#main')||rmAds(list='')||%20addsubs%20`;
-const mean1 = `preview(())|%20addBody(css%20='a',%20root='#main')||rmAds(list='')||%20addsubs%20`;
+export default parseFunctions;
+
+// const happyTest = `preview()|>addBody(css='a'|root='#main')|>rmAds(list='')|>addsubs/`;
+// const percent20Test =
+// 	`preview(show=false)|>%20addBody(css%20='a'|%20root='#main')|>rmAds(list='')|>%20addsubs%20`;
+// const mean1 = `preview(())|%20addBody(css%20='a',%20root='#main')|>rmAds(list='')|>%20addsubs%20`;
 
 // console.log(parseFunctions(mean1));

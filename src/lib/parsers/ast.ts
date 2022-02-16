@@ -22,8 +22,11 @@ const {
 	define,
 	record,
 	unknown,
-	// literal,
+	literal,
+	nullable,
 } = s;
+
+type ThunkType<T> = () => Promise<T>;
 
 export const validatedInputToAst = async (
 	preValidatecdInput: IDictValidPayloadTypes,
@@ -122,23 +125,24 @@ export const EventStreamKind = object({
 	refUrl: string(),
 	jsonSchemaUrl: string(),
 	status: object({
-		name: EventLifecycle,
+		label: EventLifecycle,
 		start: optional(union([Thunk<number>(), number()])),
 		end: optional(union([Thunk<number>(), number()])),
 	}),
 });
 
+//@todo add default docs
 export const eventDefinition = (
 	name: typeof EventNames.TYPE,
-	urls: { ref?: string; schema?: string },
 	status: { name: typeof EventLifecycle.TYPE; start?: number; end?: number },
+	urls?: { ref?: string; schema?: string },
 ): typeof EventStreamKind.TYPE => ({
 	event: name,
-	//@todo add default docs
-	jsonSchemaUrl: urls.schema ?? '',
-	refUrl: urls.ref ?? '',
+
+	jsonSchemaUrl: urls?.schema ?? '',
+	refUrl: urls?.ref ?? '',
 	status: {
-		name: 'active',
+		label: status.name,
 		start: status.start ?? new Date(2020, 0, 1).getTime(),
 		end: status.end ?? new Date(2030, 11, 31).getTime(),
 	},
@@ -174,6 +178,49 @@ export const ASTAttachmentComputable = type({
 	durationInSeconds: optional(union([Thunk<number>(), number()])),
 });
 
+const ASTimages = type({
+	icon: string(),
+	bannerImage: string(),
+	favicon: string(),
+});
+
+const ASTpaging = type({
+	nextUrl: eitherThunkOr(string()),
+	prevUrl: eitherThunkOr(string()),
+	itemCount: union([Thunk<number>(), number()]),
+});
+
+const ASTlinks = type({
+	sourceURL: string(),
+	homeUrl: string(),
+	feedUrl: string(),
+	list: array(type({
+		href: string(),
+		hreflang: optional(string()),
+		rel: optional(string()),
+		type: optional(string()),
+	})),
+});
+
+const ASTFeedMeta = partial(type({
+	generator: partial(type({
+		name: string(),
+		url: string(),
+		version: string(),
+	})),
+}));
+
+const ASTEntitlement = type({
+	serverUrl: string(),
+	forKinds: array(string()),
+	tokenData: optional(
+		record(
+			string(),
+			nullable(string()),
+		),
+	),
+});
+
 export const ASTFeedItemJson = type({
 	id: string(), // can also be the permalink
 	url: string(), // permalink
@@ -183,6 +230,7 @@ export const ASTFeedItemJson = type({
 	summary: optional(string()),
 
 	content: object({
+		// origType: enums(['html','text','markdown']),
 		html: optional(string()),
 		text: optional(string()),
 		markdown: optional(string()),
@@ -227,6 +275,7 @@ export const ASTFeedItemThunk = type({
 	summary: optional(eitherThunkOr(string())),
 
 	content: object({
+		// origType: enums(['html','text','markdown']),
 		html: optional(eitherThunkOr(string())),
 		text: optional(eitherThunkOr(string())),
 		markdown: optional(eitherThunkOr(string())),
@@ -236,6 +285,7 @@ export const ASTFeedItemThunk = type({
 		indexImage: optional(eitherThunkOr(string())),
 		bannerImage: optional(eitherThunkOr(string())), // layout above the post
 	}),
+
 	dates: object({
 		published: optional(union([number(), Thunk<number>()])),
 		modified: optional(union([number(), Thunk<number>()])),
@@ -259,6 +309,7 @@ export const ASTFeedItemThunk = type({
 		nonempty(array(ASTAuthorComputable)),
 		Thunk<s.Infer<typeof ASTAuthorComputable>[]>(),
 	])),
+
 	expires: optional(union([Thunk<number>(), number()])),
 
 	attachments: optional(union([
@@ -269,6 +320,7 @@ export const ASTFeedItemThunk = type({
 
 export const ASTKindJson = type({
 	_meta: object({
+		_type: literal('application/json+cityfeed'),
 		version: string(),
 		reference: string(),
 		comment: string(),
@@ -293,11 +345,20 @@ export const ASTKindJson = type({
 	})),
 
 	links: partial(type({
-		// sourceURL: string()
+		sourceURL: string(),
 		homeUrl: string(),
 		feedUrl: string(),
+		list: array(object({
+			href: string(),
+			hreflang: string(),
+			rel: string(),
+			type: string(),
+		})),
 	})),
 
+	entitlements: array(ASTEntitlement),
+
+	sourceFeedMeta: ASTFeedMeta,
 	items: array(ASTFeedItemJson),
 
 	eventStreamFromViewer: optional(object({
@@ -311,30 +372,14 @@ export const ASTKindJson = type({
 	__enhancement: optional(record(string(), unknown())), // [pluginName]: {someObject or value}
 });
 
-const ASTimages = type({
-	icon: eitherThunkOr(string()),
-	bannerImage: eitherThunkOr(string()),
-	favicon: eitherThunkOr(string()),
-});
-
-const ASTpaging = type({
-	nextUrl: eitherThunkOr(string()),
-	prevUrl: eitherThunkOr(string()),
-	itemCount: union([Thunk<number>(), number()]),
-});
-
-const ASTlinks = type({
-	homeUrl: eitherThunkOr(string()),
-	feedUrl: eitherThunkOr(string()),
-});
-
-export const ASTKindComputable = type({
-	_meta: optional(partial(object({
-		version: eitherThunkOr(string()),
-		reference: eitherThunkOr(string()),
-		comment: eitherThunkOr(string()),
-		sourceURL: eitherThunkOr(string()),
-	}))),
+export const ASTKindComputable = object({
+	_meta: type({
+		_type: literal('computable'),
+		version: optional(eitherThunkOr(string())),
+		reference: optional(eitherThunkOr(string())),
+		comment: optional(eitherThunkOr(string())),
+		sourceURL: optional(eitherThunkOr(string())),
+	}),
 
 	title: eitherThunkOr(string()),
 	description: eitherThunkOr(string()),
@@ -344,6 +389,7 @@ export const ASTKindComputable = type({
 		Thunk<s.Infer<typeof ASTAuthor>[]>(),
 		nonempty(array(ASTAuthor)),
 	]),
+
 	images: union([
 		ASTimages,
 		Thunk<s.Infer<typeof ASTimages>>(),
@@ -354,9 +400,19 @@ export const ASTKindComputable = type({
 		Thunk<s.Infer<typeof ASTpaging>>(),
 	]),
 
+	entitlements: union([
+		array(ASTEntitlement),
+		Thunk<s.Infer<typeof ASTEntitlement>[]>(),
+	]),
+
 	links: union([
 		ASTlinks,
 		Thunk<s.Infer<typeof ASTlinks>>(),
+	]),
+
+	sourceFeedMeta: union([
+		ASTFeedMeta,
+		Thunk<typeof ASTFeedMeta.TYPE>(),
 	]),
 
 	item: object({
@@ -378,8 +434,12 @@ export const ASTKindComputable = type({
 	__enhancement: optional(union([record(string(), unknown()), Thunk<Record<string, unknown>>()])),
 });
 
-type Thunk<T> = () => Promise<T>;
-const rezVal = async <T>(i: T | Thunk<T>) => typeof i !== 'function' ? i : (i as Thunk<T>)();
+export const rezVal = async <T>(i: T | ThunkType<T>) =>
+	typeof i === 'function' ? (i as ThunkType<T>)() : i;
+
+export const isAstJson = (ast: ASTcomputable | ASTjson): ast is ASTjson => {
+	return ast._meta._type === 'computable' ? false : true;
+};
 
 export const computableToJson = async (
 	ast: ASTcomputable | ASTjson,
@@ -387,8 +447,8 @@ export const computableToJson = async (
 	ref = '',
 	v = '',
 ): Promise<ASTjson> => {
-	if ('_meta' in ast) {
-		return ast as ASTjson;
+	if (isAstJson(ast)) {
+		return ast;
 	} else {
 		const [
 			_meta,
@@ -401,12 +461,13 @@ export const computableToJson = async (
 			rezVal(ast.images),
 			rezVal(ast.links),
 			rezVal(ast.paging),
-			rezVal(ast?.item),
+			rezVal(ast.item),
 		]);
 		const _list = await rezVal(_item.list);
 
 		return {
 			_meta: {
+				_type: 'application/json+cityfeed',
 				comment: await rezVal(_meta?.comment) ?? comment,
 				reference: await rezVal(_meta?.reference) ?? ref,
 				version: await rezVal(_meta?.version) ?? v,
@@ -421,15 +482,18 @@ export const computableToJson = async (
 				icon: await rezVal(_images.icon),
 			},
 			links: {
-				feedUrl: await rezVal(_links.feedUrl),
-				homeUrl: await rezVal(_links.homeUrl),
+				feedUrl: _links.feedUrl,
+				homeUrl: _links.homeUrl,
+				list: _links.list,
 			},
 			paging: {
 				itemCount: await rezVal(_paging.itemCount),
 				nextUrl: await rezVal(_paging.nextUrl),
 				prevUrl: await rezVal(_paging.prevUrl),
 			},
+			entitlements: await rezVal(ast.entitlements),
 			authors: await rezVal(ast.authors),
+			sourceFeedMeta: await rezVal(ast.sourceFeedMeta),
 			items: await Promise.all((_list ?? []).map(async (i) => {
 				return {
 					title: await rezVal(i.title),
@@ -462,7 +526,7 @@ export const computableToJson = async (
 					attachments: await rezVal(i.attachments),
 				} as s.Infer<typeof ASTFeedItemJson>;
 			})),
-		};
+		} as ASTjson;
 	}
 };
 

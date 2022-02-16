@@ -47,6 +47,11 @@ export const header: Handler = async (req, param = {}) => {
 					<li>
 						<a href={`/ast/https://randsinrepose.com/feed?a=1&b=2`}>Rand Repose Rss with params</a>
 					</li>
+					<li>
+						<a href='/u-ericdmoore/json/f1(a=1|b=2)|>f2(c=a,b,c)/https://randsinrepose.com/feed'>
+							Example Composition
+						</a>
+					</li>
 				</ul>
 				<h3>Full Monty + Params</h3>
 				<ul>

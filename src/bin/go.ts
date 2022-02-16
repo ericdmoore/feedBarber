@@ -71,7 +71,7 @@ export const urls = {
 								url,
 								title: d.title,
 								links: d.links,
-								length: d.item.list.length,
+								length: d.items,
 							});
 							return d;
 						})

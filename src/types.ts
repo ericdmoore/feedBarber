@@ -1,7 +1,7 @@
 import type { ISupportedTypes, TypedValidator } from './lib/start.ts';
 import type { AST as _AST, ASTcomputable, ASTFeedItemJson, ASTjson } from './lib/parsers/ast.ts';
-import type { Node as _Node } from './mods/unist.ts';
-import { vfile } from './mod.ts';
+// import type { Node as _Node } from './mods/unist.ts';
+// import { unified } from './mod.ts';
 
 export type PaginationResp<T> = Promise<
 	{ val: T; canPrev: boolean; canNext: boolean }
@@ -16,9 +16,8 @@ export interface IValidate<T> {
 	validate: () => Promise<T>;
 	prev: () => PaginationResp<T>;
 	next: () => PaginationResp<T>;
-	toXML: () => string;
 	toAST: () => Promise<_AST>;
-	exportAs: (type: 'rss' | 'atom' | 'jsonfeed') => Promise<string>;
+	toString: () => string;
 	fromAST: (ast: ASTjson | ASTComputable, ...other: unknown[]) => Promise<T>;
 }
 
@@ -51,15 +50,8 @@ export type ReducerFn = (
 	all: ASTShell[],
 ) => Promise<ASTShell>;
 
-export type UnifiedAttacher = (...options: unknown[]) => UnfiedTransformer;
-export type UnfiedTransformer = (
-	node: _Node,
-	file: vfile.VFile,
-	next: UnfiedTransformer,
-) => Promise<_Node>;
-
 export type MapperFn = (input: ASTShell) => Promise<ASTShell>;
 export type AST = _AST;
 export type ASTComputable = ASTcomputable;
-export type Node = _Node;
-export type VFile = vfile.VFile;
+export type ASTJson = ASTjson;
+// export type VFile = unified.VFileWithOutput<undefined>

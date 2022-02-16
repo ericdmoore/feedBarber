@@ -25,7 +25,7 @@ Proposal
 </viewermeta>
 ```
 
-Application should also send:
+`Open Reader Application` should also send:
 
 - who
   - userInfo
@@ -35,3 +35,10 @@ Application should also send:
   - entry.id
 - when
   - js timestamp
+
+
+Can feeds work in a various settings?
+- 1:1 // Direct Messaging
+- 1:k // Group Messaging
+- 1:N // Broadcast
+

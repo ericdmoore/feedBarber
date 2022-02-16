@@ -2,17 +2,16 @@
 // perform the fetch
 // validate the response
 
-import type { ISupportedTypes, TypedValidator } from '../start.ts';
+import type { TypedValidator } from '../start.ts';
 
 import { ASTcomputable, ASTjson, computableToJson } from './ast.ts';
-import { superstruct, toXml } from '../../mod.ts';
+import { superstruct as s, toXml } from '../../mod.ts';
 import { IValidate } from '../../types.ts';
-
-import { JsonFeed } from './jsonFeed.ts';
-import { Atom } from './atom.ts';
 
 import er from './helpers/error.ts';
 import {
+	_text,
+	_typedText,
 	CDataInnerText,
 	Enclosure,
 	Generator,
@@ -31,13 +30,16 @@ const {
 	array,
 	optional,
 	type,
-} = superstruct;
+} = s;
 
-const Category = type({
-	_attributes: type({ domain: string() }),
-	_cdata: string(),
-	_text: string(),
-});
+const structuredAttributes = <T, S>(attrSruct: s.Struct<T, S>) =>
+	type({
+		_attributes: attrSruct,
+		_cdata: string(),
+		_text: string(),
+	});
+
+const Category = structuredAttributes(type({ domain: string() }));
 
 export const RssItem = type({
 	title: optional(CDataInnerText),
@@ -46,7 +48,7 @@ export const RssItem = type({
 	comments: optional(InnerText),
 	'dc:creator': optional(TypedInnerText),
 	pubDate: optional(InnerText),
-	category: optional(union([TypedInnerText, array(TypedInnerText)])),
+	category: optional(union([TypedInnerText, array(TypedInnerText), Category, array(Category)])),
 	description: optional(TypedInnerText),
 	'content:encoded': optional(TypedInnerText),
 	'wfw:commentRss': optional(InnerText),
@@ -54,6 +56,44 @@ export const RssItem = type({
 	'atom:link': optional(TypedInnerText),
 	enclosure: optional(union([Enclosure, array(Enclosure)])),
 });
+
+interface _RssRespAttributes {
+	version?: string;
+	encoding?: string;
+	standalone?: string;
+}
+
+interface _RssRespChannelAttribs {
+	version: string;
+	'xmlns:atom': string;
+	'xmlns:content': string;
+	'xmlns:wfw': string;
+	'xmlns:dc': string;
+	'xmlns:sy': string;
+	'xmlns:slash': string;
+	'xmlns:georss': string;
+	'xmlns:geo': string;
+}
+
+interface RssChannelData {
+	'atom:link'?: {
+		_attributes: {
+			href: string;
+			rel?: string;
+			type?: string;
+		};
+	};
+	lastBuildDate?: { _text?: string };
+	'sy:updatePeriod'?: { _text?: string };
+	'sy:updateFrequency'?: { _text?: string };
+}
+
+interface RssMeta {
+	_attributes: {
+		name: string;
+		content: string;
+	};
+}
 
 export const RssResponse = type({
 	_instruction: optional(union([
@@ -104,7 +144,45 @@ export const RssResponse = type({
 
 export type RespStruct = typeof RssResponse.TYPE;
 
-export const Rss = ((
+type JSONPrim =
+	| string
+	| number
+	| boolean
+	| undefined;
+type JSONObject = { [x: string]: JSONPrim | JSONObject | JSONArray };
+type JSONArray = Array<JSONPrim | JSONObject | JSONArray>;
+type JSONStruct = JSONPrim | JSONObject | JSONArray;
+
+const removeUndefinedsFromObjectArray = (i: JSONArray): JSONArray => {
+	return i
+		.filter((v) => v) // removes undefined
+		.map((v) => {
+			return typeof v === 'object'
+				? Array.isArray(v) ? removeUndefinedsFromObjectArray(v) : removeUndefinedsFromObject(v)
+				: v;
+		});
+};
+
+const removeUndefinedsFromObject = (i: JSONObject): JSONObject => {
+	const ent = Object.entries(i)
+		.filter(([_, v]) => v) // removes undefined values
+		.map(([k, v]) => {
+			return typeof v === 'object'
+				? Array.isArray(v)
+					? [k, removeUndefinedsFromObjectArray(v)]
+					: [k, removeUndefinedsFromObject(v)]
+				: [k, v];
+		});
+	return Object.fromEntries(ent) as JSONObject;
+};
+
+const removeUndef = (i: JSONArray | JSONObject) => {
+	return typeof i === 'object'
+		? Array.isArray(i) ? removeUndefinedsFromObjectArray(i) : removeUndefinedsFromObject(i)
+		: i;
+};
+
+export const Rss: TypedValidator = ((
 	compactParse: RespStruct | unknown,
 	url: string,
 ): IValidate<RespStruct> => {
@@ -118,7 +196,7 @@ export const Rss = ((
 		clone: Rss,
 		_: compactParse as RespStruct,
 		validate: (): Promise<RespStruct> => {
-			let err: superstruct.StructError | undefined;
+			let err: s.StructError | undefined;
 			let validated: unknown;
 
 			if (typeof compactParse === 'string') {
@@ -186,20 +264,10 @@ export const Rss = ((
 				canPrev: false,
 			});
 		},
-		toXML: (): string => {
-			return toXml.js2xml(compactParse as RespStruct, { compact: true });
-		},
-		exportAs: async (type: 'rss' | 'atom' | 'jsonfeed'): Promise<string> => {
-			const ast = await Rss(compactParse, url).toAST() as ASTcomputable;
-
-			switch (type) {
-				case 'rss':
-					return Rss(await Rss<RespStruct>({}, url).fromAST(ast), url).toXML();
-				case 'atom':
-					return Atom(await Atom({}, url).fromAST(ast), url).toXML();
-				case 'jsonfeed':
-					return JsonFeed(await JsonFeed({}, url).fromAST(ast), url).toXML();
-			}
+		toString: () => {
+			return toXml.js2xml(removeUndef(compactParse as any) as Record<string, unknown>, {
+				compact: true,
+			});
 		},
 		fromAST: async (_ast: ASTcomputable | ASTjson): Promise<RespStruct> => {
 			const ast = await computableToJson(_ast);
@@ -213,24 +281,22 @@ export const Rss = ((
 				_declaration: {
 					_attributes: {
 						version: ast._rss?.version as string | undefined,
+						...((ast._rss?._declaration as { _attributes: _RssRespAttributes })?._attributes
+							? (ast._rss?._declaration as { _attributes: _RssRespAttributes })?._attributes
+							: {}),
 					},
+					...(ast._rss?._declaration ? ast._rss?._declaration as Record<string, unknown> : {}),
 				},
+				...(ast._rss?._instruction ? ast._rss?._instruction as Record<string, unknown> : {}),
 				rss: {
-					_attributes: {
-						'xmlns:atom': ast._rss?.['xmlns:atom'] as string | undefined,
-						'xmlns:content': ast?._rss?.['xmlns:atom'] as string | undefined,
-						'xmlns:dc': ast?._rss?.['xmlns:atom'] as string | undefined,
-						'xmlns:geo': ast?._rss?.['xmlns:atom'] as string | undefined,
-						'xmlns:georss': ast?._rss?.['xmlns:atom'] as string | undefined,
-						'xmlns:slash': ast?._rss?.['xmlns:atom'] as string | undefined,
-						'xmlns:sy': ast?._rss?.['xmlns:atom'] as string | undefined,
-						'xmlns:wfw': ast?._rss?.['xmlns:atom'] as string | undefined,
-						version: ast?._rss?.version as string | undefined,
-					},
+					_attributes:
+						(ast._rss as { rss?: { _attributes?: Partial<_RssRespChannelAttribs> } }).rss
+							?._attributes ?? {},
+					meta: (ast._rss as { rss?: { meta?: RssMeta } }).rss?.meta,
 					channel: {
-						link: { _text: ast.links.feedUrl ?? '' },
-						title: { _text: ast.title },
-						description: { _text: ast.description },
+						link: _text(ast.links.feedUrl),
+						title: _text(ast.title),
+						description: _text(ast.description),
 						generator: {
 							_attributes: {
 								uri: g?._attributes?.uri,
@@ -239,29 +305,30 @@ export const Rss = ((
 							_cdata: g?._cdata,
 							_text: g?._text,
 						},
+						...((ast._rss as { rss: { channel: RssChannelData } })?.rss?.channel),
 						item: await Promise.all(ast.items.map(async (i) => {
 							return {
-								title: { _text: i.title ?? '' },
-								link: { _text: i.url ?? '' },
-								guid: { _text: i.id ?? '' },
-								description: { _text: i.summary ?? '' },
-								'content:encoded': { _text: '' },
-								'dc:creator': {
-									_attributes: { type: 'text' },
-									_cdata: '',
-									_text: '',
-								},
-								'slash:comments': { _text: '' },
-								'wfw:commentRss': { _text: '' },
-								category: { _attributes: {}, _cdata: '', _text: '' },
-								comments: { _text: '' },
-								enclosure: [{
-									_attributes: {
-										url: '',
-										length: '',
-										type: '',
-									},
-								}],
+								link: _text(i.url),
+								guid: _text(i.id),
+								title: _text(i.title ?? 'null_source_title'),
+								description: _text(i.summary ?? 'null_source_description'),
+								'content:encoded': _text(i.content.html ?? 'null_source_content'),
+								category: _typedText(i.links.category),
+								'dc:creator': _typedText(i.authors?.[0].name),
+								//
+								'atom:link': i._rss?.['atom:link'] as undefined | typeof TypedInnerText.TYPE,
+								'slash:comments': i._rss?.['slash:comments'] as undefined | { _text: string },
+								'wfw:commentRss': i._rss?.['wfw:commentRss'] as undefined | { _text: string },
+								comments: i._rss?.comments as undefined | { _text: string },
+								//
+								enclosure: (i.attachments ?? [])
+									.map((a) => ({
+										_attributes: {
+											url: a.url,
+											length: a.sizeInBytes?.toString(),
+											type: a.mimeType,
+										},
+									})),
 							};
 						})),
 					},
@@ -270,40 +337,93 @@ export const Rss = ((
 		},
 		toAST: async (): Promise<ASTcomputable> => {
 			const c = compactParse as RespStruct;
+
+			console.log('item0:', c.rss.channel.item[0]);
+
 			return {
 				_meta: {
+					_type: 'computable',
 					sourceURL: url,
 				},
-				title: c.rss.channel?.title?._text ?? c.rss.channel.link?._text ?? '>> no title given',
-				description: c.rss.channel.description?._text ?? '>> no description',
-				authors: [],
-				images: {
-					favicon: '',
-					icon: '',
-					bannerImage: '',
-				},
+				title: txtorCData('>> no title given', c.rss.channel.title, c.rss.channel.link),
+				description: txtorCData('>> no description', c.rss.channel.description),
 				language: 'en-US',
-				links: {
-					feedUrl: c.rss.channel.link?._text ?? '',
-					homeUrl: c.rss.channel.link?._text ?? '',
+				authors: async () => {
+					const authors = c.rss.channel.item.reduce((p, i) => {
+						return {
+							...p,
+							[txtorCData('null_Author', i['dc:creator'])]: {
+								name: txtorCData('null_Author', i['dc:creator']),
+							},
+						};
+					}, {} as { [name: string]: { name: string } });
+					return Object.values(authors);
 				},
-				paging: {
-					itemCount: c.rss.channel.item.length,
-					nextUrl: '',
-					prevUrl: '',
+				images: async () => {
+					return {
+						favicon: txtorCData('null_favicon', c.rss.channel.image?.url),
+						icon: txtorCData('null_icon', c.rss.channel.image?.url),
+						bannerImage: txtorCData('null_bannerImage', c.rss.channel.image?.url),
+					};
 				},
+				links: async () => {
+					return {
+						feedUrl: txtorCData('', c.rss.channel.link),
+						homeUrl: txtorCData('', c.rss.channel.link),
+						sourceURL: txtorCData('', c.rss.channel.link),
+						list: [
+							...(
+								c.rss.channel['atom:link'] ? [c.rss.channel['atom:link']._attributes] : []
+							),
+						],
+					};
+				},
+				sourceFeedMeta: async () => {
+					return {
+						generator: {
+							name: txtorCData('', c.rss.channel.generator),
+							url: c.rss.channel.generator?._attributes?.uri,
+							version: c.rss.channel.generator?._attributes?.version,
+						},
+					};
+				},
+				paging: async () => {
+					return {
+						nextUrl: '',
+						prevUrl: '',
+						itemCount: c.rss.channel.item.length,
+					};
+				},
+				entitlements: [
+					{
+						serverUrl: '',
+						forKinds: ['copyrights'],
+						tokenData: { 'copyright': c.rss.channel.copyright?._text ?? null },
+					},
+				],
 				_rss: {
-					// all your other rss stuff
+					_declaration: c._declaration,
+					_instruction: c._instruction,
+					rss: {
+						_attributes: c.rss._attributes,
+						meta: c.rss.meta,
+						channel: {
+							'atom:link': c.rss.channel['atom:link'],
+							'sy:updateFrequency': c.rss.channel['sy:updateFrequency'],
+							'sy:updatePeriod': c.rss.channel['sy:updatePeriod'],
+							lastBuildDate: c.rss.channel.lastBuildDate,
+						},
+					},
 				},
 				item: {
 					next: async () => [],
 					list: (c.rss.channel.item ?? []).map((i) => {
 						return {
-							title: txtorCData('', i.title),
-							summary: txtorCData('', i.description),
+							title: txtorCData('_missing', i.title),
+							summary: txtorCData('_missing', i.description),
 							language: txtorCData('en-US', c.rss.channel.language),
-							url: txtorCData('_gone', i.link),
-							id: txtorCData('_gone', i.guid),
+							url: txtorCData('_missing', i.link),
+							id: txtorCData('_missing', i.guid),
 							authors: [{
 								name: txtorCData('>>anonymous<<', i['dc:creator']),
 								email: undefined,
@@ -311,9 +431,9 @@ export const Rss = ((
 								imageURL: undefined,
 							}],
 							content: {
-								htmlL: txtorCData('Err: 105 - Missing Content', i['content:encoded']),
+								html: txtorCData('Err: 105 - Missing Content', i['content:encoded']),
+								text: txtorCData('Err: 105 - Missing Content', i['content:encoded']),
 								makrdown: undefined,
-								text: undefined,
 							},
 							images: {
 								indexImage: undefined,
@@ -333,7 +453,12 @@ export const Rss = ((
 									: [],
 								externalURLs: [],
 							},
-							_rss: {},
+							_rss: {
+								'atom:link': i['atom:link'],
+								'slash:comments': i['slash:comments'],
+								'wfw:commentRss': i['wfw:commentRss'],
+								comments: i.comments,
+							},
 							expires: undefined,
 							attachments: Array.isArray(i.enclosure)
 								? i.enclosure.filter((e) => e?._attributes.type && e?._attributes.url).map((e) => {

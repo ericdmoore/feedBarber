@@ -32,10 +32,10 @@ serve({
 	'/ast/:url(.*)': echoAST,
 	'/t-:tempToken': token('Temp'),
 	'/u-:userToken': token('User'),
-	'/(u|t)-:userOrTempToken/:outputFmt/': configure('Configure From Scratch'),
-	'/(u|t)-:userOrTempToken/:outputFmt/:composition': configure(),
-	'/(u|t)-:userOrTempToken/:outputFmt/:composition/:url': proxy,
-	'/(u|t)-:userOrTempToken/:outputFmt/:composition/preview/:url': preview,
+	'/:tokType(u|t)-:token/:outputFmt': configure('Configure From Scratch'),
+	'/:tokType(u|t)-:token/:outputFmt/:composition': configure('Configure Params for Composition'),
+	'/:tokType(u|t)-:token/:outputFmt/:composition/:url(.*)': proxy,
+	'/:tokType(u|t)-:token/:outputFmt/:composition/preview/:url(.*)': preview,
 	'/exhausted/:priorURL': () => jsx(App('Exhausted')), // Ask For
 	404: () => jsx(NotFound(), { status: 404 }),
 });

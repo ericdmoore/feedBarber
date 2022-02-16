@@ -1,5 +1,5 @@
 import { fromXml } from '../mod.ts';
-import { ASTComputable, IValidate } from '../types.ts';
+import { ASTComputable, ASTJson, IValidate } from '../types.ts';
 import { atom, jsonfeed, rss, sitemap } from './parsers/index.ts';
 import { computableToJson } from './parsers/ast.ts';
 
@@ -147,7 +147,7 @@ export const fetchParseValidate = async (url: string) =>
 export const fetchAndValidateIntoAST = async (url: string) => {
 	const r = await fetchParseValidate(url);
 	const astC = await r.parser(r.data, r.url).toAST() as ASTComputable;
-	return computableToJson(astC);
+	return computableToJson(astC) as Promise<ASTJson>;
 };
 
 export default parseAndPickType;
