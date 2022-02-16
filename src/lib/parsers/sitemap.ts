@@ -293,6 +293,8 @@ export const Sitemap: TypedValidator = ((
 				_meta: {
 					_type: 'computable',
 					sourceURL: url,
+					version:'',
+					reference:'',
 				},
 				title: url,
 				description: 'this feed is generated from a sitemap',
@@ -328,39 +330,33 @@ export const Sitemap: TypedValidator = ((
 							id: u.loc._text,
 							url: u.loc._text,
 							language: 'en-US',
-
-							title: async () => 'null',
-							summary: async () => 'null',
-							authors: async () => {
-								return [{ name: 'null' }];
-							},
-
-							content: {
-								html: async () => 'null',
-								makrdown: async () => 'null',
-								text: async () => 'null',
-							},
-							dates: {
-								published: async () => -1,
-								modified: async () => u.lastmod?._text ? new Date(u.lastmod?._text).getTime() : -1,
-							},
-
-							images: {
-								bannerImage: async () => 'null',
-								indexImage: async () => 'null',
-							},
-
-							links: {
-								nextPost: async () => 'null',
-								prevPost: async () => 'null',
-								category: async () => 'null',
-								tags: async () => ['null'],
-								externalURLs: async () => ['null'],
-							},
-							attachments: async () => {
-								return [{ url: 'null', mimeType: 'null' }];
-							},
+							title: async () => '',
+							summary: async () => '',
 							expires: undefined,
+							authors: async () => ([{ name: 'null' }]),
+							content: async ()=>({
+								html: '',
+								makrdown: '',
+								text: '',
+							}),
+							dates: async ()=> ({
+								published: -1,
+								modified: u.lastmod?._text ? new Date(u.lastmod?._text).getTime() : -1,
+							}),
+
+							images: async () => ({
+								bannerImage: '',
+								indexImage: '',
+							}),
+
+							links: async ()=>({
+								nextPost: '',
+								prevPost: 'null',
+								category: 'null',
+								tags: [],
+								externalURLs: [],
+							}),
+							attachments: async () => { return []; },
 							_sitemap: {
 								changefreq: u.changefreq ?? ((u) => {
 									return u.lastmod?._text

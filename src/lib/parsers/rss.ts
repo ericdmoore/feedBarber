@@ -343,6 +343,8 @@ export const Rss: TypedValidator = ((
 				_meta: {
 					_type: 'computable',
 					sourceURL: url,
+					reference:'',
+					version:'',
 				},
 				title: txtorCData('>> no title given', c.rss.channel.title, c.rss.channel.link),
 				description: txtorCData('>> no description', c.rss.channel.description),

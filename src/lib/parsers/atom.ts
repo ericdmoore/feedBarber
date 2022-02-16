@@ -302,6 +302,8 @@ export const Atom = ((
 				_meta: {
 					_type: 'computable',
 					sourceURL: url,
+					version:'',
+					reference:''
 				},
 				title: txtorCData('>> no title << ', c.feed.title),
 				description: txtorCData('>> no description <<', c.feed.subtitle),
@@ -339,11 +341,11 @@ export const Atom = ((
 						}),
 					};
 				},
-				paging: {
+				paging: async ()=>({
 					itemCount: c.feed.entry.length,
-					nextUrl: async () => '',
-					prevUrl: async () => '',
-				},
+					nextUrl: '',
+					prevUrl: '',
+				}),
 				_atom: {},
 				entitlements: [],
 				sourceFeedMeta: async () => {

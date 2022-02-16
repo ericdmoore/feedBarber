@@ -329,30 +329,15 @@ export const ASTKindComputable = object({
 	title: eitherThunkOr(string()),
 	description: eitherThunkOr(string()),
 	language: eitherThunkOr(string()),
+
 	_meta: union([ASTmetaComputable, Thunk<s.Infer<typeof ASTmetaComputable>>()]),
 
 	authors: union([Thunk<s.Infer<typeof ASTAuthor>[]>(), nonempty(array(ASTAuthor))]),
 	images: union([ASTimages, Thunk<s.Infer<typeof ASTimages>>()]),
-
-	paging: union([
-		ASTpaging,
-		Thunk<s.Infer<typeof ASTpaging>>(),
-	]),
-
-	entitlements: union([
-		array(ASTEntitlement),
-		Thunk<s.Infer<typeof ASTEntitlement>[]>(),
-	]),
-
-	links: union([
-		ASTlinks,
-		Thunk<s.Infer<typeof ASTlinks>>(),
-	]),
-
-	sourceFeedMeta: union([
-		ASTFeedMeta,
-		Thunk<typeof ASTFeedMeta.TYPE>(),
-	]),
+	paging: union([ ASTpaging, Thunk<s.Infer<typeof ASTpaging>>() ]),
+	entitlements: union([ array(ASTEntitlement), Thunk<s.Infer<typeof ASTEntitlement>[]>() ]),
+	links: union([ ASTlinks, Thunk<s.Infer<typeof ASTlinks>>() ]),
+	sourceFeedMeta: union([ ASTFeedMeta, Thunk<typeof ASTFeedMeta.TYPE>() ]),
 
 	item: object({
 		next: Thunk<typeof ASTFeedItemThunk.TYPE[]>(),
@@ -464,13 +449,11 @@ export const computableToJson = async (
 					images,
 					dates,
 					links,
-					attachments,
 				] = await Promise.all([
 					rezVal(i.content),
 					rezVal(i.images),
 					rezVal(i.dates),
 					rezVal(i.links),
-					rezVal(i.attachments),
 				]);
 
 				return {
@@ -501,7 +484,7 @@ export const computableToJson = async (
 						externalURLs: await rezVal(links.externalURLs),
 					},
 					expires: await rezVal(i.expires),
-					attachments: attachments,
+					attachments: await rezVal(i.attachments),
 				} as s.Infer<typeof ASTFeedItemJson>;
 			})),
 		} as ASTjson;

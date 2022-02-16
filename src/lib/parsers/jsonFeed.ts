@@ -79,7 +79,6 @@ export const JsonFeedKind = type({
 	title: string(),
 	home_page_url: string(),
 	feed_url: string(), // import meta.url
-	items: array(JsonFeedItem),
 	author: optional(JsonFeedAuthor),
 	authors: optional(array(JsonFeedAuthor)),
 	description: optional(string()), // of feed
@@ -89,6 +88,7 @@ export const JsonFeedKind = type({
 	favicon: optional(string()),
 	language: optional(string()),
 	expired: optional(boolean()),
+	items: array(JsonFeedItem),
 	hubs: optional(array(object({
 		type: string(),
 		url: string(),
@@ -196,7 +196,6 @@ export const JsonFeed = ((
 
 			const ret: RespStruct = {
 				version: 'https://jsonfeed.org/version/1.1',
-
 				title: ast.title,
 				description: ast.description,
 
@@ -210,7 +209,20 @@ export const JsonFeed = ((
 				feed_url: ast.links.feedUrl,
 				home_page_url: ast.links.homeUrl,
 
-				items: ast.items,
+				items: ast.items.map(i=>{
+					return {
+						...i,
+						attachments: i.attachments.map(a =>{
+							const {sizeInBytes, durationInSeconds, mimeType, ...jsonAttach} = a
+							return {
+								...jsonAttach,
+								mime_type: mimeType,
+								duration_in_seconds: sizeInBytes,
+								size_in_bytes: durationInSeconds,
+							}
+						})
+					}
+				})
 			} as RespStruct;
 			return ret;
 		},
@@ -223,6 +235,8 @@ export const JsonFeed = ((
 				_meta: {
 					_type: 'computable',
 					sourceURL: url,
+					version:'',
+					reference:''
 				},
 				title: c.title,
 				description: c.description ?? '>> no description <<',
@@ -241,11 +255,11 @@ export const JsonFeed = ((
 					bannerImage: c.icon ?? '',
 				}),
 				entitlements: [],
-				paging: {
-					nextUrl: async () => '',
-					prevUrl: async () => '',
+				paging: async () => ({
+					nextUrl: '',
+					prevUrl: '',
 					itemCount: c.items.length,
-				},
+				}),
 				authors: Array.isArray(c.authors) && c.authors?.length > 0 ? c.authors : [
 					{
 						name: c.author?.name ?? '>> no name provided <<',
@@ -289,10 +303,10 @@ export const JsonFeed = ((
 							modified: i.date_modified ? (new Date(i.date_modified)).getTime() : Date.now(),
 							published: i.date_published ? (new Date(i.date_published)).getTime() : Date.now(),
 						},
-						images: {
-							bannerImage: async () => '',
-							indexImage: async () => '',
-						},
+						images: async ()=> ({
+							bannerImage: '',
+							indexImage: '',
+						}),
 						links: {
 							category: '',
 							externalURLs: [],
