@@ -289,9 +289,8 @@ export const Rss: TypedValidator = ((
 				},
 				...(ast._rss?._instruction ? ast._rss?._instruction as Record<string, unknown> : {}),
 				rss: {
-					_attributes:
-						(ast._rss as { rss?: { _attributes?: Partial<_RssRespChannelAttribs> } }).rss
-							?._attributes ?? {},
+					_attributes: (ast._rss as { rss?: { _attributes?: Partial<_RssRespChannelAttribs> } }).rss
+						?._attributes ?? {},
 					meta: (ast._rss as { rss?: { meta?: RssMeta } }).rss?.meta,
 					channel: {
 						link: _text(ast.links.feedUrl),

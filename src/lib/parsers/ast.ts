@@ -155,14 +155,14 @@ export const ASTAuthor = type({
 	imageURL: optional(string()),
 });
 
-export const ASTAuthorComputable = type({
+const ASTAuthorComputable = type({
 	name: eitherThunkOr(string()),
 	url: optional(eitherThunkOr(string())),
 	email: optional(eitherThunkOr(string())),
 	imageURL: optional(eitherThunkOr(string())),
 });
 
-export const ASTAttachment = type({
+const ASTAttachment = type({
 	url: string(),
 	mimeType: string(),
 	title: optional(string()),
@@ -170,24 +170,16 @@ export const ASTAttachment = type({
 	durationInSeconds: optional(number()),
 });
 
-export const ASTAttachmentComputable = type({
-	url: union([StrThunk, string()]),
-	mimeType: union([StrThunk, string()]),
-	title: optional(union([StrThunk, string()])),
-	sizeInBytes: optional(union([Thunk<number>(), number()])),
-	durationInSeconds: optional(union([Thunk<number>(), number()])),
-});
-
-const ASTimages = type({
+const ASTimages = partial(type({
 	icon: string(),
 	bannerImage: string(),
 	favicon: string(),
-});
+}));
 
 const ASTpaging = type({
-	nextUrl: eitherThunkOr(string()),
-	prevUrl: eitherThunkOr(string()),
-	itemCount: union([Thunk<number>(), number()]),
+	nextUrl: optional(string()),
+	prevUrl: optional(string()),
+	itemCount: number(),
 });
 
 const ASTlinks = type({
@@ -221,42 +213,42 @@ const ASTEntitlement = type({
 	),
 });
 
+const ItemContent = object({
+	html: optional(string()),
+	text: optional(string()),
+	markdown: optional(string()),
+});
+
+const ItemLinks = type({
+	category: optional(string()),
+	tags: optional(array(string())),
+	externalURLs: optional(array(string())),
+	nextPost: optional(string()),
+	prevPost: optional(string()),
+});
+
+const ItemImages = object({
+	indexImage: optional(string()),
+	bannerImage: optional(string()), // layout above the post
+});
+const ItemDates = object({
+	published: number(),
+	modified: number(),
+});
+
 export const ASTFeedItemJson = type({
 	id: string(), // can also be the permalink
 	url: string(), // permalink
-
 	language: optional(string()),
 	title: optional(string()),
 	summary: optional(string()),
-
-	content: object({
-		// origType: enums(['html','text','markdown']),
-		html: optional(string()),
-		text: optional(string()),
-		markdown: optional(string()),
-	}),
-
-	images: object({
-		indexImage: optional(string()),
-		bannerImage: optional(string()), // layout above the post
-	}),
-	dates: object({
-		published: optional(number()),
-		modified: optional(number()),
-	}),
-
-	links: type({
-		category: optional(string()),
-		tags: optional(array(string())),
-		externalURLs: optional(array(string())),
-		nextPost: optional(string()),
-		prevPost: optional(string()),
-	}),
-
-	authors: nonempty(array(ASTAuthor)),
 	expires: optional(number()),
-
-	attachments: optional(array(ASTAttachment)),
+	content: ItemContent,
+	images: ItemImages,
+	dates: ItemDates,
+	links: ItemLinks,
+	attachments: array(ASTAttachment),
+	authors: nonempty(array(ASTAuthor)),
 
 	_: optional(record(string(), unknown())), // for what?
 	_rss: optional(record(string(), unknown())),
@@ -273,91 +265,50 @@ export const ASTFeedItemThunk = type({
 	language: optional(eitherThunkOr(string())),
 	title: optional(eitherThunkOr(string())),
 	summary: optional(eitherThunkOr(string())),
+	expires: optional(union([Thunk<number>(), number()])),
 
-	content: object({
-		// origType: enums(['html','text','markdown']),
-		html: optional(eitherThunkOr(string())),
-		text: optional(eitherThunkOr(string())),
-		markdown: optional(eitherThunkOr(string())),
-	}),
-
-	images: type({
-		indexImage: optional(eitherThunkOr(string())),
-		bannerImage: optional(eitherThunkOr(string())), // layout above the post
-	}),
-
-	dates: object({
-		published: optional(union([number(), Thunk<number>()])),
-		modified: optional(union([number(), Thunk<number>()])),
-	}),
+	content: union([ItemContent, Thunk<s.Infer<typeof ItemContent>>()]),
+	images: union([ItemImages, Thunk<s.Infer<typeof ItemImages>>()]),
+	dates: union([ItemDates, Thunk<s.Infer<typeof ItemDates>>()]),
+	links: union([ItemLinks, Thunk<s.Infer<typeof ItemLinks>>()]),
+	attachments: union([array(ASTAttachment), Thunk<s.Infer<typeof ASTAttachment>[]>()]),
+	authors: union([
+		nonempty(array(ASTAuthorComputable)),
+		Thunk<s.Infer<typeof ASTAuthorComputable>[]>(),
+	]),
 
 	_rss: optional(union([record(string(), unknown()), Thunk<Record<string, unknown>>()])),
 	_atom: optional(union([record(string(), unknown()), Thunk<Record<string, unknown>>()])),
 	_sitemap: optional(union([record(string(), unknown()), Thunk<Record<string, unknown>>()])),
 	__analysis: optional(union([record(string(), unknown()), Thunk<Record<string, unknown>>()])),
 	__enhancement: optional(union([record(string(), unknown()), Thunk<Record<string, unknown>>()])),
-
-	links: type({
-		nextPost: optional(eitherThunkOr(string())),
-		prevPost: optional(eitherThunkOr(string())),
-		category: optional(eitherThunkOr(string())),
-		tags: optional(union([array(string()), Thunk<string[]>()])),
-		externalURLs: optional(union([array(string()), Thunk<string[]>()])),
-	}),
-
-	authors: optional(union([
-		nonempty(array(ASTAuthorComputable)),
-		Thunk<s.Infer<typeof ASTAuthorComputable>[]>(),
-	])),
-
-	expires: optional(union([Thunk<number>(), number()])),
-
-	attachments: optional(union([
-		array(ASTAttachmentComputable),
-		Thunk<typeof ASTAttachment.TYPE[]>(),
-	])),
 });
 
-export const ASTKindJson = type({
-	_meta: object({
-		_type: literal('application/json+cityfeed'),
+const ASTmeta = <T, S>(t: s.Struct<T, S>) =>
+	type({
+		_type: t,
 		version: string(),
 		reference: string(),
-		comment: string(),
 		sourceURL: string(),
-	}),
+		comment: optional(string()),
+	});
 
+export const ASTKindJson = type({
+	_meta: ASTmeta(
+		literal('application/json+cityfeed') as s.Struct<
+			'application/json+cityfeed',
+			'application/json+cityfeed'
+		>,
+	),
 	title: string(),
 	description: string(),
 	language: string(),
+
 	authors: nonempty(array(ASTAuthor)),
-
-	images: partial(type({
-		icon: string(),
-		favicon: string(),
-		bannerImage: string(),
-	})),
-
-	paging: partial(type({
-		nextUrl: string(),
-		prevUrl: string(),
-		itemCount: number(),
-	})),
-
-	links: partial(type({
-		sourceURL: string(),
-		homeUrl: string(),
-		feedUrl: string(),
-		list: array(object({
-			href: string(),
-			hreflang: string(),
-			rel: string(),
-			type: string(),
-		})),
-	})),
-
+	images: ASTimages,
+	paging: ASTpaging,
+	links: ASTlinks,
 	entitlements: array(ASTEntitlement),
-
 	sourceFeedMeta: ASTFeedMeta,
 	items: array(ASTFeedItemJson),
 
@@ -372,28 +323,16 @@ export const ASTKindJson = type({
 	__enhancement: optional(record(string(), unknown())), // [pluginName]: {someObject or value}
 });
 
-export const ASTKindComputable = object({
-	_meta: type({
-		_type: literal('computable'),
-		version: optional(eitherThunkOr(string())),
-		reference: optional(eitherThunkOr(string())),
-		comment: optional(eitherThunkOr(string())),
-		sourceURL: optional(eitherThunkOr(string())),
-	}),
+const ASTmetaComputable = ASTmeta(literal('computable') as s.Struct<'computable', 'computable'>);
 
+export const ASTKindComputable = object({
 	title: eitherThunkOr(string()),
 	description: eitherThunkOr(string()),
 	language: eitherThunkOr(string()),
+	_meta: union([ASTmetaComputable, Thunk<s.Infer<typeof ASTmetaComputable>>()]),
 
-	authors: union([
-		Thunk<s.Infer<typeof ASTAuthor>[]>(),
-		nonempty(array(ASTAuthor)),
-	]),
-
-	images: union([
-		ASTimages,
-		Thunk<s.Infer<typeof ASTimages>>(),
-	]),
+	authors: union([Thunk<s.Infer<typeof ASTAuthor>[]>(), nonempty(array(ASTAuthor))]),
+	images: union([ASTimages, Thunk<s.Infer<typeof ASTimages>>()]),
 
 	paging: union([
 		ASTpaging,
@@ -416,11 +355,11 @@ export const ASTKindComputable = object({
 	]),
 
 	item: object({
+		next: Thunk<typeof ASTFeedItemThunk.TYPE[]>(),
 		list: union([
 			array(ASTFeedItemThunk),
 			Thunk<typeof ASTFeedItemThunk.TYPE[]>(),
 		]),
-		next: Thunk<typeof ASTFeedItemThunk.TYPE[]>(),
 	}),
 
 	eventStreamFromViewer: optional(object({
@@ -438,8 +377,33 @@ export const rezVal = async <T>(i: T | ThunkType<T>) =>
 	typeof i === 'function' ? (i as ThunkType<T>)() : i;
 
 export const isAstJson = (ast: ASTcomputable | ASTjson): ast is ASTjson => {
-	return ast._meta._type === 'computable' ? false : true;
+	return typeof ast._meta === 'function' || ast._meta._type === 'computable' ? false : true;
 };
+
+export const jsonToComputable = async (ast: ASTcomputable | ASTjson): Promise<ASTcomputable> => {
+	if (isAstJson(ast)) {
+		return {
+			...ast,
+			_meta: {
+				_type: 'computable',
+				sourceURL: ast._meta.sourceURL,
+				reference: '',
+				version: '',
+			},
+			item: {
+				next: async () => ast.paging.nextUrl ? (await fetch(ast.paging.nextUrl)).json() : [],
+				list: ast.items,
+			},
+		};
+	} else {
+		return ast;
+	}
+};
+
+// Type '{ _type: string; sourceURL: string; }' is not assignable to type
+//   '{ _type: unknown; version: string; reference: string; sourceURL: string; comment?: string | undefined; } | (() => Promise<{ _type: unknown; version: string; reference: string; sourceURL: string; comment?: string | undefined; }>)'.
+
+// Type '{ _type: string; sourceURL: string; }' is missing the following properties from type '{ _type: unknown; version: string; reference: string; sourceURL: string; comment?: string | undefined; }': version, reference
 
 export const computableToJson = async (
 	ast: ASTcomputable | ASTjson,
@@ -495,6 +459,20 @@ export const computableToJson = async (
 			authors: await rezVal(ast.authors),
 			sourceFeedMeta: await rezVal(ast.sourceFeedMeta),
 			items: await Promise.all((_list ?? []).map(async (i) => {
+				const [
+					content,
+					images,
+					dates,
+					links,
+					attachments,
+				] = await Promise.all([
+					rezVal(i.content),
+					rezVal(i.images),
+					rezVal(i.dates),
+					rezVal(i.links),
+					rezVal(i.attachments),
+				]);
+
 				return {
 					title: await rezVal(i.title),
 					summary: await rezVal(i.summary),
@@ -503,27 +481,27 @@ export const computableToJson = async (
 					id: await rezVal(i.id),
 					authors: await rezVal(i.authors),
 					content: {
-						html: await rezVal(i.content.html),
-						markdown: await rezVal(i.content.html),
-						text: await rezVal(i.content.html),
+						html: await rezVal(content.html),
+						markdown: await rezVal(content.markdown),
+						text: await rezVal(content.text),
 					},
 					images: {
-						bannerImage: await rezVal(i.images.bannerImage),
-						indexImage: await rezVal(i.images.indexImage),
+						bannerImage: await rezVal(images.bannerImage),
+						indexImage: await rezVal(images.indexImage),
 					},
 					dates: {
-						published: await rezVal(i.dates.published),
-						modified: await rezVal(i.dates.modified),
+						published: await rezVal(dates.published),
+						modified: await rezVal(dates.modified),
 					},
 					links: {
-						category: await rezVal(i.links.category),
-						tags: await rezVal(i.links.tags),
-						nextPost: await rezVal(i.links.nextPost),
-						prevPost: await rezVal(i.links.prevPost),
-						externalURLs: await rezVal(i.links.externalURLs),
+						category: await rezVal(links.category),
+						tags: await rezVal(links.tags),
+						nextPost: await rezVal(links.nextPost),
+						prevPost: await rezVal(links.prevPost),
+						externalURLs: await rezVal(links.externalURLs),
 					},
 					expires: await rezVal(i.expires),
-					attachments: await rezVal(i.attachments),
+					attachments: attachments,
 				} as s.Infer<typeof ASTFeedItemJson>;
 			})),
 		} as ASTjson;
