@@ -764,4 +764,16 @@ export const jsonFeed = `{
   ]
 }`;
 
-export default { jsonFeed, sitemap };
+export const jsonFeedNoItems = `{
+  "version": "https://jsonfeed.org/version/1",
+  "title": "News from Flying Meat",
+  "home_page_url": "http://flyingmeat.com/blog",
+  "feed_url": "http://flyingmeat.com/blog/feed.json",
+  "description": "News from your friends at Flying Meat.",
+  "author": { "name": "Gus Mueller" },
+  "items": []
+}`;
+
+export default { jsonFeed, sitemap, jsonFeedNoItems };
+
+// console.log(jsonFeedNoItems)

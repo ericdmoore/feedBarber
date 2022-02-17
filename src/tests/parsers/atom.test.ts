@@ -5,21 +5,37 @@ import { computableToJson } from '../../lib/parsers/ast.ts';
 import { Atom, RespStruct as atomStruct } from '../../lib/parsers/atom.ts';
 import { assertEquals } from 'https://deno.land/std@0.123.0/testing/asserts.ts';
 
-Deno.test(skip(
+Deno.test(
 	'Atom -> AST -> Atom',
 	async () => {
+		console.log();
 		const fakeUrl = 'http://world.hey.com/dhh/atom.xml';
-		const c1 = await parseAndValidate(dhhAtom, fakeUrl) as unknown as atomStruct;
-		const ast = await Atom(c1, fakeUrl).toAST();
+
+		const a1 = await parseAndValidate(dhhAtom, fakeUrl) as unknown as atomStruct;
+		console.log('a1:',a1);
+
+		const ast = await Atom(a1, fakeUrl).toAST();
+		console.log('ast:',ast);
+
 		const astJson = await computableToJson(ast);
-		const c2 = await Atom({}, fakeUrl).fromAST(astJson) as atomStruct;
-		assertEquals(c1, c2);
+		console.log('astJson:',astJson);
+
+		const a2 = await Atom({}, fakeUrl).fromAST(astJson) as atomStruct;
+		console.log('a2:',a2);
+
+		assertEquals(a1, a2);
 	},
-));
+);
 
 Deno.test(skip(
 	'Atom -> AST -> Rss',
 	async () => {
+		const fakeUrl = 'http://world.hey.com/dhh/atom.xml';
+		const cAtom1 = await parseAndValidate(dhhAtom, fakeUrl) as unknown as atomStruct;
+		const ast = await Atom(cAtom1, fakeUrl).toAST();
+		const astJson = await computableToJson(ast);
+		const cAtom2 = await Atom({}, fakeUrl).fromAST(astJson) as atomStruct;
+		assertEquals(cAtom1, cAtom2);
 	},
 ));
 

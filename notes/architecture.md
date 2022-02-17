@@ -37,6 +37,18 @@ Proposal
   - js timestamp
 
 
+## Social Setup:
+
+You can `Follow My: [Posts]` - think twitter
+You can `Follow My: [Reads]` - read what I am reading.
+
+If I clean up a permalink/URL
+and you are asking for the same transformations
+- you can just use mine if you want.
+- saves on bandwidth, beating up the source site, and is usually faster.
+
+`Discovery Task` :  Who has what I am looking for - post transformations.
+
 Can feeds work in a various settings?
 - 1:1 // Direct Messaging
 - 1:k // Group Messaging

@@ -168,18 +168,14 @@ const removeUndefinedsFromObject = (i: JSONObject): JSONObject => {
 		.filter(([_, v]) => v) // removes undefined values
 		.map(([k, v]) => {
 			return typeof v === 'object'
-				? Array.isArray(v)
-					? [k, removeUndefinedsFromObjectArray(v)]
-					: [k, removeUndefinedsFromObject(v)]
+				? Array.isArray(v) ? [k, removeUndefinedsFromObjectArray(v)] : [k, removeUndefinedsFromObject(v)]
 				: [k, v];
 		});
 	return Object.fromEntries(ent) as JSONObject;
 };
 
 const removeUndef = (i: JSONArray | JSONObject) => {
-	return typeof i === 'object'
-		? Array.isArray(i) ? removeUndefinedsFromObjectArray(i) : removeUndefinedsFromObject(i)
-		: i;
+	return typeof i === 'object' ? Array.isArray(i) ? removeUndefinedsFromObjectArray(i) : removeUndefinedsFromObject(i) : i;
 };
 
 export const Rss: TypedValidator = ((
@@ -343,8 +339,8 @@ export const Rss: TypedValidator = ((
 				_meta: {
 					_type: 'computable',
 					sourceURL: url,
-					reference:'',
-					version:'',
+					reference: '',
+					version: '',
 				},
 				title: txtorCData('>> no title given', c.rss.channel.title, c.rss.channel.link),
 				description: txtorCData('>> no description', c.rss.channel.description),
@@ -442,9 +438,7 @@ export const Rss: TypedValidator = ((
 							},
 							dates: { published: 0, modified: 0 },
 							links: {
-								category: Array.isArray(i.category)
-									? txtorCData('', i.category[0])
-									: txtorCData('', i.category),
+								category: Array.isArray(i.category) ? txtorCData('', i.category[0]) : txtorCData('', i.category),
 								nextPost: undefined,
 								prevPost: undefined,
 								tags: Array.isArray(i.category)
@@ -465,10 +459,9 @@ export const Rss: TypedValidator = ((
 								? i.enclosure.filter((e) => e?._attributes.type && e?._attributes.url).map((e) => {
 									return {
 										durationInSeconds: 0,
-										sizeInBytes:
-											e?._attributes.length && !Number.isNaN(Number.parseInt(e?._attributes.length))
-												? Number.parseInt(e?._attributes.length)
-												: undefined,
+										sizeInBytes: e?._attributes.length && !Number.isNaN(Number.parseInt(e?._attributes.length))
+											? Number.parseInt(e?._attributes.length)
+											: undefined,
 										mimeType: e?._attributes.type as string,
 										url: e?._attributes.url as string,
 										title: e?._attributes.url as string,

@@ -209,20 +209,20 @@ export const JsonFeed = ((
 				feed_url: ast.links.feedUrl,
 				home_page_url: ast.links.homeUrl,
 
-				items: ast.items.map(i=>{
+				items: ast.items.map((i) => {
 					return {
 						...i,
-						attachments: i.attachments.map(a =>{
-							const {sizeInBytes, durationInSeconds, mimeType, ...jsonAttach} = a
+						attachments: i.attachments.map((a) => {
+							const { sizeInBytes, durationInSeconds, mimeType, ...jsonAttach } = a;
 							return {
 								...jsonAttach,
 								mime_type: mimeType,
 								duration_in_seconds: sizeInBytes,
 								size_in_bytes: durationInSeconds,
-							}
-						})
-					}
-				})
+							};
+						}),
+					};
+				}),
 			} as RespStruct;
 			return ret;
 		},
@@ -235,8 +235,8 @@ export const JsonFeed = ((
 				_meta: {
 					_type: 'computable',
 					sourceURL: url,
-					version:'',
-					reference:''
+					version: '',
+					reference: '',
 				},
 				title: c.title,
 				description: c.description ?? '>> no description <<',
@@ -303,7 +303,7 @@ export const JsonFeed = ((
 							modified: i.date_modified ? (new Date(i.date_modified)).getTime() : Date.now(),
 							published: i.date_published ? (new Date(i.date_published)).getTime() : Date.now(),
 						},
-						images: async ()=> ({
+						images: async () => ({
 							bannerImage: '',
 							indexImage: '',
 						}),

@@ -88,16 +88,14 @@ export const AtomFeedKind = object({
 	updated: InnerText,
 	link: LinkOrLinkSet,
 	entry: array(EntryKind),
-	// id: ID,
-	//
 	_attributes: optional(object({
 		xmlns: literal('http://www.w3.org/2005/Atom'),
 		'xml:lang': optional(string()), //* default to?? 'en-US' \ 'en'
 	})),
 	id: optional(ID),
 	generator: optional(union([InnerText, Generator])),
-	icon: optional(union([string(), InnerText])),
-	logo: optional(union([string(), InnerText])),
+	icon: optional(InnerText),
+	logo: optional(InnerText),
 	subtitle: optional(Subitle),
 	author: optional(Author),
 	contributor: optional(array(Author)),
@@ -147,7 +145,8 @@ export const Atom = ((
 		inputKind: 'atom',
 		clone: Atom,
 		_: compactParse as RespStruct,
-		paginateFrom: (pos: number = 0, offset: number = 50) => {
+		paginateFrom: (pos = 0, offset = 50) => {
+			console.log({pos, offset})
 			return Promise.resolve({
 				val: compactParse as RespStruct,
 				canPrev: false,
@@ -266,11 +265,8 @@ export const Atom = ((
 					category: [] as string[],
 					icon: _text(ast.images.favicon),
 					logo: _text(ast.images.icon),
-					// generator: { _attributes: { uri: '', version: '' }, _cdata: '', _text: '' },
 					id: _text(ast.links.feedUrl),
-					...(
-						ast._rss?.rights ? { rights: _text(ast._rss?.rights as string | undefined) } : {}
-					),
+					rights: _text(ast._rss?.rights as string | undefined),
 					entry: ast.items.map((i) => {
 						return {
 							_attributes: { 'xml:lang': 'en-US' },
@@ -281,7 +277,7 @@ export const Atom = ((
 							updated: _text(new Date(i.dates?.modified ?? 0).toISOString()),
 							id: _text(i.id),
 
-							author: { email: _text(), name: { _text: '' }, uri: { _text: '' } },
+							author: { name: _text(i.authors?.[0].name), email: _text(i.authors?.[0].email), uri: { _text: '' } },
 							content: { _attributes: { type: 'html' }, _text: '', _cdata: '' },
 							published: { _text: '' },
 						};
@@ -302,62 +298,58 @@ export const Atom = ((
 				_meta: {
 					_type: 'computable',
 					sourceURL: url,
-					version:'',
-					reference:''
+					version: '',
+					reference: '',
 				},
 				title: txtorCData('>> no title << ', c.feed.title),
-				description: txtorCData('>> no description <<', c.feed.subtitle),
-				language: c.feed._attributes?.['xml:lang'] ?? 'en-US',
+				description: txtorCData('>> no description <<', c.feed?.subtitle),
+				language: c.feed?._attributes?.['xml:lang'] ?? 'en-US',
 				authors: [{
-					name: txtorCData('_missing name', c.feed.author?.name),
-					url: txtorCData('_missing url', c.feed.author?.uri),
-					email: txtorCData('_missing email', c.feed.author?.email),
+					name: txtorCData('_missing name', c.feed?.author?.name),
+					url: txtorCData('_missing url', c.feed?.author?.uri),
+					email: txtorCData('_missing email', c.feed?.author?.email),
 				}],
 				images: {
-					favicon: typeof c.feed.logo === 'string' ? c.feed.logo : c.feed.logo?._text ?? '',
-					icon: typeof c.feed.logo === 'string' ? c.feed.logo : c.feed.logo?._text ?? '',
-					bannerImage: typeof c.feed.logo === 'string' ? c.feed.logo : c.feed.logo?._text ?? '',
+					favicon: txtorCData('_missing logo', c.feed?.logo),
+					icon: txtorCData('_missing logo', c.feed?.logo),
+					bannerImage: txtorCData('_missing logo', c.feed?.logo),
 				},
 				links: async () => {
-					const links = Array.isArray(c.feed.link) ? c.feed.link : [c.feed.link];
-					const homeUrl = links.filter((l) =>
-						l._attributes.rel === 'alternate'
-					)[0]._attributes.href ?? '';
-					const sourceURL = links.filter((l) => l._attributes.rel === 'self')[0]._attributes.href ??
-						'';
-					const feedUrl = links.filter((l) => l._attributes.rel === 'self')[0]._attributes.href ??
-						'';
+					const links = Array.isArray(c.feed?.link) ? c.feed?.link : [c.feed?.link];
+					const homeUrl = links.filter((l) => l?._attributes.rel === 'alternate')[0]?._attributes?.href ?? '';
+					const sourceURL = links.filter((l) => l?._attributes.rel === 'self')[0]?._attributes?.href ?? '';
+					const feedUrl = links.filter((l) => l?._attributes.rel === 'self')[0]?._attributes?.href ?? '';
 					return {
 						feedUrl,
 						homeUrl,
 						sourceURL,
 						list: links.map((l) => {
 							return {
-								href: l._attributes.href ?? '',
-								hreflang: l._attributes.hreflang ?? '',
-								rel: l._attributes.rel ?? '',
-								type: l._attributes.type ?? '',
+								href: l?._attributes.href ?? '',
+								hreflang: l?._attributes.hreflang ?? '',
+								rel: l?._attributes.rel ?? '',
+								type: l?._attributes.type ?? '',
 							};
 						}),
 					};
 				},
-				paging: async ()=>({
-					itemCount: c.feed.entry.length,
-					nextUrl: '',
-					prevUrl: '',
-				}),
+				paging: {
+					itemCount: c.feed?.entry?.length,
+					nextUrl: undefined,
+					prevUrl: undefined,
+				},
 				_atom: {},
 				entitlements: [],
-				sourceFeedMeta: async () => {
-					return {
-						generator: {
-							name: c.feed.generator?._text,
-						},
-					};
+				sourceFeedMeta: {
+					generator: {
+						name: txtorCData('?gen.name', c?.feed?.generator),
+						url: txtorCData('?gen.url', c?.feed?.generator),
+						version: txtorCData('?gen.version', c?.feed?.generator),
+					},
 				},
 				item: {
 					next: async () => [],
-					list: (c.feed.entry ?? []).map((i: s.Infer<typeof EntryKind>) => ({
+					list: (c.feed?.entry ?? []).map((i: s.Infer<typeof EntryKind>) => ({
 						id: i.id?._text ?? pickURL('>> no link provided', i.link),
 						url: pickURL('>> no link provided', i.link),
 						title: txtorCData('', i.title),
@@ -370,15 +362,15 @@ export const Atom = ((
 						}],
 						links: {
 							category: 'uncategorized',
-							tags: [],
-							externalURLs: [],
 							nextPost: '',
 							prevPost: '',
+							tags: [],
+							externalURLs: [],
 						},
 						content: {
-							html: i.content?._cdata,
+							html: i.content?._attributes.type === 'html' ? i.content?._text : i.content?._cdata,
+							text: i.content?._attributes.type === 'html' ? undefined : i.content?._text,
 							makrdown: '',
-							text: i.content?._text,
 						},
 						dates: {
 							modified: i.updated?._text ? new Date(i.updated._text).getTime() : Date.now(),

@@ -16,10 +16,12 @@ export interface IValidate<T> {
 	validate: () => Promise<T>;
 	prev: () => PaginationResp<T>;
 	next: () => PaginationResp<T>;
-	toAST: () => Promise<_AST>;
+	toAST: () => Promise<ASTcomputable>;
 	toString: () => string;
 	fromAST: (ast: ASTjson | ASTComputable, ...other: unknown[]) => Promise<T>;
 }
+
+export type PromiseOr<T> = T | Promise<T>;
 
 export interface ASTShell {
 	ast: _AST;

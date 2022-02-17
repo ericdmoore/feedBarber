@@ -21,7 +21,7 @@
       },
       "options": {
         "useTabs": true,
-        "lineWidth": 100,
+        "lineWidth": 125,
         "indentWidth": 2,
         "singleQuote": true,
         "proseWrap": "preserve"

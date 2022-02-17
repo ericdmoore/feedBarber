@@ -17,7 +17,7 @@ cli:
 	deno run --allow-net src/bin/cli.ts
 
 fmt:
-	deno fmtmake 
+	deno fmt 
 
 scratch:
 	deno run --allow-net _sratch/discover.ts

@@ -1,12 +1,8 @@
-import type { ASTcomputable, ASTFeedItemJson, ASTjson } from './ast.ts';
-import type { ISupportedTypes, TypedValidator } from '../start.ts';
+import type { ASTcomputable, ASTjson } from './ast.ts';
+import type { TypedValidator } from '../start.ts';
 import { superstruct, toXml } from '../../mod.ts';
 import { IValidate } from '../../types.ts';
 import { computableToJson } from './ast.ts';
-import * as jf from './jsonFeed.ts';
-import * as atom from './atom.ts';
-import * as rss from './rss.ts';
-
 import { InnerText } from './helpers/composedPrimitives.ts';
 import { IDictUnionOfPayloadTypes, parseAndPickType } from '../start.ts';
 import er from './helpers/error.ts';
@@ -293,8 +289,8 @@ export const Sitemap: TypedValidator = ((
 				_meta: {
 					_type: 'computable',
 					sourceURL: url,
-					version:'',
-					reference:'',
+					version: '',
+					reference: '',
 				},
 				title: url,
 				description: 'this feed is generated from a sitemap',
@@ -333,13 +329,13 @@ export const Sitemap: TypedValidator = ((
 							title: async () => '',
 							summary: async () => '',
 							expires: undefined,
-							authors: async () => ([{ name: 'null' }]),
-							content: async ()=>({
+							authors: async () => [{ name: 'null' }],
+							content: async () => ({
 								html: '',
 								makrdown: '',
 								text: '',
 							}),
-							dates: async ()=> ({
+							dates: async () => ({
 								published: -1,
 								modified: u.lastmod?._text ? new Date(u.lastmod?._text).getTime() : -1,
 							}),
@@ -349,19 +345,19 @@ export const Sitemap: TypedValidator = ((
 								indexImage: '',
 							}),
 
-							links: async ()=>({
+							links: async () => ({
 								nextPost: '',
 								prevPost: 'null',
 								category: 'null',
 								tags: [],
 								externalURLs: [],
 							}),
-							attachments: async () => { return []; },
+							attachments: async () => {
+								return [];
+							},
 							_sitemap: {
 								changefreq: u.changefreq ?? ((u) => {
-									return u.lastmod?._text
-										? pickChangeFreq(new Date(u.lastmod?._text).getTime())
-										: 'yearly';
+									return u.lastmod?._text ? pickChangeFreq(new Date(u.lastmod?._text).getTime()) : 'yearly';
 								})(u),
 								priority: u.priority ?? 0.5,
 							},

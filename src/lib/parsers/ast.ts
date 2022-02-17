@@ -1,7 +1,7 @@
 import type { IDictValidPayloadTypes, ISupportedTypes } from '../start.ts';
+import type { ASTShell, IValidate, PromiseOr } from '../../types.ts';
 
 import { superstruct as s } from '../../mod.ts';
-import { ASTShell, IValidate } from '../../types.ts';
 
 import * as rss from './rss.ts';
 import * as jsonFeed from './jsonFeed.ts';
@@ -334,10 +334,10 @@ export const ASTKindComputable = object({
 
 	authors: union([Thunk<s.Infer<typeof ASTAuthor>[]>(), nonempty(array(ASTAuthor))]),
 	images: union([ASTimages, Thunk<s.Infer<typeof ASTimages>>()]),
-	paging: union([ ASTpaging, Thunk<s.Infer<typeof ASTpaging>>() ]),
-	entitlements: union([ array(ASTEntitlement), Thunk<s.Infer<typeof ASTEntitlement>[]>() ]),
-	links: union([ ASTlinks, Thunk<s.Infer<typeof ASTlinks>>() ]),
-	sourceFeedMeta: union([ ASTFeedMeta, Thunk<typeof ASTFeedMeta.TYPE>() ]),
+	paging: union([ASTpaging, Thunk<s.Infer<typeof ASTpaging>>()]),
+	entitlements: union([array(ASTEntitlement), Thunk<s.Infer<typeof ASTEntitlement>[]>()]),
+	links: union([ASTlinks, Thunk<s.Infer<typeof ASTlinks>>()]),
+	sourceFeedMeta: union([ASTFeedMeta, Thunk<typeof ASTFeedMeta.TYPE>()]),
 
 	item: object({
 		next: Thunk<typeof ASTFeedItemThunk.TYPE[]>(),
@@ -358,8 +358,7 @@ export const ASTKindComputable = object({
 	__enhancement: optional(union([record(string(), unknown()), Thunk<Record<string, unknown>>()])),
 });
 
-export const rezVal = async <T>(i: T | ThunkType<T>) =>
-	typeof i === 'function' ? (i as ThunkType<T>)() : i;
+export const rezVal = async <T>(i: T | ThunkType<T>) => typeof i === 'function' ? (i as ThunkType<T>)() : i;
 
 export const isAstJson = (ast: ASTcomputable | ASTjson): ast is ASTjson => {
 	return typeof ast._meta === 'function' || ast._meta._type === 'computable' ? false : true;
@@ -385,17 +384,9 @@ export const jsonToComputable = async (ast: ASTcomputable | ASTjson): Promise<AS
 	}
 };
 
-// Type '{ _type: string; sourceURL: string; }' is not assignable to type
-//   '{ _type: unknown; version: string; reference: string; sourceURL: string; comment?: string | undefined; } | (() => Promise<{ _type: unknown; version: string; reference: string; sourceURL: string; comment?: string | undefined; }>)'.
-
-// Type '{ _type: string; sourceURL: string; }' is missing the following properties from type '{ _type: unknown; version: string; reference: string; sourceURL: string; comment?: string | undefined; }': version, reference
-
-export const computableToJson = async (
-	ast: ASTcomputable | ASTjson,
-	comment = '',
-	ref = '',
-	v = '',
-): Promise<ASTjson> => {
+type ThunkOrJsonAST = ASTcomputable | ASTjson;
+export const computableToJson = async (_ast: PromiseOr<ThunkOrJsonAST>): Promise<ASTjson> => {
+	const ast = await _ast;
 	if (isAstJson(ast)) {
 		return ast;
 	} else {
@@ -415,20 +406,20 @@ export const computableToJson = async (
 		const _list = await rezVal(_item.list);
 
 		return {
-			_meta: {
-				_type: 'application/json+cityfeed',
-				comment: await rezVal(_meta?.comment) ?? comment,
-				reference: await rezVal(_meta?.reference) ?? ref,
-				version: await rezVal(_meta?.version) ?? v,
-				sourceURL: await rezVal(_meta?.sourceURL) ?? '',
-			},
 			title: await rezVal(ast.title),
 			description: await rezVal(ast.description),
 			language: await rezVal(ast.language),
+			_meta: {
+				_type: 'application/json+cityfeed',
+				reference: _meta.reference,
+				version: _meta.version,
+				sourceURL: _meta.sourceURL,
+				comment: _meta.comment ?? '',
+			},
 			images: {
-				bannerImage: await rezVal(_images.bannerImage),
-				favicon: await rezVal(_images.favicon),
-				icon: await rezVal(_images.icon),
+				bannerImage: _images.bannerImage,
+				favicon: _images.favicon,
+				icon: _images.icon,
 			},
 			links: {
 				feedUrl: _links.feedUrl,
@@ -436,9 +427,9 @@ export const computableToJson = async (
 				list: _links.list,
 			},
 			paging: {
-				itemCount: await rezVal(_paging.itemCount),
-				nextUrl: await rezVal(_paging.nextUrl),
-				prevUrl: await rezVal(_paging.prevUrl),
+				itemCount: _paging.itemCount,
+				nextUrl: _paging.nextUrl,
+				prevUrl: _paging.prevUrl,
 			},
 			entitlements: await rezVal(ast.entitlements),
 			authors: await rezVal(ast.authors),
@@ -446,14 +437,14 @@ export const computableToJson = async (
 			items: await Promise.all((_list ?? []).map(async (i) => {
 				const [
 					content,
+					links,
 					images,
 					dates,
-					links,
 				] = await Promise.all([
 					rezVal(i.content),
+					rezVal(i.links),
 					rezVal(i.images),
 					rezVal(i.dates),
-					rezVal(i.links),
 				]);
 
 				return {
@@ -463,28 +454,28 @@ export const computableToJson = async (
 					url: await rezVal(i.url),
 					id: await rezVal(i.id),
 					authors: await rezVal(i.authors),
-					content: {
-						html: await rezVal(content.html),
-						markdown: await rezVal(content.markdown),
-						text: await rezVal(content.text),
-					},
-					images: {
-						bannerImage: await rezVal(images.bannerImage),
-						indexImage: await rezVal(images.indexImage),
-					},
-					dates: {
-						published: await rezVal(dates.published),
-						modified: await rezVal(dates.modified),
-					},
-					links: {
-						category: await rezVal(links.category),
-						tags: await rezVal(links.tags),
-						nextPost: await rezVal(links.nextPost),
-						prevPost: await rezVal(links.prevPost),
-						externalURLs: await rezVal(links.externalURLs),
-					},
 					expires: await rezVal(i.expires),
 					attachments: await rezVal(i.attachments),
+					content: {
+						html: content.html,
+						markdown: content.markdown,
+						text: content.text,
+					},
+					images: {
+						bannerImage: images.bannerImage,
+						indexImage: images.indexImage,
+					},
+					dates: {
+						published: dates.published,
+						modified: dates.modified,
+					},
+					links: {
+						category: links.category,
+						tags: links.tags,
+						nextPost: links.nextPost,
+						prevPost: links.prevPost,
+						externalURLs: links.externalURLs,
+					},
 				} as s.Infer<typeof ASTFeedItemJson>;
 			})),
 		} as ASTjson;

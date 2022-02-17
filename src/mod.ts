@@ -7,6 +7,8 @@ export * as fromXml from 'https://deno.land/x/xml2js@1.0.0/mod.ts';
 export * as toXml from 'https://deno.land/x/js2xml@1.0.2/mod.ts';
 export * as DenoDom from 'https://deno.land/x/deno_dom/deno-dom-wasm.ts';
 
+export * as mustache from 'https://deno.land/x/mustache@v0.3.0/mod.ts';
+
 // export * as vfile from 'https://cdn.skypack.dev/vfile?dts';
 // export * as unified from 'https://cdn.skypack.dev/unified@10?dts';
 

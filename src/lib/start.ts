@@ -62,9 +62,11 @@ export const parseAndPickType = (i: {
 			};
 		}
 	} catch (_) {
+		// console.error(e)
 		const jsO = fromXml.xml2js(i.txt, { compact: true });
-		// console.log({ jsO });
+		console.log({ jsO });
 		if (jsO?.feed) {
+			// console.log('atom picked for this string')
 			return {
 				url: i.url,
 				kind: 'atom',
@@ -138,11 +140,9 @@ export const start = async (url: string) => {
 	return { url, txt: await remoteData.text() };
 };
 
-export const parseAndValidate = async (url: string, txt: string) =>
-	typedValidation(parseAndPickType({ txt, url }));
+export const parseAndValidate = async (url: string, txt: string) => typedValidation(parseAndPickType({ txt, url }));
 
-export const fetchParseValidate = async (url: string) =>
-	typedValidation(parseAndPickType(await start(url)));
+export const fetchParseValidate = async (url: string) => typedValidation(parseAndPickType(await start(url)));
 
 export const fetchAndValidateIntoAST = async (url: string) => {
 	const r = await fetchParseValidate(url);

@@ -24,9 +24,7 @@ export const enhanceWithKeywords = async (
 								: undefined;
 							md = await convertToMD(html);
 						} else {
-							md = typeof content.markdown === 'function'
-								? await content.markdown()
-								: content.markdown;
+							md = typeof content.markdown === 'function' ? await content.markdown() : content.markdown;
 						}
 
 						const kw = await determineKeywords(md);
