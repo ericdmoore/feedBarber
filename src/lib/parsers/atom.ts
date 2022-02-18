@@ -131,9 +131,31 @@ const pickURL = (fallback: string, link: typeof LinkOrLinkSet.TYPE) => {
 		: link._attributes.href ?? fallback;
 };
 
+
+export const ChannelSideCar = object({
+	_declaration: object({
+		_attributes: object({
+			encoding: string(),
+			version: string(),
+		})
+	}),
+	feed: object({
+		_attributes: object({
+			'xml:lang': string(),
+			xmlns: string()
+		})
+	})
+})
+
+export const ItemSideCar = object({
+	
+})
+
+
 export const Atom = ((
 	compactParse: RespStruct | unknown,
 	url: string,
+	// originalText?: string
 ): IValidate<RespStruct> => {
 	const structs = {
 		feed: AtomFeedKind,
@@ -211,28 +233,20 @@ export const Atom = ((
 		},
 		fromAST: async (_ast: ASTcomputable | ASTjson): Promise<RespStruct> => {
 			const ast = await computableToJson(_ast);
-			const version = (ast?._atom?._declaration as any)?._attributes?.version as string | undefined;
-			const xmlLang = (ast?._atom?.feed as any)._attributes['xml:lang'] ?? 'en-US' as string;
-
 			return {
-				_declaration: {
-					_attributes: { encoding: 'utf-8', version: version },
-				},
+				_declaration: (ast._atom as s.Infer<typeof ChannelSideCar>)._declaration,
 				feed: {
-					_attributes: {
-						xmlns: 'http://www.w3.org/2005/Atom',
-						'xml:lang': xmlLang,
-					},
+					_attributes: (ast._atom as s.Infer<typeof ChannelSideCar>).feed._attributes,
 					title: _typedText(ast.title),
 					subtitle: _typedText(ast.description),
-					link: [{
-						_attributes: {
-							href: '',
-							hreflang: '',
-							rel: '',
-							type: '',
-						},
-					}],
+					link: ast.links.list.map(l=>{
+						return { _attributes: {
+									rel: l.rel,
+									href: l.href,
+									type: l.type,
+									hreflang: l.hreflang }
+								}	
+					}),
 					updated: _text(
 						Math.max(
 							...ast.items.map((i) => {
@@ -294,14 +308,19 @@ export const Atom = ((
 		 */
 		toAST: async (): Promise<ASTcomputable> => {
 			const c = await compactParse as RespStruct;
+			console.log('atom#toAST printing compactform', c)
 			return {
 				_meta: {
 					_type: 'computable',
-					sourceURL: url,
 					version: '',
 					reference: '',
+					source:{
+						url: url,
+						t: Date.now(),
+						hash: ''
+					}
 				},
-				title: txtorCData('>> no title << ', c.feed.title),
+				title: txtorCData('>> no title << ', c.feed?.title),
 				description: txtorCData('>> no description <<', c.feed?.subtitle),
 				language: c.feed?._attributes?.['xml:lang'] ?? 'en-US',
 				authors: [{

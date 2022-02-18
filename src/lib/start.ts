@@ -64,7 +64,7 @@ export const parseAndPickType = (i: {
 	} catch (_) {
 		// console.error(e)
 		const jsO = fromXml.xml2js(i.txt, { compact: true });
-		console.log({ jsO });
+		// console.log({ jsO });
 		if (jsO?.feed) {
 			// console.log('atom picked for this string')
 			return {
@@ -140,12 +140,12 @@ export const start = async (url: string) => {
 	return { url, txt: await remoteData.text() };
 };
 
-export const parseAndValidate = async (url: string, txt: string) => typedValidation(parseAndPickType({ txt, url }));
+export const parseAndValidate = async (i:{url: string, txt: string}) => typedValidation(parseAndPickType(i));
 
-export const fetchParseValidate = async (url: string) => typedValidation(parseAndPickType(await start(url)));
+export const fetchParseValidate = async (i:{url: string}) => typedValidation(parseAndPickType(await start(i.url)));
 
-export const fetchAndValidateIntoAST = async (url: string) => {
-	const r = await fetchParseValidate(url);
+export const fetchAndValidateIntoAST = async (i:{url: string}) => {
+	const r = await fetchParseValidate(i);
 	const astC = await r.parser(r.data, r.url).toAST() as ASTComputable;
 	return computableToJson(astC) as Promise<ASTJson>;
 };

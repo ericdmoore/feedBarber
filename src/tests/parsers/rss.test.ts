@@ -9,8 +9,8 @@ Deno.test(skip(
 	'Rss -> AST -> Rss',
 	async () => {
 		const fakeUrl = 'https://world.hey.com/dhh/atom.xml';
-		const c1 = await parseAndValidate(dhhAtom, fakeUrl) as unknown as atomStruct;
-		const ast = await Atom(c1, fakeUrl).toAST();
+		const c1 = await parseAndValidate({url: fakeUrl, txt: dhhAtom});
+		const ast = await Atom(c1.data, fakeUrl).toAST();
 		const astJson = await computableToJson(ast);
 		const c2 = await Atom({}, fakeUrl).fromAST(astJson) as atomStruct;
 		assertEquals(c1, c2);

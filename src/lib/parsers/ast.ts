@@ -148,6 +148,12 @@ export const eventDefinition = (
 	},
 });
 
+const ASTSource = type({
+	t: number(),
+	url: string(),
+	hash: string()
+})
+
 export const ASTAuthor = type({
 	name: string(),
 	url: optional(string()),
@@ -217,6 +223,7 @@ const ItemContent = object({
 	html: optional(string()),
 	text: optional(string()),
 	markdown: optional(string()),
+	source: optional(ASTSource),
 });
 
 const ItemLinks = type({
@@ -284,12 +291,15 @@ export const ASTFeedItemThunk = type({
 	__enhancement: optional(union([record(string(), unknown()), Thunk<Record<string, unknown>>()])),
 });
 
+
+
+
 const ASTmeta = <T, S>(t: s.Struct<T, S>) =>
 	type({
 		_type: t,
 		version: string(),
 		reference: string(),
-		sourceURL: string(),
+		source: ASTSource,
 		comment: optional(string()),
 	});
 
@@ -370,7 +380,7 @@ export const jsonToComputable = async (ast: ASTcomputable | ASTjson): Promise<AS
 			...ast,
 			_meta: {
 				_type: 'computable',
-				sourceURL: ast._meta.sourceURL,
+				source: ast._meta.source,
 				reference: '',
 				version: '',
 			},
@@ -413,7 +423,7 @@ export const computableToJson = async (_ast: PromiseOr<ThunkOrJsonAST>): Promise
 				_type: 'application/json+cityfeed',
 				reference: _meta.reference,
 				version: _meta.version,
-				sourceURL: _meta.sourceURL,
+				source: _meta.source,
 				comment: _meta.comment ?? '',
 			},
 			images: {
@@ -460,6 +470,7 @@ export const computableToJson = async (_ast: PromiseOr<ThunkOrJsonAST>): Promise
 						html: content.html,
 						markdown: content.markdown,
 						text: content.text,
+						source: content.source
 					},
 					images: {
 						bannerImage: images.bannerImage,

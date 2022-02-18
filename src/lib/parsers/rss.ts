@@ -238,7 +238,8 @@ export const Rss: TypedValidator = ((
 				);
 			}
 		},
-		paginateFrom: (pos: number = 0, pageBy: number = 50) => {
+		paginateFrom: (pos = 0, pageBy = 50) => {
+			console.log({pos, pageBy});
 			return Promise.resolve({
 				val: compactParse as RespStruct,
 				canPrev: false,
@@ -261,7 +262,7 @@ export const Rss: TypedValidator = ((
 			});
 		},
 		toString: () => {
-			return toXml.js2xml(removeUndef(compactParse as any) as Record<string, unknown>, {
+			return toXml.js2xml(removeUndef(compactParse as RespStruct) as Record<string, unknown>, {
 				compact: true,
 			});
 		},
@@ -338,9 +339,13 @@ export const Rss: TypedValidator = ((
 			return {
 				_meta: {
 					_type: 'computable',
-					sourceURL: url,
 					reference: '',
 					version: '',
+					source:{
+						url: url,
+						t: Date.now(),
+						hash: ''
+					}
 				},
 				title: txtorCData('>> no title given', c.rss.channel.title, c.rss.channel.link),
 				description: txtorCData('>> no description', c.rss.channel.description),

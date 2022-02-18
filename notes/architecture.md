@@ -54,3 +54,18 @@ Can feeds work in a various settings?
 - 1:k // Group Messaging
 - 1:N // Broadcast
 
+## Motivating Example
+- I love this Op Ed guy from the NYT
+- I never have enough time to read all his work since he gets paid by the word
+- So I run a trnasform pipeline to turn his articles (via RSS) into my own podcast albeit read my a voice not as good as the one affoarded to Stephen Hawking.
+- I have followers in my network - and I can share my created resource with them so they dont have to pay AWS to make it and store it.
+
+### Users can Brodcast:
+- I started with this NYT article - {url, @t, #hash} = 𝓐
+- applied this transform pipeline (requires canonical Ids) *maybe even a transform hash* 𝓣
+- I ended with this content - derived by: { from:𝓐 createdBy:𝓣 #hash } 
+- Also NOTE: any site - that merely includes a js Date.now() number in the html - will break the content hash discovery. So we will need a "collisioning hash" to resolve that.
+
+
+So that others can check the URL @@ sourcehash
+get your 

@@ -222,7 +222,8 @@ export const Sitemap: TypedValidator = ((
 				);
 			}
 		},
-		paginateFrom: (pos: number = 0, pageBy: number = 50) => {
+		paginateFrom: (pos = 0, pageBy = 50) => {
+			console.log({pos, pageBy});
 			return Promise.resolve({
 				val: compactParse as RespStruct,
 				canPrev: false,
@@ -288,9 +289,13 @@ export const Sitemap: TypedValidator = ((
 			return {
 				_meta: {
 					_type: 'computable',
-					sourceURL: url,
 					version: '',
 					reference: '',
+					source:{
+						url: url,
+						t: Date.now(),
+						hash: ''
+					}
 				},
 				title: url,
 				description: 'this feed is generated from a sitemap',

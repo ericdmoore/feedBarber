@@ -1,6 +1,7 @@
 import type { ASTComputable } from '../../types.ts';
 import determineKeywords from '../analysis/determineKeywords.ts';
 import convertToMD from '../analysis/convertHTMLtoMD.ts';
+import {rezVal} from '../parsers/ast.ts'
 
 export const enhanceWithKeywords = async (
 	input: PromiseLike<ASTComputable>,
@@ -14,17 +15,13 @@ export const enhanceWithKeywords = async (
 			list: () =>
 				Promise.all(list.map(
 					async (i) => {
-						const { content } = i;
+						const content = await rezVal(i.content)
 						let md: string | undefined;
 						if (!content.markdown) {
-							const html = typeof content?.html === 'string'
-								? content.html
-								: content.html
-								? await content.html()
-								: undefined;
+							const html = content?.html
 							md = await convertToMD(html);
 						} else {
-							md = typeof content.markdown === 'function' ? await content.markdown() : content.markdown;
+							md = content.markdown
 						}
 
 						const kw = await determineKeywords(md);

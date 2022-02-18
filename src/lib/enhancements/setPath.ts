@@ -48,7 +48,7 @@ export const setPath = (
 					replacerVal = JSON.parse(str) as JsonValue;
 					break;
 				case 'mustache':
-					mustacheRender = mustache.render(str, ast as Object) as string;
+					mustacheRender = mustache.render(str, ast as Record<string, unknown>) as string;
 					replacerVal = JSON.parse(mustacheRender) as string;
 					break;
 				default:

@@ -170,7 +170,8 @@ export const JsonFeed = ((
 		 * @param pageBy - intteger value (pos|neg) indicating the page size and direction from the starting position
 		 * @returns
 		 */
-		paginateFrom: (pos: number = 0, pageBy: number = 50) => {
+		paginateFrom: (pos = 0, pageBy = 50) => {
+			console.log({pos, pageBy});
 			return Promise.resolve({
 				val: compactParse as RespStruct,
 				canPrev: false,
@@ -234,9 +235,13 @@ export const JsonFeed = ((
 			return {
 				_meta: {
 					_type: 'computable',
-					sourceURL: url,
 					version: '',
 					reference: '',
+					source:{
+						url: url,
+						t: Date.now(),
+						hash: ''
+					}
 				},
 				title: c.title,
 				description: c.description ?? '>> no description <<',
