@@ -61,11 +61,10 @@ Can feeds work in a various settings?
 - I have followers in my network - and I can share my created resource with them so they dont have to pay AWS to make it and store it.
 
 ### Users can Brodcast:
-- I started with this NYT article - {url, @t, #hash} = 𝓐
+- I started with this NYT article - {url, @t, #hash} = 𝔸
 - applied this transform pipeline (requires canonical Ids) *maybe even a transform hash* 𝓣
-- I ended with this content - derived by: { from:𝓐 createdBy:𝓣 #hash } 
+- I ended with this content - derived by: { from:𝔸, createdBy:𝓣, #hash } = 𝓐
 - Also NOTE: any site - that merely includes a js Date.now() number in the html - will break the content hash discovery. So we will need a "collisioning hash" to resolve that.
 
+So depending on what I stored / can share - I would broadcast som version of 𝓐 + 𝔸 so that others could benefit from my work - asking their network "Has anyone already done this?, and is willing to share?"
 
-So that others can check the URL @@ sourcehash
-get your 

@@ -7,6 +7,12 @@ export type PaginationResp<T> = Promise<
 	{ val: T; canPrev: boolean; canNext: boolean }
 >;
 
+// export interface StartValidator<T = unknown>{
+// 	fromUrl:  (i: { url:string }) => Promise<IValidate<T>>
+// 	fromText: (i: { url:string, txt:string }) => Promise<IValidate<T>>
+// 	fromData: (i: { url:string, data: unknown }) => Promise<IValidate<T>>
+// }
+
 export interface IValidate<T> {
 	_: T;
 	url: string;
