@@ -371,7 +371,8 @@ export const isAstJson = (ast: ASTcomputable | ASTjson): ast is ASTjson => {
 	return typeof ast._meta === 'function' || ast._meta._type === 'computable' ? false : true;
 };
 
-export const jsonToComputable = async (ast: ASTcomputable | ASTjson): Promise<ASTcomputable> => {
+export const jsonToComputable = async (_ast: PromiseOr<ASTcomputable | ASTjson>): Promise<ASTcomputable> => {
+	const ast = await _ast as ASTcomputable | ASTjson
 	if (isAstJson(ast)) {
 		return {
 			...ast,

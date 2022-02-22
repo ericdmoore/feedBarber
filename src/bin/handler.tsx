@@ -1,6 +1,6 @@
 /** @jsx h */
 
-import { h, jsx, serve } from 'https://deno.land/x/sift@0.4.3/mod.ts';
+import { h, jsx, serve, PathParams } from 'https://deno.land/x/sift@0.4.3/mod.ts';
 import configure from './pages/configure.tsx';
 import create from './pages/create.tsx';
 import logout from './pages/logout.tsx';
@@ -17,10 +17,11 @@ import echoAST from './pages/ast.tsx';
 
 const App = (title = 'Hello World!') => h('div', {}, [h('h1', {}, [title])]);
 
-const NotFound = () =>
-	h('div', {}, [
-		h('h1', {}, ['Page not found']),
-	]);
+const NotFound = (req:Request, params: PathParams) => (
+	<div>
+		<h1>Page Now Found</h1>
+	</div>
+)
 
 serve({
 	'/': header, // Home Page?
@@ -32,10 +33,18 @@ serve({
 	'/ast/:url(.*)': echoAST,
 	'/t-:tempToken': token('Temp'),
 	'/u-:userToken': token('User'),
+
+	// ???
 	'/:tokType(u|t)-:token/:outputFmt': configure('Configure From Scratch'),
 	'/:tokType(u|t)-:token/:outputFmt/:composition': configure('Configure Params for Composition'),
+	
+	// ???
 	'/:tokType(u|t)-:token/:outputFmt/:composition/:url(.*)': proxy,
+	'/:tokType(u|t)-:token/:outputFmt/:url(.*)': proxy,
+	
+	// ???
+	'/:tokType(u|t)-:token/:outputFmt/:composition/preview': preview,
 	'/:tokType(u|t)-:token/:outputFmt/:composition/preview/:url(.*)': preview,
 	'/exhausted/:priorURL': () => jsx(App('Exhausted')), // Ask For
-	404: () => jsx(NotFound(), { status: 404 }),
+	404: (req, params) => jsx(NotFound(req, params), { status: 404 }),
 });

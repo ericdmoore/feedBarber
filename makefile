@@ -9,7 +9,7 @@ test:
 	deno test -j=3 --coverage=.cov ./src/tests/**/*
 
 server:
-	open http://localhost:8000; deno run --allow-net --allow-env ./src/bin/handler.ts
+	open http://localhost:8000; deno run --allow-net --allow-env ./src/bin/handler.tsx
 
 start:
 	deno run --allow-net src/bin/go.ts

@@ -132,12 +132,12 @@ const pickURL = (fallback: string, link: typeof LinkOrLinkSet.TYPE) => {
 };
 
 export const ChannelSideCar = object({
-	_declaration: object({
+	_declaration: optional(object({
 		_attributes: object({
 			encoding: string(),
 			version: string(),
 		}),
-	}),
+	})),
 	feed: object({
 		_attributes: object({
 			'xml:lang': string(),
@@ -230,9 +230,9 @@ export const Atom = ((
 		fromAST: async (_ast: ASTcomputable | ASTjson): Promise<RespStruct> => {
 			const ast = await computableToJson(_ast);
 			return {
-				_declaration: (ast._atom as s.Infer<typeof ChannelSideCar>)._declaration,
+				_declaration: (ast._atom as s.Infer<typeof ChannelSideCar>)?._declaration,
 				feed: {
-					_attributes: (ast._atom as s.Infer<typeof ChannelSideCar>).feed._attributes,
+					_attributes: (ast._atom as s.Infer<typeof ChannelSideCar>)?.feed._attributes,
 					title: _typedText(ast.title),
 					subtitle: _typedText(ast.description),
 					link: ast.links.list.map((l) => {

@@ -1,33 +1,34 @@
 import type { ASTComputable, PromiseOr } from '../../types.ts';
-import { computableToJson } from '../parsers/ast.ts';
+import { rezVal } from '../parsers/ast.ts';
 import { cidStr } from '../analysis/calcMultihash.ts';
 
-export const addHash = (_i: never) =>
+export const addHash = (_i?: unknown) =>
 	async (ast: PromiseOr<ASTComputable>): Promise<ASTComputable> => {
-		const a = await computableToJson(ast);
+		ast = await ast as ASTComputable
+		const _meta = await rezVal(ast._meta)
+		const list = await rezVal(ast.item.list)
 
-		const itemHashes = await Promise.all(a.items.map(async (i) => {
-			const content = i.content.text ?? i.content.markdown ?? i.content.html;
+		const itemHashes = await Promise.all(list.map(async (i) => {
+			const {html, text, markdown} = await rezVal(i.content)
+			const content = text ?? markdown ?? html;
 			return content ? await cidStr(content) : undefined;
 		}));
 
-		const hashedNullItems = (await Promise.all(itemHashes.map(async (i) => {
-			return i ? i : cidStr('null');
-		}))).join('');
+		const hashedNullItems = itemHashes.filter(v=>v).join('');
 
 		return {
-			...a,
+			...ast,
 			_meta: {
-				...a._meta,
+				..._meta,
 				_type: 'computable',
 				source: {
-					...a._meta.source,
+					..._meta.source,
 					hash: await cidStr(hashedNullItems),
 				},
 			},
 			item: {
 				next: async () => [],
-				list: a.items.map((item, i) => {
+				list: list.map((item, i) => {
 					return { ...item, source: { ...(itemHashes[i] ? { hash: itemHashes[i] } : {}) } };
 				}),
 			},

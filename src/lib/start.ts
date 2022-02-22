@@ -133,10 +133,13 @@ export const parseAndValidate = async (i: { url: string; txt: string }) => typed
 
 export const fetchParseValidate = async (i: { url: string }) => typedValidation(parseAndPickType(await startFromURL(i.url)));
 
-export const fetchAndValidateIntoAST = async (i: { url: string }) => {
+export const fetchAndValidateIntoASTJson = async (i: { url: string }):Promise<ASTJson> => {
+	return computableToJson(fetchAndValidateIntoAST(i));
+};
+
+export const fetchAndValidateIntoAST = async (i: { url: string }): Promise<ASTComputable> => {
 	const r = await fetchParseValidate(i);
-	const astC = await r.parser(r.data, r.url).toAST() as ASTComputable;
-	return computableToJson(astC) as Promise<ASTJson>;
+	return r.parser(r.data, r.url).toAST();
 };
 
 export const setup = {
