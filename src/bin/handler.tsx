@@ -15,13 +15,22 @@ import echoAST from './pages/ast.tsx';
 
 // @see  NOTES from '../../notes/accounts.md'
 
-const App = (title = 'Hello World!') => h('div', {}, [h('h1', {}, [title])]);
+const App = (title = 'Hello World!') => jsx(
+	<div>
+		<h1>{title}</h1>
+	</div>
+,{ status: 200 })
 
-const NotFound = (req:Request, params: PathParams) => (
+const NotFound = (req:Request, params: PathParams) => jsx(
 	<div>
 		<h1>Page Now Found</h1>
+		<h3>Params</h3>
+		<pre>{ JSON.stringify(params, null, 2) }</pre>  
+		
+		<h3 style="margin: 1em 0 0 0">Req</h3>
+		<pre>{ JSON.stringify(req, null, 2) }</pre>
 	</div>
-)
+,{ status: 404 })
 
 serve({
 	'/': header, // Home Page?
@@ -45,6 +54,6 @@ serve({
 	// ???
 	'/:tokType(u|t)-:token/:outputFmt/:composition/preview': preview,
 	'/:tokType(u|t)-:token/:outputFmt/:composition/preview/:url(.*)': preview,
-	'/exhausted/:priorURL': () => jsx(App('Exhausted')), // Ask For
-	404: (req, params) => jsx(NotFound(req, params), { status: 404 }),
+	'/exhausted/:priorURL': () => App('Exhausted'), // Ask For Payment to bring it back
+	404: (req, params) => NotFound(req, params),
 });
