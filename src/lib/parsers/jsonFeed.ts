@@ -171,7 +171,7 @@ export const JsonFeed = ((
 		 * @returns
 		 */
 		paginateFrom: (pos = 0, pageBy = 50) => {
-			console.log({pos, pageBy});
+			console.log({ pos, pageBy });
 			return Promise.resolve({
 				val: compactParse as RespStruct,
 				canPrev: false,
@@ -237,11 +237,11 @@ export const JsonFeed = ((
 					_type: 'computable',
 					version: '',
 					reference: '',
-					source:{
+					source: {
 						url: url,
 						t: Date.now(),
-						hash: ''
-					}
+						hash: '',
+					},
 				},
 				title: c.title,
 				description: c.description ?? '>> no description <<',

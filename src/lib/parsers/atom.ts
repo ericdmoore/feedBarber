@@ -131,26 +131,22 @@ const pickURL = (fallback: string, link: typeof LinkOrLinkSet.TYPE) => {
 		: link._attributes.href ?? fallback;
 };
 
-
 export const ChannelSideCar = object({
 	_declaration: object({
 		_attributes: object({
 			encoding: string(),
 			version: string(),
-		})
+		}),
 	}),
 	feed: object({
 		_attributes: object({
 			'xml:lang': string(),
-			xmlns: string()
-		})
-	})
-})
+			xmlns: string(),
+		}),
+	}),
+});
 
-export const ItemSideCar = object({
-	
-})
-
+export const ItemSideCar = object({});
 
 export const Atom = ((
 	compactParse: RespStruct | unknown,
@@ -168,7 +164,7 @@ export const Atom = ((
 		clone: Atom,
 		_: compactParse as RespStruct,
 		paginateFrom: (pos = 0, offset = 50) => {
-			console.log({pos, offset})
+			console.log({ pos, offset });
 			return Promise.resolve({
 				val: compactParse as RespStruct,
 				canPrev: false,
@@ -239,13 +235,15 @@ export const Atom = ((
 					_attributes: (ast._atom as s.Infer<typeof ChannelSideCar>).feed._attributes,
 					title: _typedText(ast.title),
 					subtitle: _typedText(ast.description),
-					link: ast.links.list.map(l=>{
-						return { _attributes: {
-									rel: l.rel,
-									href: l.href,
-									type: l.type,
-									hreflang: l.hreflang }
-								}	
+					link: ast.links.list.map((l) => {
+						return {
+							_attributes: {
+								rel: l.rel,
+								href: l.href,
+								type: l.type,
+								hreflang: l.hreflang,
+							},
+						};
 					}),
 					updated: _text(
 						Math.max(
@@ -308,17 +306,17 @@ export const Atom = ((
 		 */
 		toAST: async (): Promise<ASTcomputable> => {
 			const c = await compactParse as RespStruct;
-			console.log('atom#toAST printing compactform', c)
+			console.log('atom#toAST printing compactform', c);
 			return {
 				_meta: {
 					_type: 'computable',
 					version: '',
 					reference: '',
-					source:{
+					source: {
 						url: url,
 						t: Date.now(),
-						hash: ''
-					}
+						hash: '',
+					},
 				},
 				title: txtorCData('>> no title << ', c.feed?.title),
 				description: txtorCData('>> no description <<', c.feed?.subtitle),

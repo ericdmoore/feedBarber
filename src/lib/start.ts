@@ -32,7 +32,7 @@ export type IDictUnionOfPayloadTypes =
 	| { kind: 'sitemap'; url: string; data: typeof sitemap.SitemapKind.TYPE; parser: TypedValidator }
 	| { kind: 'JS_SELECTION_ERROR'; url: string; data: Error; parser: TypedValidator }
 	| { kind: 'TEXT_SELECTION_ERROR'; url: string; data: Error; parser: TypedValidator };
-	// | { kind: 'jsonLD'; data: typeof jsonfeed.JsonFeedKind.TYPE }
+// | { kind: 'jsonLD'; data: typeof jsonfeed.JsonFeedKind.TYPE }
 
 export type IDictValidPayloadTypes = Exclude<
 	IDictUnionOfPayloadTypes,
@@ -40,13 +40,12 @@ export type IDictValidPayloadTypes = Exclude<
 	| { kind: 'TEXT_SELECTION_ERROR' }
 >;
 
-
 export const startFromURL = async (url: string) => {
 	const remoteData = await fetch(url);
 	return { url, txt: await remoteData.text() };
 };
 
-export const pickType = (i: {url:string, data:Record<string, unknown>}):IDictUnionOfPayloadTypes=>{
+export const pickType = (i: { url: string; data: Record<string, unknown> }): IDictUnionOfPayloadTypes => {
 	if ('items' in i.data && i.data?.items) {
 		return {
 			url: i.url,
@@ -54,31 +53,28 @@ export const pickType = (i: {url:string, data:Record<string, unknown>}):IDictUni
 			data: i.data as typeof jsonfeed.JsonFeedKind.TYPE,
 			parser: jsonfeed.JsonFeed,
 		};
-	}
-	else if ('feed' in i.data && i.data?.feed) {
+	} else if ('feed' in i.data && i.data?.feed) {
 		return {
 			url: i.url,
 			kind: 'atom',
 			data: i.data as typeof atom.AtomResponse.TYPE,
 			parser: atom.Atom,
 		};
-	}else if(i.data?.rss) {
+	} else if (i.data?.rss) {
 		return {
 			url: i.url,
 			kind: 'rss',
 			data: i.data as typeof rss.RssResponse.TYPE,
 			parser: rss.Rss,
 		};
-	}
-	else if(i.data?.urlset || i.data?.sitemapindex){
+	} else if (i.data?.urlset || i.data?.sitemapindex) {
 		return {
 			url: i.url,
 			kind: 'sitemap',
 			data: i.data as typeof sitemap.SitemapKind.TYPE,
 			parser: sitemap.Sitemap,
 		};
-	}
-	else {
+	} else {
 		return {
 			url: i.url,
 			kind: 'TEXT_SELECTION_ERROR',
@@ -86,11 +82,14 @@ export const pickType = (i: {url:string, data:Record<string, unknown>}):IDictUni
 			parser: jsonfeed.JsonFeed,
 		};
 	}
-}
+};
 
 export const parseAndPickType = (i: { url: string; txt: string }): IDictUnionOfPayloadTypes => {
-	try { return pickType({url: i.url, data: JSON.parse(i.txt)})
-	} catch (_) { return pickType({url: i.url, data: fromXml.xml2js(i.txt, { compact: true })}) }
+	try {
+		return pickType({ url: i.url, data: JSON.parse(i.txt) });
+	} catch (_) {
+		return pickType({ url: i.url, data: fromXml.xml2js(i.txt, { compact: true }) });
+	}
 };
 
 export const typedValidation = async (
@@ -130,43 +129,43 @@ export const typedValidation = async (
 	}
 };
 
-export const parseAndValidate = async (i:{url: string, txt: string}) => typedValidation(parseAndPickType(i));
+export const parseAndValidate = async (i: { url: string; txt: string }) => typedValidation(parseAndPickType(i));
 
-export const fetchParseValidate = async (i:{url: string}) => typedValidation(parseAndPickType(await startFromURL(i.url)));
+export const fetchParseValidate = async (i: { url: string }) => typedValidation(parseAndPickType(await startFromURL(i.url)));
 
-export const fetchAndValidateIntoAST = async (i:{url: string}) => {
+export const fetchAndValidateIntoAST = async (i: { url: string }) => {
 	const r = await fetchParseValidate(i);
 	const astC = await r.parser(r.data, r.url).toAST() as ASTComputable;
 	return computableToJson(astC) as Promise<ASTJson>;
 };
 
 export const setup = {
-	aParser:{
-		fromUrl : async (i:{url:string}) => { 
-			const d = await fetchParseValidate(i); 
-			return d.parser(d.data, d.url) 
+	aParser: {
+		fromUrl: async (i: { url: string }) => {
+			const d = await fetchParseValidate(i);
+			return d.parser(d.data, d.url);
 		},
-		fromText : async (i:{url:string, txt:string})=>{ 
-			const d = await parseAndValidate(i); 
-			return d.parser(d.data, d.url) 
-		} ,
-		fromData: async (i:{url:string, data:unknown})=>{ 
-			const o = i.data as Record<string, unknown>
-			const d = await pickType( {url: i.url, data: o });
-			return d.parser(d.data, d.url)
+		fromText: async (i: { url: string; txt: string }) => {
+			const d = await parseAndValidate(i);
+			return d.parser(d.data, d.url);
+		},
+		fromData: async (i: { url: string; data: unknown }) => {
+			const o = i.data as Record<string, unknown>;
+			const d = await pickType({ url: i.url, data: o });
+			return d.parser(d.data, d.url);
 		},
 	},
-	anAST:{
-		fromUrl : async (i:{url:string}) => { 
-			return (await setup.aParser.fromUrl(i)).toAST()
+	anAST: {
+		fromUrl: async (i: { url: string }) => {
+			return (await setup.aParser.fromUrl(i)).toAST();
 		},
-		fromText : async (i:{url:string, txt:string})=>{ 
-			return (await setup.aParser.fromText(i)).toAST()
-		} ,
-		fromData: async (i:{url:string, data:unknown})=>{ 
-			return (await setup.aParser.fromData(i)).toAST()
+		fromText: async (i: { url: string; txt: string }) => {
+			return (await setup.aParser.fromText(i)).toAST();
 		},
-	}
-}
+		fromData: async (i: { url: string; data: unknown }) => {
+			return (await setup.aParser.fromData(i)).toAST();
+		},
+	},
+};
 
 export default parseAndPickType;

@@ -11,15 +11,15 @@ Deno.test(
 		console.log();
 		const fakeUrl = 'http://world.hey.com/dhh/atom.xml';
 
-		const a1 = await parseAndValidate({url:fakeUrl, txt:dhhAtom});
+		const a1 = await parseAndValidate({ url: fakeUrl, txt: dhhAtom });
 		const ast = await Atom(a1, fakeUrl).toAST();
-		console.log('ast:',ast);
+		console.log('ast:', ast);
 
 		const astJson = await computableToJson(ast);
-		console.log('astJson:',astJson);
+		console.log('astJson:', astJson);
 
 		const a2 = await Atom({}, fakeUrl).fromAST(astJson) as atomStruct;
-		console.log('a2:',a2);
+		console.log('a2:', a2);
 
 		assertEquals(a1.data, a2);
 	},
@@ -29,7 +29,7 @@ Deno.test(skip(
 	'Atom -> AST -> Rss',
 	async () => {
 		const fakeUrl = 'http://world.hey.com/dhh/atom.xml';
-		const cAtom1 = await parseAndValidate({txt: dhhAtom, url:fakeUrl}) as unknown as atomStruct;
+		const cAtom1 = await parseAndValidate({ txt: dhhAtom, url: fakeUrl }) as unknown as atomStruct;
 		const ast = await Atom(cAtom1, fakeUrl).toAST();
 		const astJson = await computableToJson(ast);
 		const cAtom2 = await Atom({}, fakeUrl).fromAST(astJson) as atomStruct;

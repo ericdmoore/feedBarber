@@ -151,8 +151,8 @@ export const eventDefinition = (
 const ASTSource = type({
 	t: number(),
 	url: string(),
-	hash: string()
-})
+	hash: string(),
+});
 
 export const ASTAuthor = type({
 	name: string(),
@@ -290,9 +290,6 @@ export const ASTFeedItemThunk = type({
 	__analysis: optional(union([record(string(), unknown()), Thunk<Record<string, unknown>>()])),
 	__enhancement: optional(union([record(string(), unknown()), Thunk<Record<string, unknown>>()])),
 });
-
-
-
 
 const ASTmeta = <T, S>(t: s.Struct<T, S>) =>
 	type({
@@ -470,7 +467,7 @@ export const computableToJson = async (_ast: PromiseOr<ThunkOrJsonAST>): Promise
 						html: content.html,
 						markdown: content.markdown,
 						text: content.text,
-						source: content.source
+						source: content.source,
 					},
 					images: {
 						bannerImage: images.bannerImage,

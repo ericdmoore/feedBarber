@@ -11,8 +11,8 @@ export * as multiformat from 'https://cdn.skypack.dev/multiformats@9.6.4?dts';
 
 // import { Minhash, LshIndex } from "https://cdn.skypack.dev/minhash@0.0.9?dts";
 // export { Minhash, LshIndex }
-import mh from 'https://cdn.skypack.dev/minhash@v0.0.9?dts'
-export { mh as minhash }
+import mh from 'https://cdn.skypack.dev/minhash@v0.0.9?dts';
+export { mh as minhash };
 
 // export * as vfile from 'https://cdn.skypack.dev/vfile?dts';
 // export * as unified from 'https://cdn.skypack.dev/unified@10?dts';
