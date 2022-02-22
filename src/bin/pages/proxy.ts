@@ -8,7 +8,7 @@ import respondAs from '../utils/respondAs.ts';
 import pumpReader from '../utils/pumpReader.ts';
 
 export const proxy: Handler = async (_, params): Promise<Response> => {
-	const ast: ASTJson = await fetchAndValidateIntoAST(params?.url ?? '');
+	const ast: ASTJson = await fetchAndValidateIntoAST({url: params?.url ?? ''});
 	// console.log({ast})
 
 	const respAs = await respondAs(
