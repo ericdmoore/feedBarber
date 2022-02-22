@@ -66,5 +66,12 @@ Can feeds work in a various settings?
 - I ended with this content - derived by: { from:𝔸, createdBy:𝓣, #hash } = 𝓐
 - Also NOTE: any site - that merely includes a js Date.now() number in the html - will break the content hash discovery. So we will need a "collisioning hash" to resolve that.
 
+What if the ID for A is noisy; then its hard to key-lookup the final hash on A`
+
+> 𝓣(𝔸) = 𝓐
+> hashT,hashA => hashA\`
+
+maybe it would be nice if there was some monoid that would allow you to T on to A and have some resemblance of A\`
+
 So depending on what I stored / can share - I would broadcast som version of 𝓐 + 𝔸 so that others could benefit from my work - asking their network "Has anyone already done this?, and is willing to share?"
 
