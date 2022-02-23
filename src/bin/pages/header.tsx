@@ -1,13 +1,16 @@
 /** @jsx h */
 import type { Handler, VNode } from 'https://deno.land/x/sift@0.4.3/mod.ts';
+import type {ILayoutHeader} from './layout.tsx'
+
 import { h, jsx } from 'https://deno.land/x/sift@0.4.3/mod.ts';
 import pageLayout from './layout.tsx';
 
+
 export const header: Handler = async (req, param = {}) => {
-	const header = <title>Feed Supply</title>;
+	const header:ILayoutHeader = {title: "Feed City"}
 	const body = (
 		<div>
-			<h1>Welcome to feed supply</h1>
+			<h1>Feed City</h1>
 			<nav>
 				<h3>Basics</h3>
 				<ul>
@@ -36,20 +39,23 @@ export const header: Handler = async (req, param = {}) => {
 						<a href='/u-1234sdfg2345'>user token</a>
 					</li>
 					<li>
-						<a href='/ast/https://danluu.com/sitemap.xml'>DanLuu Sitemap</a>
+						<a href='/ast/https://danluu.com/sitemap.xml'> AST: DanLuu Sitemap</a>
 					</li>
 					<li>
-						<a href='/ast/https://danluu.com/atom.xml'>DanLuu Rss</a>
+						<a href='/ast/https://danluu.com/atom.xml'> AST: DanLuu Rss</a>
 					</li>
 					<li>
-						<a href='/ast/https://randsinrepose.com/feed/'>Rand Repose Rss</a>
+						<a href='/ast/https://randsinrepose.com/feed/'>AST: Rand Rss</a>
 					</li>
 					<li>
-						<a href={`/ast/https://randsinrepose.com/feed?a=1&b=2`}>Rand Repose Rss with params</a>
+						<a href={`/ast/https://randsinrepose.com/feed?a=1&b=2`}>AST: Rand Rss (with params)</a>
+					</li>
+					<li>
+						<a href={`/u-ericdmoore/json/https://randsinrepose.com/feed`}> JSON: No Composition</a>
 					</li>
 					<li>
 						<a href='/u-ericdmoore/json/f1(a=1|b=2)|>f2(c=a,b,c)/https://randsinrepose.com/feed'>
-							Example Composition
+							JSON: Composition
 						</a>
 					</li>
 				</ul>
@@ -75,7 +81,7 @@ export const header: Handler = async (req, param = {}) => {
 		</div>
 	);
 
-	return pageLayout(() => body);
+	return pageLayout(() => body, header);
 };
 
 export default header;

@@ -334,7 +334,7 @@ export const Rss: TypedValidator = ((
 		toAST: async (): Promise<ASTcomputable> => {
 			const c = compactParse as RespStruct;
 
-			console.log('item0:', c.rss.channel.item[0]);
+			// console.log('item0:', c.rss.channel.item[0]);
 
 			return {
 				_meta: {

@@ -6,9 +6,7 @@ export const readToString = async (
 ) => {
 	if (!rs) return '';
 	else {
-		for await (const line of rs) {
-			s.write(line);
-		}
+		for await (const line of rs) { s.write(line) }
 		return s.toString();
 	}
 };
