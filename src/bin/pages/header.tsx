@@ -1,9 +1,9 @@
 /** @jsx h */
 import { h, Handler } from 'https://deno.land/x/sift@0.4.3/mod.ts';
-import {ILayoutHeader, pageLayout} from './layout.tsx';
+import { ILayoutHeader, pageLayout } from './layout.tsx';
 
 export const header: Handler = async (req, param = {}) => {
-	const header:ILayoutHeader = {title: "Feed City"}
+	const header: ILayoutHeader = { title: 'Feed City' };
 	const body = (
 		<body>
 			<h1>Feed City</h1>
@@ -35,10 +35,10 @@ export const header: Handler = async (req, param = {}) => {
 						<a href='/u-1234sdfg2345'>user token</a>
 					</li>
 					<li>
-						<a href='/ast/https://danluu.com/sitemap.xml'> AST: DanLuu Sitemap</a>
+						<a href='/ast/https://danluu.com/sitemap.xml'>AST: DanLuu Sitemap</a>
 					</li>
 					<li>
-						<a href='/ast/https://danluu.com/atom.xml'> AST: DanLuu Rss</a>
+						<a href='/ast/https://danluu.com/atom.xml'>AST: DanLuu Rss</a>
 					</li>
 					<li>
 						<a href='/ast/https://randsinrepose.com/feed/'>AST: Rand Rss</a>
@@ -63,7 +63,6 @@ export const header: Handler = async (req, param = {}) => {
 					<li>
 						<a href={`/u-ericdmoore/atom/https://randsinrepose.com/feed`}>ATOM: No Composition</a>
 					</li>
-
 				</ul>
 				<h3>Full Monty + Params</h3>
 				<ul>

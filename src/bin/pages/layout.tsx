@@ -1,27 +1,29 @@
 /** @jsx h */
 /** @jsxFrag Fragment */
 
-import { h, jsx, VNode, Fragment} from 'https://deno.land/x/sift@0.4.3/mod.ts';
+import { Fragment, h, jsx, VNode } from 'https://deno.land/x/sift@0.4.3/mod.ts';
+import { StringWriter } from 'https://deno.land/std@0.125.0/io/mod.ts';
+import pumpReader from '../../lib/utils/pumpReader.ts';
 
-export interface ILayoutHeader{
-	title?: string
-	description?: string
+export interface ILayoutHeader {
+	title?: string;
+	description?: string;
 	og?: {
-		title: string
-		type: string
-		url: string
-		image: string
-	}
+		title: string;
+		type: string;
+		url: string;
+		image: string;
+	};
 }
 
-export const pageLayout = (
+export const pageLayout = async (
 	Body: (() => VNode | h.JSX.Element),
-	hdr?: ILayoutHeader
-): Response => {
+	hdr?: ILayoutHeader,
+): Promise<Response> => {
 	const Head = () => (
 		<head>
 			<title>{hdr?.title ?? 'TITLE'}</title>
-			<meta charSet='utf-8'/>
+			<meta charSet='utf-8' />
 			<meta name='description' content={hdr?.description ?? ''}></meta>
 			<meta name='viewport' content='width=device-width, initial-scale=1'></meta>
 
@@ -33,6 +35,11 @@ export const pageLayout = (
 			<meta name='theme-color' content='#fafafa' />
 
 			{/* <link rel='icon' sizes='any' href='/favicon.ico' /> */}
+			<link
+				rel='icon'
+				href='data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🏙</text></svg>'
+			>
+			</link>
 			{/* <link rel='icon' type='image/svg+xml' href='/icon.svg' /> */}
 			{/* <link rel='apple-touch-icon' href='icon.png' /> */}
 			{/* <link rel='stylesheet' href='css/normalize.css' /> */}
@@ -44,14 +51,18 @@ export const pageLayout = (
 	const ret = jsx(
 		<>
 			<html lang='en-US' charSet='UTF-8'>
-				<Head/>
-				<Body/>
+				<Head />
+				<Body />
 			</html>,
-		</>
+		</>,
 	);
 
-	// @todo add <!DOCTYPE html> to front
-	return ret;
+	const body = await pumpReader(ret.body, new StringWriter('<!DOCTYPE html>'));
+	return new Response(body, {
+		headers: ret.headers,
+		status: ret.status,
+		statusText: ret.statusText,
+	});
 };
 
 export default pageLayout;

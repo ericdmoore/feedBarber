@@ -9,7 +9,7 @@ export const respondAs = async (
 ): Promise<Response> => {
 	let resp: Response;
 
-	const ast = await computableToJson(input.ast)
+	const ast = await computableToJson(input.ast);
 
 	if (outpuFormat === 'rss') {
 		const compactRssData = await rss.Rss({} as rss.RespStruct, input.url).fromAST(input.ast);
@@ -24,7 +24,7 @@ export const respondAs = async (
 			headers: { 'Content-Type': 'application/xml+atom' },
 		});
 	} else if (outpuFormat === 'city') {
-		resp = json(ast, { headers: { 'Content-Type':'application/json+cityfeed'} });
+		resp = json(ast, { headers: { 'Content-Type': 'application/json+cityfeed' } });
 	} //
 	// add else if here
 	//

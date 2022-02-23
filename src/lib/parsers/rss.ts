@@ -7,7 +7,7 @@ import type { TypedValidator } from '../start.ts';
 import { ASTcomputable, ASTjson, computableToJson } from './ast.ts';
 import { superstruct as s, toXml } from '../../mod.ts';
 import { IValidate } from '../../types.ts';
-import {JSONStruct, removeUndef} from './helpers/removeUndef.ts'
+import { JSONStruct, removeUndef } from './helpers/removeUndef.ts';
 
 import er from './helpers/error.ts';
 import {
@@ -230,8 +230,8 @@ export const Rss: TypedValidator = ((
 		},
 		toString: () => {
 			return toXml.js2xml(
-				removeUndef(compactParse as JSONStruct) as Record<string, unknown>, 
-				{ compact: true }
+				removeUndef(compactParse as JSONStruct) as Record<string, unknown>,
+				{ compact: true },
 			);
 		},
 		fromAST: async (_ast: ASTcomputable | ASTjson): Promise<RespStruct> => {

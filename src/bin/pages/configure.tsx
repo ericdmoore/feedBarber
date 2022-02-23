@@ -12,7 +12,7 @@ export const configure = (s = 'Configure Composition'): Handler =>
 					<li>Show all params setup for each function</li>
 					<li>Sync the URL with function(param) and order</li>
 				</ul>
-			</div>
+			</div>,
 		);
 	};
 

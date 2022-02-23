@@ -4,17 +4,17 @@ import { cidStr } from '../analysis/calcMultihash.ts';
 
 export const addHash = (_i?: unknown) =>
 	async (ast: PromiseOr<ASTComputable>): Promise<ASTComputable> => {
-		ast = await ast as ASTComputable
-		const _meta = await rezVal(ast._meta)
-		const list = await rezVal(ast.item.list)
+		ast = await ast as ASTComputable;
+		const _meta = await rezVal(ast._meta);
+		const list = await rezVal(ast.item.list);
 
 		const itemHashes = await Promise.all(list.map(async (i) => {
-			const {html, text, markdown} = await rezVal(i.content)
+			const { html, text, markdown } = await rezVal(i.content);
 			const content = text ?? markdown ?? html;
 			return content ? await cidStr(content) : undefined;
 		}));
 
-		const hashedNullItems = itemHashes.filter(v=>v).join('');
+		const hashedNullItems = itemHashes.filter((v) => v).join('');
 
 		return {
 			...ast,

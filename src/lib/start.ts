@@ -13,7 +13,7 @@ export type ISupportedTypeNames =
 	| 'JS_SELECTION_ERROR'
 	| 'TEXT_SELECTION_ERROR';
 
-export type ISupportedTypes = 
+export type ISupportedTypes =
 	| atom.RespStruct
 	| jsonfeed.RespStruct
 	| rss.RespStruct
@@ -136,7 +136,7 @@ export const parseAndValidate = async (i: { url: string; txt: string }) => typed
 
 export const fetchParseValidate = async (i: { url: string }) => typedValidation(parseAndPickType(await startFromURL(i.url)));
 
-export const fetchAndValidateIntoASTJson = async (i: { url: string }):Promise<ASTJson> => {
+export const fetchAndValidateIntoASTJson = async (i: { url: string }): Promise<ASTJson> => {
 	return computableToJson(fetchAndValidateIntoAST(i));
 };
 
