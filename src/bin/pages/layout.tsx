@@ -1,5 +1,7 @@
 /** @jsx h */
-import { h, jsx, VNode } from 'https://deno.land/x/sift@0.4.3/mod.ts';
+/** @jsxFrag Fragment */
+
+import { h, jsx, VNode, Fragment} from 'https://deno.land/x/sift@0.4.3/mod.ts';
 
 export interface ILayoutHeader{
 	title?: string
@@ -16,7 +18,7 @@ export const pageLayout = (
 	Body: (() => VNode | h.JSX.Element),
 	hdr?: ILayoutHeader
 ): Response => {
-	const Hdr = () => (
+	const Head = () => (
 		<head>
 			<title>{hdr?.title ?? 'TITLE'}</title>
 			<meta charSet='utf-8'/>
@@ -40,10 +42,13 @@ export const pageLayout = (
 	);
 
 	const ret = jsx(
-		<html lang='en-US' charSet='UTF-8'>
-			<Hdr/>
-			<Body/>
-		</html>,
+		<>
+			<!doctype html>
+			<html lang='en-US' charSet='UTF-8'>
+				<Head/>
+				<Body/>
+			</html>,
+		</>
 	);
 
 	// @todo add <!DOCTYPE html> to front

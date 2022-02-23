@@ -7,6 +7,7 @@ import type { TypedValidator } from '../start.ts';
 import { ASTcomputable, ASTjson, computableToJson } from './ast.ts';
 import { superstruct as s, toXml } from '../../mod.ts';
 import { IValidate } from '../../types.ts';
+import {JSONStruct, removeUndef} from './helpers/removeUndef.ts'
 
 import er from './helpers/error.ts';
 import {
@@ -144,40 +145,6 @@ export const RssResponse = type({
 
 export type RespStruct = typeof RssResponse.TYPE;
 
-type JSONPrim =
-	| string
-	| number
-	| boolean
-	| undefined;
-type JSONObject = { [x: string]: JSONPrim | JSONObject | JSONArray };
-type JSONArray = Array<JSONPrim | JSONObject | JSONArray>;
-type JSONStruct = JSONPrim | JSONObject | JSONArray;
-
-const removeUndefinedsFromObjectArray = (i: JSONArray): JSONArray => {
-	return i
-		.filter((v) => v) // removes undefined
-		.map((v) => {
-			return typeof v === 'object'
-				? Array.isArray(v) ? removeUndefinedsFromObjectArray(v) : removeUndefinedsFromObject(v)
-				: v;
-		});
-};
-
-const removeUndefinedsFromObject = (i: JSONObject): JSONObject => {
-	const ent = Object.entries(i)
-		.filter(([_, v]) => v) // removes undefined values
-		.map(([k, v]) => {
-			return typeof v === 'object'
-				? Array.isArray(v) ? [k, removeUndefinedsFromObjectArray(v)] : [k, removeUndefinedsFromObject(v)]
-				: [k, v];
-		});
-	return Object.fromEntries(ent) as JSONObject;
-};
-
-const removeUndef = (i: JSONArray | JSONObject) => {
-	return typeof i === 'object' ? Array.isArray(i) ? removeUndefinedsFromObjectArray(i) : removeUndefinedsFromObject(i) : i;
-};
-
 export const Rss: TypedValidator = ((
 	compactParse: RespStruct | unknown,
 	url: string,
@@ -262,9 +229,10 @@ export const Rss: TypedValidator = ((
 			});
 		},
 		toString: () => {
-			return toXml.js2xml(removeUndef(compactParse as RespStruct) as Record<string, unknown>, {
-				compact: true,
-			});
+			return toXml.js2xml(
+				removeUndef(compactParse as JSONStruct) as Record<string, unknown>, 
+				{ compact: true }
+			);
 		},
 		fromAST: async (_ast: ASTcomputable | ASTjson): Promise<RespStruct> => {
 			const ast = await computableToJson(_ast);

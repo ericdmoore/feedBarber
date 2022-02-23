@@ -3,6 +3,7 @@ import { ASTComputable, ASTJson, IValidate } from '../types.ts';
 import { atom, jsonfeed, rss, sitemap } from './parsers/index.ts';
 import { computableToJson } from './parsers/ast.ts';
 
+// #region types
 export type ISupportedTypeNames =
 	| 'atom'
 	| 'jsonFeed'
@@ -12,7 +13,7 @@ export type ISupportedTypeNames =
 	| 'JS_SELECTION_ERROR'
 	| 'TEXT_SELECTION_ERROR';
 
-export type ISupportedTypes =
+export type ISupportedTypes = 
 	| atom.RespStruct
 	| jsonfeed.RespStruct
 	| rss.RespStruct
@@ -39,6 +40,8 @@ export type IDictValidPayloadTypes = Exclude<
 	| { kind: 'JS_SELECTION_ERROR' }
 	| { kind: 'TEXT_SELECTION_ERROR' }
 >;
+
+// #endregion types
 
 export const startFromURL = async (url: string) => {
 	const remoteData = await fetch(url);

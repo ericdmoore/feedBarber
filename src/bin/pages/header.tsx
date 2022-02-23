@@ -5,7 +5,7 @@ import {ILayoutHeader, pageLayout} from './layout.tsx';
 export const header: Handler = async (req, param = {}) => {
 	const header:ILayoutHeader = {title: "Feed City"}
 	const body = (
-		<div>
+		<body>
 			<h1>Feed City</h1>
 			<nav>
 				<h3>Basics</h3>
@@ -47,7 +47,10 @@ export const header: Handler = async (req, param = {}) => {
 						<a href={`/ast/https://randsinrepose.com/feed?a=1&b=2`}>AST: Rand Rss (with params)</a>
 					</li>
 					<li>
-						<a href={`/u-ericdmoore/json/https://randsinrepose.com/feed`}> JSON: No Composition</a>
+						<a href={`/ast/addHash/https://randsinrepose.com/feed`}>AST: Rand Rss (with F.train)</a>
+					</li>
+					<li>
+						<a href={`/u-ericdmoore/json/https://randsinrepose.com/feed`}>JSON: No Composition</a>
 					</li>
 					<li>
 						<a href='/u-ericdmoore/json/f1(a=1|b=2)|>f2(c=a,b,c)/https://randsinrepose.com/feed'>
@@ -55,10 +58,10 @@ export const header: Handler = async (req, param = {}) => {
 						</a>
 					</li>
 					<li>
-						<a href={`/u-ericdmoore/rss/https://randsinrepose.com/feed`}> RSS: No Composition</a>
+						<a href={`/u-ericdmoore/rss/https://randsinrepose.com/feed`}>RSS: No Composition</a>
 					</li>
 					<li>
-						<a href={`/u-ericdmoore/atom/https://randsinrepose.com/feed`}> ATOM: No Composition</a>
+						<a href={`/u-ericdmoore/atom/https://randsinrepose.com/feed`}>ATOM: No Composition</a>
 					</li>
 
 				</ul>
@@ -81,9 +84,8 @@ export const header: Handler = async (req, param = {}) => {
 					</li>
 				</ul>
 			</nav>
-		</div>
+		</body>
 	);
-
 	return pageLayout(() => body, header);
 };
 

@@ -2,6 +2,7 @@ import type { TypedValidator } from '../start.ts';
 import type { IValidate } from '../../types.ts';
 import { ASTcomputable, ASTjson, computableToJson } from '../parsers/ast.ts';
 import { superstruct as s, toXml } from '../../mod.ts';
+import {JSONStruct, removeUndef} from './helpers/removeUndef.ts'
 
 import {
 	_text,
@@ -298,12 +299,8 @@ export const Atom = ((
 			} as RespStruct;
 		},
 		toString: () => {
-			return toXml.js2xml(compactParse as RespStruct, { compact: true });
+			return toXml.js2xml(removeUndef(compactParse as JSONStruct) as Record<string, unknown>, { compact: true });
 		},
-		/**
-		 * Contains logic to get the Syntax to an AST repr
-		 * @returns ASTShell
-		 */
 		toAST: async (): Promise<ASTcomputable> => {
 			const c = await compactParse as RespStruct;
 			console.log('atom#toAST printing compactform', c);
