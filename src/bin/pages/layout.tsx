@@ -1,6 +1,5 @@
 /** @jsx h */
-import type { VNode } from 'https://deno.land/x/sift@0.4.3/mod.ts';
-import { h, jsx } from 'https://deno.land/x/sift@0.4.3/mod.ts';
+import { h, jsx, VNode } from 'https://deno.land/x/sift@0.4.3/mod.ts';
 
 export interface ILayoutHeader{
 	title?: string
@@ -42,11 +41,10 @@ export const pageLayout = (
 
 	const ret = jsx(
 		<html lang='en-US' charSet='UTF-8'>
-			<Hdr />
-			<Body />
+			<Hdr/>
+			<Body/>
 		</html>,
 	);
-
 
 	// @todo add <!DOCTYPE html> to front
 	return ret;

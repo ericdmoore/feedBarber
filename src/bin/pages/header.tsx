@@ -1,10 +1,6 @@
 /** @jsx h */
-import type { Handler, VNode } from 'https://deno.land/x/sift@0.4.3/mod.ts';
-import type {ILayoutHeader} from './layout.tsx'
-
-import { h, jsx } from 'https://deno.land/x/sift@0.4.3/mod.ts';
-import pageLayout from './layout.tsx';
-
+import { h, Handler } from 'https://deno.land/x/sift@0.4.3/mod.ts';
+import {ILayoutHeader, pageLayout} from './layout.tsx';
 
 export const header: Handler = async (req, param = {}) => {
 	const header:ILayoutHeader = {title: "Feed City"}
