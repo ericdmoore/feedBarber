@@ -43,7 +43,8 @@ export const pageLayout = (
 
 	const ret = jsx(
 		<>
-			<!doctype html>
+			{/* Angle brackets are escaped  - so this does not work */}
+			{'< !doctype html >'}
 			<html lang='en-US' charSet='UTF-8'>
 				<Head/>
 				<Body/>
