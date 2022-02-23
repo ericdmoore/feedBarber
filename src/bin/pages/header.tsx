@@ -54,6 +54,13 @@ export const header: Handler = async (req, param = {}) => {
 							JSON: Composition
 						</a>
 					</li>
+					<li>
+						<a href={`/u-ericdmoore/rss/https://randsinrepose.com/feed`}> RSS: No Composition</a>
+					</li>
+					<li>
+						<a href={`/u-ericdmoore/atom/https://randsinrepose.com/feed`}> ATOM: No Composition</a>
+					</li>
+
 				</ul>
 				<h3>Full Monty + Params</h3>
 				<ul>
