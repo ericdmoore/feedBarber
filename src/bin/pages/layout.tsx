@@ -43,8 +43,8 @@ export const pageLayout = (
 
 	const ret = jsx(
 		<>
-			{/* Angle brackets are escaped  - so this does not work */}
-			{'< !doctype html >'}
+			{/* perhaps still have to intercept the Response and prepend the raw string */}
+			{/* '< !doctype html >' */}
 			<html lang='en-US' charSet='UTF-8'>
 				<Head/>
 				<Body/>
