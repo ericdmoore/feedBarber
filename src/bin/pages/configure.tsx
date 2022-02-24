@@ -1,27 +1,35 @@
 /** @jsx h */
-import { h, Handler, jsx } from 'https://deno.land/x/sift@0.4.3/mod.ts';
+/** @jsxFrag Fragment */
+import { Fragment, h, jsx, VNode, Handler } from 'https://deno.land/x/sift@0.4.3/mod.ts';
+import { ILayoutHeader, pageLayout } from './layout.tsx';
 import funcMap from '../../lib/enhancements/index.ts'
 
 export const configure = (s = 'Configure Composition'): Handler =>
 	async (req, pathParam) => {
-		return jsx(
-			<div>
-				<h1>{s}</h1>
-				<p>Here we will</p>
-				<ul>
-					<li><a href='#funcs'> Show all the functions to be used</a></li>
-					<li>Show all params setup for each function</li>
-					<li>Sync the URL with function(param) and order</li>
-				</ul>
+		const header: ILayoutHeader = {title: 'Feed City'}
+		const body = (
+		<div>
+			<h1>{s}</h1>
+			
+			<h4>Echo Path Params</h4>
+			<pre>{JSON.stringify(pathParam)}</pre>
 
-				<h3 id='funcs'>Functions</h3>
-				<pre>{JSON.stringify(funcMap,null,2)}</pre>
+			<p>Here we will</p>
+			<ul>
+				<li>
+					<a href='#funcs'>Show all the functions to be used</a>
+				</li>
+				<li>Show all params setup for each function</li>
+				<li>Sync the URL with function(param) and order</li>
+			</ul>
 
-				<h3 id='params'>Functions</h3>
-				<pre>{JSON.stringify(funcMap,null,2)}</pre>
+			<h3 id='funcs'>Functions &amp Params</h3>
+			<pre>{JSON.stringify(funcMap,null,2)}</pre>
 
-			</div>,
+			
+		</div>
 		);
-	};
+		return pageLayout(() => body, header);
+	}
 
 export default configure;

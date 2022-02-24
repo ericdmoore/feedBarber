@@ -12,8 +12,9 @@ const pickArticle = async (raw:string, css:string) : Promise<string|undefined> =
     return articleNode?.outerHTML
 }
 
-export const addLoadRawAndArticle  = (input:{articleCss: string}) => 
+export const addLoadRawAndArticle  = (input:{articleCss: string}) =>
     async (ast_: PromiseOr<ASTComputable>) : Promise<ASTComputable>=>{
+        input.articleCss = btoa(input.articleCss)
         const ast = await ast_
         return {
             ...ast,
@@ -42,7 +43,7 @@ export const addLoadRawAndArticle  = (input:{articleCss: string}) =>
 const paramSchema = {
     type: "object",
     properties: {
-        articleCss: {type: "string"},
+        articleCss: {type: "string",format: "base64" },
     },
     required: ["articleCss"],
     additionalProperties: false

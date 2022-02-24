@@ -38,7 +38,8 @@ const loadUrlAndPluckCssPath = async (
 export const addPostLinks  = (input:{nextPost:string, prevPost:string}) => 
     async (_ast: PromiseOr<ASTComputable>):Promise<ASTComputable>=>{
         const ast = await _ast
-
+        input.nextPost = btoa(input.nextPost)
+        input.prevPost = btoa(input.prevPost)
         return {
             ...ast,
             item: {
@@ -65,8 +66,8 @@ export const addPostLinks  = (input:{nextPost:string, prevPost:string}) =>
 const paramSchema = {
   type: "object",
   properties: {
-    nextPost:{type: "string"}, 
-    prevPost:{type: "string"},
+    nextPost:{ type: "string", format: "base64" }, 
+    prevPost:{ type: "string", format: "base64" },
   },
   required: ["prevPost","nextPost"],
   additionalProperties: false

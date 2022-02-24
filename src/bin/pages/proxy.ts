@@ -36,13 +36,13 @@ const setupAstPipeline = async (ast: ASTComputable, funcParms: FuncInterface[]):
 	// import the name
 	// apply the params
 	// and invoke thunk
-	const chainFuncs = funcParms.map((f, i) => {
+	const chainFuncs = funcParms.map((fi, i) => {
 		// @todo blow out this directory
 		// integrate with npm?
 		// make a developer user name lookup
 		// use raw urls?
-		if (funcMap?.[f.fname]) {
-			return funcMap[f.fname](f.params) as ASTChainFunc;
+		if (funcMap?.[fi.fname]) {
+			return funcMap[fi.fname].f((fi.params)) as ASTChainFunc;
 		} else {
 			funcParms[i].messages = [
 				...(funcParms[i].messages ?? []),

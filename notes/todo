@@ -1,5 +1,11 @@
 [] correct change of format
 [] html injection
+    [] continue use css selectors as params
+    [] continue passing params via URL
+        problem : but # is used which cuts off everything after the ocotothorpe
+        - option1: change encoding of params - say `atob`? 
+        - option2: create alternate syntax
+        - CHOSE 1
 [] ad removal
 [] html 2 md transform
 ------------------------
