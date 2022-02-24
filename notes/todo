@@ -13,4 +13,5 @@
 [] caching layer
     - ttl: hash(url) to store the raw html string
     - pk;h(url);;s;h(url)
+[] rename: functrain.city ?  
 ------------------------

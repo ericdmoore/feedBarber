@@ -3,7 +3,7 @@ export const parseFunctions = (compositinPath: string) => {
 	const removedEndSlash = unencoded.endsWith('/') ? unencoded.slice(0, -1) : unencoded;
 
 	const tokens = removedEndSlash
-		.split('|>')
+		.split('|')
 		.map((fc) => {
 			const [f, pStr] = fc.split('(');
 			return { fname: f, paramStr: !pStr ? null : pStr.slice(0, -1) };
@@ -13,7 +13,7 @@ export const parseFunctions = (compositinPath: string) => {
 			? {
 				fName: i.fname,
 				namedParamVals: Object.fromEntries(
-					i.paramStr.split('|').map((s) => s.split('=')),
+					i.paramStr.split(',').map((s) => s.split(':')),
 				) as { [paramName: string]: string },
 			}
 			: {
