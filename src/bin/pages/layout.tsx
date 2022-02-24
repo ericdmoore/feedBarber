@@ -19,10 +19,9 @@ export interface ILayoutHeader {
 export const pageLayout = async (
 	Body: (() => VNode | h.JSX.Element),
 	hdr?: ILayoutHeader,
-	Neck?: (() => VNode | h.JSX.Element ),
+	Neck?: (() => VNode | h.JSX.Element),
 	Feet?: (() => VNode | h.JSX.Element),
 ): Promise<Response> => {
-
 	const Head = () => (
 		<head>
 			<title>{hdr?.title ?? 'TITLE'}</title>
@@ -49,7 +48,7 @@ export const pageLayout = async (
 			{/* <link rel='stylesheet' href='css/style.css' /> */}
 			{/* <link rel='manifest' href='site.webmanifest' /> */}
 			{Neck && <Neck></Neck>}
-		</head>	
+		</head>
 	);
 
 	const ret = jsx(
@@ -59,7 +58,7 @@ export const pageLayout = async (
 				<Body />
 				{Feet && <Feet></Feet>}
 			</html>
-		</>
+		</>,
 	);
 
 	const body = await pumpReader(ret.body, new StringWriter('<!DOCTYPE html>'));

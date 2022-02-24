@@ -295,7 +295,7 @@ export const Sitemap: TypedValidator = ((
 						url: url,
 						t: Date.now(),
 						hash: '',
-						from:''
+						from: '',
 					},
 				},
 				title: url,

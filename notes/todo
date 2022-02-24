@@ -1,11 +1,16 @@
-[] correct change of format
-[] html injection
-    [] continue use css selectors as params
-    [] continue passing params via URL
+[started] correct change of format
+[started] html injection
+    [working] continue use css selectors as params
+    [working] continue passing params via URL
         problem : but # is used which cuts off everything after the ocotothorpe
         - option1: change encoding of params - say `atob`? 
         - option2: create alternate syntax
         - CHOSE 1
 [] ad removal
+    [] removal via article selection
+    [] removal via removal list selection
 [] html 2 md transform
+[] caching layer
+    - ttl: hash(url) to store the raw html string
+    - pk;h(url);;s;h(url)
 ------------------------

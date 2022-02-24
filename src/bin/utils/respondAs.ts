@@ -17,19 +17,15 @@ export const respondAs = async (
 		resp = new Response(rss.Rss(compactRssData, input.url).toString(), {
 			headers: { 'Content-Type': 'application/xml+rss' },
 		});
-
 	} else if (outpuFormat === 'atom') {
 		const compactAtomData = await atom.Atom({} as atom.RespStruct, input.url).fromAST(input.ast);
 		// console.log('chose atom: \n', compactAtomData);
 		resp = new Response(atom.Atom(compactAtomData, input.url).toString(), {
 			headers: { 'Content-Type': 'application/xml+atom' },
 		});
-
 	} else if (outpuFormat === 'city') {
 		resp = json(ast, { headers: { 'Content-Type': 'application/json+cityfeed' } });
-	} 
-	
-	//
+	} //
 	// add else if here
 	//
 	else if (outpuFormat.match('json')) {
@@ -39,7 +35,6 @@ export const respondAs = async (
 		);
 		// console.log('chose json: \n', jsonDatam);
 		resp = json(jsonDatam, {});
-
 	} else {
 		// default case - is city
 		resp = json(ast, { headers: { 'Content-Type': 'application/json+cityfeed' } });

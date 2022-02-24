@@ -23,7 +23,9 @@ export const ListFeedsForUser: Handler = async (req, pathParam) => {
 				<li>Setup Funco Trains</li>
 				<li>Send the Funco Trains to a Feed</li>
 				<li>Buy Funcos</li>
-				<li>Import and Alias Funcos</li>
+				<li>Alias Funcos with Params</li>
+				<li>Import Funcos and Alias Them</li>
+				<li>...and re-alias them with params</li>
 			</ul>
 		</>,
 	);

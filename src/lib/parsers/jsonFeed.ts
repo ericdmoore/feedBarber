@@ -241,7 +241,7 @@ export const JsonFeed = ((
 						url: url,
 						t: Date.now(),
 						hash: '',
-						from:''
+						from: '',
 					},
 				},
 				title: c.title,

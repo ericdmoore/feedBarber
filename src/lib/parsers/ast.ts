@@ -152,7 +152,7 @@ const ASTSource = type({
 	t: number(),
 	url: string(),
 	hash: string(),
-	from: enums(['html', 'text', 'markdown', 'article', 'raw', 'blend'])
+	from: enums(['html', 'text', 'markdown', 'article', 'raw', 'blend']),
 });
 
 export const ASTAuthor = type({
