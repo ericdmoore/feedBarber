@@ -43,7 +43,7 @@ export const addLoadRawAndArticle  = (input:{articleCss: string}) =>
 const paramSchema = {
     type: "object",
     properties: {
-        articleCss: {type: "string",format: "base64" },
+        articleCss: {type: "string", contentEncoding:"base64" },
     },
     required: ["articleCss"],
     additionalProperties: false

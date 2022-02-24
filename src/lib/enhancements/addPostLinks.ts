@@ -66,8 +66,8 @@ export const addPostLinks  = (input:{nextPost:string, prevPost:string}) =>
 const paramSchema = {
   type: "object",
   properties: {
-    nextPost:{ type: "string", format: "base64" }, 
-    prevPost:{ type: "string", format: "base64" },
+    nextPost:{ type: "string", contentEncoding:"base64" }, 
+    prevPost:{ type: "string", contentEncoding:"base64" },
   },
   required: ["prevPost","nextPost"],
   additionalProperties: false

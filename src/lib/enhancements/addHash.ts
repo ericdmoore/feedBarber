@@ -52,7 +52,7 @@ export const addHash = (_i?: unknown) =>
 	};
 
 const paramSchema = {
-	type: ['object','string'],
+	type: 'string',
 	nullable: true
 }
 
