@@ -223,6 +223,7 @@ const ItemContent = object({
 	html: optional(string()),
 	text: optional(string()),
 	markdown: optional(string()),
+	raw: optional(string()),
 	source: optional(ASTSource),
 });
 
@@ -454,6 +455,8 @@ export const computableToJson = async (_ast: PromiseOr<ThunkOrJsonAST>): Promise
 					rezVal(i.images),
 					rezVal(i.dates),
 				]);
+
+				// console.log({content})
 
 				return {
 					title: await rezVal(i.title),

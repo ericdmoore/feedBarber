@@ -67,9 +67,6 @@ export const proxy: Handler = async (_, params): Promise<Response> => {
 		funcs,
 	);
 
-	// console.log({ astViewer: ast })
-	// respondAS
-
 	const respAs = await respondAs(params?.outputFmt ?? 'json', { ast, url: params?.url ?? '' });
 
 	// respond sometimes XML, sometimes JSON

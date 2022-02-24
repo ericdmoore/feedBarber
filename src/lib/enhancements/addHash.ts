@@ -4,17 +4,20 @@ import { cidStr } from '../analysis/calcMultihash.ts';
 
 export const addHash = (_i?: unknown) =>
 	async (ast: PromiseOr<ASTComputable>): Promise<ASTComputable> => {
+		
 		ast = await ast as ASTComputable;
 		const _meta = await rezVal(ast._meta);
 		const list = await rezVal(ast.item.list);
-
+		
 		const itemHashes = await Promise.all(list.map(async (i) => {
 			const { html, text, markdown } = await rezVal(i.content);
 			const content = text ?? markdown ?? html;
 			return content ? await cidStr(content) : undefined;
 		}));
 
-		const hashedNullItems = itemHashes.filter((v) => v).join('');
+		// console.log({itemHashes})
+
+		const concatValidHashses = itemHashes.filter((v) => v).join('');
 
 		return {
 			...ast,
@@ -22,15 +25,35 @@ export const addHash = (_i?: unknown) =>
 				..._meta,
 				_type: 'computable',
 				source: {
-					..._meta.source,
-					hash: await cidStr(hashedNullItems),
+					t: Date.now(),
+					url: (await rezVal(ast.links)).sourceURL,
+					hash: await cidStr(concatValidHashses),
 				},
 			},
 			item: {
 				next: async () => [],
-				list: list.map((item, i) => {
-					return { ...item, source: { ...(itemHashes[i] ? { hash: itemHashes[i] } : {}) } };
-				}),
-			},
-		};
+				list: await Promise.all(list.map(async (item, i) => {
+					const c = await rezVal(item.content)
+					return { 
+						...item,
+						content:{
+							...c,
+							source: { 
+								...c.source,
+								hash: itemHashes[i],
+								url: item.url,
+								t: Date.now(),
+							} 
+						}						
+					}
+				}))
+			}
+		} as ASTComputable;
 	};
+
+const paramSchema = {
+	type: ['object','string'],
+	nullable: true
+}
+
+export default {f: addHash, param: JSON.stringify(paramSchema) as string}
