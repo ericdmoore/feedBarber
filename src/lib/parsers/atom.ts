@@ -313,6 +313,7 @@ export const Atom = ((
 						url: url,
 						t: Date.now(),
 						hash: '',
+						from:''
 					},
 				},
 				title: txtorCData('>> no title << ', c.feed?.title),

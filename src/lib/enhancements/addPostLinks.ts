@@ -38,8 +38,8 @@ const loadUrlAndPluckCssPath = async (
 export const addPostLinks  = (input:{nextPost:string, prevPost:string}) => 
     async (_ast: PromiseOr<ASTComputable>):Promise<ASTComputable>=>{
         const ast = await _ast
-        input.nextPost = btoa(input.nextPost)
-        input.prevPost = btoa(input.prevPost)
+        input.nextPost = atob(input.nextPost)
+        input.prevPost = atob(input.prevPost)
         return {
             ...ast,
             item: {

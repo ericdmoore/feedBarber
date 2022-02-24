@@ -64,7 +64,7 @@ export const header: Handler = async (req, param = {}) => {
 						<a href={`/u-ericdmoore/atom/https://randsinrepose.com/feed`}>ATOM: No Composition</a>
 					</li>
 					<li>
-						<a href="/u-ericdmoore/city/article(articleCss=#primary)|>postLinks(nextPost=.next>a:nth-child(2)|prevPost=.previous>a:nth-child(2))|>hash()/https://randsinrepose.com/feed"> City: Rand with Comp Train</a>
+						<a href="/u-ericdmoore/city/article(articleCss=I3ByaW1hcnkK)|>postLinks(nextPost=Lm5leHQ+YTpudGgtY2hpbGQoMikK|prevPost=LnByZXZpb3VzPmE6bnRoLWNoaWxkKDIpCg==)|>hash()/https://randsinrepose.com/feed"> City: Rand with Comp Train</a>
 					</li>
 				</ul>
 				<h3>Full Monty + Params</h3>

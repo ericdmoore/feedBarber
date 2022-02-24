@@ -12,7 +12,8 @@ export const addHash = (_i?: unknown) =>
 		const itemHashes = await Promise.all(list.map(async (i) => {
 			const { html, text, markdown } = await rezVal(i.content);
 			const content = text ?? markdown ?? html;
-			return content ? await cidStr(content) : undefined;
+			const type = text ? 'text' : html ? 'html' : markdown ? 'markdown' : null
+			return {type, hash: content ? await cidStr(content) : undefined}
 		}));
 
 		// console.log({itemHashes})
@@ -28,6 +29,7 @@ export const addHash = (_i?: unknown) =>
 					t: Date.now(),
 					url: (await rezVal(ast.links)).sourceURL,
 					hash: await cidStr(concatValidHashses),
+					from: 'blend'
 				},
 			},
 			item: {
@@ -39,10 +41,10 @@ export const addHash = (_i?: unknown) =>
 						content:{
 							...c,
 							source: { 
-								...c.source,
-								hash: itemHashes[i],
 								url: item.url,
 								t: Date.now(),
+								hash: itemHashes[i].hash,
+								from: itemHashes[i].type
 							} 
 						}						
 					}

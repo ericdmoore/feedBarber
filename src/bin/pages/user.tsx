@@ -17,6 +17,14 @@ export const ListFeedsForUser: Handler = async (req, pathParam) => {
 
 			<h3 style='margin: 1em 0 0 0;'>Functions</h3>
 			<p>show a list of feeds...</p>
+
+			<p>Users can of course</p>
+			<ul>
+				<li>Setup Funco Trains</li>
+				<li>Send the Funco Trains to a Feed</li>
+				<li>Buy Funcos</li>
+				<li>Import and Alias Funcos</li>
+			</ul>
 		</>,
 	);
 };

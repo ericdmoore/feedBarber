@@ -313,6 +313,7 @@ export const Rss: TypedValidator = ((
 						url: url,
 						t: Date.now(),
 						hash: '',
+						from:'',
 					},
 				},
 				title: txtorCData('>> no title given', c.rss.channel.title, c.rss.channel.link),

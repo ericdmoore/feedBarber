@@ -53,14 +53,14 @@ const setupAstPipeline = async (ast: ASTComputable, funcParms: FuncInterface[]):
 	}).filter((f: ASTChainFunc | null) => f as ASTChainFunc) as ASTChainFunc[];
 
 	return applyPipeline(ast, ...chainFuncs).catch((e) => {
-		console.log(e);
+		console.error(e);
 		return Promise.reject(er(e, `An Error Occured occured on the CityTrain - please look at ${e}`, new Error().stack));
 	});
 };
 
 export const proxy: Handler = async (_, params): Promise<Response> => {
 	// find/parse funcs
-	const funcs = parseFuncs(params?.composition ?? 'addHash') as FuncInterface[];
+	const funcs = parseFuncs(params?.composition ?? 'hash') as FuncInterface[];
 
 	const ast = await setupAstPipeline(
 		await fetchAndValidateIntoAST({ url: params?.url ?? '' }),

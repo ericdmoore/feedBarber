@@ -152,6 +152,7 @@ const ASTSource = type({
 	t: number(),
 	url: string(),
 	hash: string(),
+	from: enums(['html', 'text', 'markdown', 'article', 'raw', 'blend'])
 });
 
 export const ASTAuthor = type({
@@ -224,6 +225,8 @@ const ItemContent = object({
 	text: optional(string()),
 	markdown: optional(string()),
 	raw: optional(string()),
+	article: optional(string()),
+
 	source: optional(ASTSource),
 });
 
@@ -472,6 +475,8 @@ export const computableToJson = async (_ast: PromiseOr<ThunkOrJsonAST>): Promise
 						markdown: content.markdown,
 						text: content.text,
 						source: content.source,
+						article: content.article,
+						raw: content.raw,
 					},
 					images: {
 						bannerImage: images.bannerImage,

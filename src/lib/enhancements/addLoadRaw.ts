@@ -14,7 +14,8 @@ const pickArticle = async (raw:string, css:string) : Promise<string|undefined> =
 
 export const addLoadRawAndArticle  = (input:{articleCss: string}) =>
     async (ast_: PromiseOr<ASTComputable>) : Promise<ASTComputable>=>{
-        input.articleCss = btoa(input.articleCss)
+
+        input.articleCss = atob(input.articleCss)
         const ast = await ast_
         return {
             ...ast,
