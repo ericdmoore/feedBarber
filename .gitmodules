@@ -1,0 +1,3 @@
+[submodule "src/vendor/unified"]
+	path = src/vendor/unified
+	url = https://github.com/unifiedjs/unified.git

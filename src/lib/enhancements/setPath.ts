@@ -64,8 +64,17 @@ export const setPath = (
 const schema = {
 	type: 'object',
 	properties: {
-		path: { type: 'string', default: 'title', nullable: true },
-		value: { type: 'string', default: 'json::"Title: Hello World!"', nullable: true },
+		path: { 
+			type: 'string', 
+			default: 'title', 
+			nullable: true 
+		},
+		value: { 
+			type: 'string', 
+			default: 'json::"Title: Hello World!"', 
+			pattern: '[json::|\{\{::].+',
+			nullable: true 
+		},
 	},
 };
 export default { f: setPath, param: JSON.stringify(schema) };

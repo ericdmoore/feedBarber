@@ -7,15 +7,15 @@ export * as fromXml from 'https://deno.land/x/xml2js@1.0.0/mod.ts';
 export * as toXml from 'https://deno.land/x/js2xml@1.0.2/mod.ts';
 export * as DenoDom from 'https://deno.land/x/deno_dom@v0.1.21-alpha/deno-dom-wasm.ts';
 export * as mustache from 'https://deno.land/x/mustache@v0.3.0/mod.ts';
+
 export * as multiformat from 'https://cdn.skypack.dev/multiformats@9.6.4?dts';
 
-// import { Minhash, LshIndex } from "https://cdn.skypack.dev/minhash@0.0.9?dts";
-// export { Minhash, LshIndex }
 import mh from 'https://cdn.skypack.dev/minhash@v0.0.9?dts';
 export { mh as minhash };
 
-// export * as vfile from 'https://cdn.skypack.dev/vfile?dts';
-// export * as unified from 'https://cdn.skypack.dev/unified@10?dts';
+export { unified } from 'https://cdn.skypack.dev/unified@10.1.1?dts';
+export * as vfile from 'https://cdn.skypack.dev/vfile@v5.3.0?dts';
+// export * as error from 'https://cdn.skypack.dev/error@10.4.0?dts';
 
 // parse
 // export * as rehypeParse from 'https://cdn.skypack.dev/rehype-parse@8?dts';
