@@ -9,22 +9,20 @@ export * as DenoDom from 'https://deno.land/x/deno_dom@v0.1.21-alpha/deno-dom-wa
 export * as mustache from 'https://deno.land/x/mustache@v0.3.0/mod.ts';
 
 export * as multiformat from 'https://cdn.skypack.dev/multiformats@9.6.4?dts';
-
 export { default as minhash } from 'https://cdn.skypack.dev/minhash@v0.0.9?dts';
-
 export { unified } from "https://denopkg.com/ericdmoore/unified@main/mod.ts"
-// export * as vfile from 'https://cdn.skypack.dev/vfile@v5.3.0?dts';
+export {VFile} from "https://denopkg.com/ericdmoore/vfile@main/mod.ts"
 
-// export * as error from 'https://cdn.skypack.dev/error@10.4.0?dts';
+export {default as error} from 'https://cdn.skypack.dev/error@10.4.0?dts';
 
 // parse
-// export * as rehypeParse from 'https://cdn.skypack.dev/rehype-parse@8?dts';
+// export {default as rehypeParse} from 'https://cdn.skypack.dev/rehype-parse@8?dts';
 // export * as retextParse from 'https://cdn.skypack.dev/retext-english?dts';
 // export * as retextEnglish from 'https://cdn.skypack.dev/retext-english@4?dts'; // 'Parse' is lang specific
-// export * as remarkParse from 'https://cdn.skypack.dev/remark-parse@10?dts';
+export {remarkParse} from 'https://denopkg.com/ericdmoore/remark@main/packages/remark-parse/mod.ts';
 
 // stringify
-// export * as remarkStringify from 'https://cdn.skypack.dev/remark-stringify@10?dts';
+export {default as remarkStringify} from 'https://denopkg.com/ericdmoore/remark@main/packages/remark-stringify/mod.ts';
 // export * as rehypeStringify from 'https://cdn.skypack.dev/rehype-stringify@9?dts';
 // export * as retextStringify from 'https://cdn.skypack.dev/retext-stringify?dts';
 
