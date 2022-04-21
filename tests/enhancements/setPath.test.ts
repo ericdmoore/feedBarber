@@ -4,7 +4,7 @@ import { setPath } from '../../src/lib/enhancements/setPath.ts';
 import { computableToJson, rezVal } from '../../src/lib/parsers/ast.ts';
 
 import { parseAndPickType } from '../../src/lib/start.ts';
-import { jsonFeedNoItems as jsfTXT } from '../parsers/mocks/flyingmeat.ts';
+import { jsonFeedNoItems as jsfTXT } from '../mocks/jsonFeed/flyingmeat.ts';
 import { assertEquals, assertNotEquals } from 'https://deno.land/std@0.123.0/testing/asserts.ts';
 
 // import {getPath} from '../../lib/utils/propertyPath.ts'
