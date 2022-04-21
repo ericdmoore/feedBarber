@@ -10,23 +10,23 @@ export * as mustache from 'https://deno.land/x/mustache@v0.3.0/mod.ts';
 
 export * as multiformat from 'https://esm.sh/multiformats@9.6.4';
 export { default as minhash } from 'https://esm.sh/minhash@v0.0.9';
-export { unified } from "https://denopkg.com/ericdmoore/unified@main/mod.ts"
-export {VFile} from "https://denopkg.com/ericdmoore/vfile@main/mod.ts"
+export { unified } from 'https://denopkg.com/ericdmoore/unified@main/mod.ts';
+export { VFile } from 'https://denopkg.com/ericdmoore/vfile@main/mod.ts';
 
 // parse
-export {default as rehypeParse} from "https://denopkg.com/ericdmoore/rehype@main/packages/rehype-parse/mod.ts";
-export {default as remarkParse} from 'https://denopkg.com/ericdmoore/remark@main/packages/remark-parse/mod.ts';
+export { rehypeParse } from 'https://denopkg.com/ericdmoore/rehype@main/packages/rehype-parse/mod.ts';
+export { remarkParse } from 'https://denopkg.com/ericdmoore/remark@main/packages/remark-parse/mod.ts';
 // export * as retextParse from 'https://esm.sh/retext-english?dts';
 // export * as retextEnglish from 'https://esm.sh/retext-english@4?dts'; // 'Parse' is lang specific
 
 // stringify
-export {default as remarkStringify} from 'https://denopkg.com/ericdmoore/remark@main/packages/remark-stringify/mod.ts';
-export {default as rehypeStringify} from "https://denopkg.com/ericdmoore/rehype@main/packages/rehype-stringify/mod.ts";
-export {default as retextStringify} from 'https://esm.sh/retext-stringify@3.1.0';
+export { remarkStringify } from 'https://denopkg.com/ericdmoore/remark@main/packages/remark-stringify/mod.ts';
+export { rehypeStringify } from 'https://denopkg.com/ericdmoore/rehype@main/packages/rehype-stringify/mod.ts';
+// export {default as retextStringify} from 'https://esm.sh/retext-stringify@3.1.0';
 
-// bridge
-export * as rehypeRemark from 'https://esm.sh/rehype-remark@9.1.2';
-export * as remarkRehype from 'https://esm.sh/remark-rehype@10.1.0';
+// bridges
+export { rehypeRemark } from 'https://denopkg.com/ericdmoore/rehype-remark@main/mod.ts';
+export { remarkRehype } from 'https://denopkg.com/ericdmoore/remark-rehype@main/mod.ts';
 // export * as remarkRetext from 'https://esm.sh/remark-retext?dts';
 
 // RETEXT-middlewares
@@ -35,3 +35,19 @@ export * as remarkRehype from 'https://esm.sh/remark-rehype@10.1.0';
 // export * as retextSpell from 'https://esm.sh/retext-spell?dts';
 // export * as spellingDict from 'https://esm.sh/dictionary-en?dts';
 // export * as retextReadability from 'https://esm.sh/retext-readability?dts';
+
+interface ABPRuleInit {
+	protocol?: string;
+	username?: string;
+	password?: string;
+	hostname?: string;
+	port?: string;
+	pathname?: string;
+	search?: string;
+	hash?: string;
+	baseURL?: string;
+	elementBy: {
+		allow?: boolean;
+		selector?: string;
+	};
+}

@@ -16,7 +16,7 @@ export interface ILayoutHeader {
 	};
 }
 
-export type JSXThunk = (() => VNode | h.JSX.Element)
+export type JSXThunk = (() => VNode | h.JSX.Element);
 
 export const pageLayout = async (
 	Body: JSXThunk,

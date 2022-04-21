@@ -1,6 +1,6 @@
 // deno-lint-ignore no-unused-vars
 import skip from '../../helpers.ts';
-import { txtorCData } from '../../../lib/parsers/helpers/composedPrimitives.ts';
+import { txtorCData } from '../../../src/lib/parsers/helpers/composedPrimitives.ts';
 import { assertEquals } from 'https://deno.land/std@0.123.0/testing/asserts.ts';
 
 Deno.test('Pick Inner Text', async () => {

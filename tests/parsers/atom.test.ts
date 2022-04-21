@@ -1,8 +1,8 @@
 import { skip } from '../helpers.ts';
-import { atom as dhhAtom } from './mocks/dhh_hey.ts';
-import { parseAndValidate } from '../../lib/start.ts';
-import { computableToJson } from '../../lib/parsers/ast.ts';
-import { Atom, RespStruct as atomStruct } from '../../lib/parsers/atom.ts';
+import { atom as dhhAtom } from '../mocks/atom/dhh_hey.ts';
+import { parseAndValidate } from '../../src/lib/start.ts';
+import { computableToJson } from '../../src/lib/parsers/ast.ts';
+import { Atom, RespStruct as atomStruct } from '../../src/lib/parsers/atom.ts';
 import { assertEquals } from 'https://deno.land/std@0.123.0/testing/asserts.ts';
 
 Deno.test(

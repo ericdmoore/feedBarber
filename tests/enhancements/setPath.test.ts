@@ -1,12 +1,14 @@
 // deno-lint-ignore no-unused-vars
 import skip from '../helpers.ts';
-import { setPath } from '../../lib/enhancements/setPath.ts';
-// import {getPath} from '../../lib/utils/propertyPath.ts'
-import { computableToJson, rezVal } from '../../lib/parsers/ast.ts';
-// import {jsonfeed} from '../../lib/parsers/index.ts'
-import { parseAndPickType } from '../../lib/start.ts';
+import { setPath } from '../../src/lib/enhancements/setPath.ts';
+import { computableToJson, rezVal } from '../../src/lib/parsers/ast.ts';
+
+import { parseAndPickType } from '../../src/lib/start.ts';
 import { jsonFeedNoItems as jsfTXT } from '../parsers/mocks/flyingmeat.ts';
 import { assertEquals, assertNotEquals } from 'https://deno.land/std@0.123.0/testing/asserts.ts';
+
+// import {getPath} from '../../lib/utils/propertyPath.ts'
+// import {jsonfeed} from '../../lib/parsers/index.ts'
 
 Deno.test('Setter Default', async () => {
 	// console.log()

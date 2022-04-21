@@ -6,9 +6,7 @@ import { DOMParser, Node } from 'https://deno.land/x/deno_dom@v0.1.21-alpha/deno
 const nodeToPath = (initURL: string) =>
 	(n: (Node & { attributes?: { href: string } })) => {
 		return n.attributes?.href
-			? n.attributes?.href.startsWith('http') 
-				? n.attributes?.href 
-				: join(initURL, n.attributes?.href)
+			? n.attributes?.href.startsWith('http') ? n.attributes?.href : join(initURL, n.attributes?.href)
 			: initURL;
 	};
 
@@ -25,7 +23,7 @@ const loadUrlAndPluckCssPath = async (
 	const doc = new DOMParser().parseFromString(raw, 'text/html')!;
 	const nextPostNodes = doc.querySelectorAll(css.nextPost);
 	const prevPostNodes = doc.querySelectorAll(css.prevPost);
-	
+
 	const toPath = nodeToPath(url);
 	return {
 		nextPost: maybeHead([...nextPostNodes].map(toPath)),

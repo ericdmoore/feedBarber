@@ -1,7 +1,7 @@
 // deno-lint-ignore no-unused-vars
 import skip from '../helpers.ts';
 import { assertEquals } from 'https://deno.land/std@0.123.0/testing/asserts.ts';
-import { getPath, setPath } from '../../lib/utils/propertyPath.ts';
+import { getPath, setPath } from '../../src/lib/utils/propertyPath.ts';
 
 Deno.test('getPath - Basic Object', async () => {
 	const actual = getPath('a.b.c.d', { a: { b: { c: { d: true } } } });

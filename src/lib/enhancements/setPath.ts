@@ -64,16 +64,16 @@ export const setPath = (
 const schema = {
 	type: 'object',
 	properties: {
-		path: { 
-			type: 'string', 
-			default: 'title', 
-			nullable: true 
+		path: {
+			type: 'string',
+			default: 'title',
+			nullable: true,
 		},
-		value: { 
-			type: 'string', 
-			default: 'json::"Title: Hello World!"', 
+		value: {
+			type: 'string',
+			default: 'json::"Title: Hello World!"',
 			pattern: '[json::|\{\{::].+',
-			nullable: true 
+			nullable: true,
 		},
 	},
 };

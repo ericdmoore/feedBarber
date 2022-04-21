@@ -17,7 +17,7 @@ export const addHash = (_i?: unknown) =>
 
 		// console.log({itemHashes})
 
-		const concatValidHashses = itemHashes.filter((v) => v).join('');
+		const concatValidHashses = itemHashes.filter((v) => v).map((i) => i.hash).join('');
 
 		return {
 			...ast,
