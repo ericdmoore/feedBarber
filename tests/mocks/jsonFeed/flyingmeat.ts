@@ -1,6 +1,5 @@
-
 // curl https://flyingmeat.com/sitemap.xml >> src/tests/mocks/flyingmeat.ts
-import flyingmeatJson from './flyingmeat.json' assert { type: 'json' }
+import flyingmeatJson from './jsons/flyingmeat.json' assert { type: 'json' }
 
 export const sitemap = `<?xml version="1.0" encoding="UTF-8"?>
 <urlset
