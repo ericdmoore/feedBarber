@@ -7,6 +7,7 @@ export * as fromXml from 'https://deno.land/x/xml2js@1.0.0/mod.ts';
 export * as toXml from 'https://deno.land/x/js2xml@1.0.2/mod.ts';
 export * as DenoDom from 'https://deno.land/x/deno_dom@v0.1.21-alpha/deno-dom-wasm.ts';
 export * as mustache from 'https://deno.land/x/mustache@v0.3.0/mod.ts';
+export * as jsonSchema from 'https://deno.land/x/json_schema_typed@v8.0.0/draft_latest.ts';
 
 export * as multiformat from 'https://esm.sh/multiformats@9.6.4';
 export { default as minhash } from 'https://esm.sh/minhash@v0.0.9';

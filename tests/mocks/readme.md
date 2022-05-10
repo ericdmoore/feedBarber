@@ -10,6 +10,7 @@
 # Rss
 
 - https://danluu.com/atom.xml
+- https://daringfireball.net/feeds/main
 - http://feeds.foxnews.com/foxnews/latest
 - https://rss.nytimes.com/services/xml/rss/nyt/US.xml
 - https://rss.nytimes.com/services/xml/rss/nyt/HomePage.xml

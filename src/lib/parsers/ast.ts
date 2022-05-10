@@ -245,6 +245,7 @@ const ItemImages = object({
 const ItemDates = object({
 	published: number(),
 	modified: number(),
+	expiresOn: optional(number()),
 });
 
 export const ASTFeedItemJson = type({
@@ -276,8 +277,7 @@ export const ASTFeedItemThunk = type({
 	language: optional(eitherThunkOr(string())),
 	title: optional(eitherThunkOr(string())),
 	summary: optional(eitherThunkOr(string())),
-	expires: optional(union([Thunk<number>(), number()])),
-
+	expiresIn: optional(union([Thunk<number>(), number()])),
 	content: union([ItemContent, Thunk<s.Infer<typeof ItemContent>>()]),
 	images: union([ItemImages, Thunk<s.Infer<typeof ItemImages>>()]),
 	dates: union([ItemDates, Thunk<s.Infer<typeof ItemDates>>()]),
@@ -327,9 +327,11 @@ export const ASTKindJson = type({
 		tokenData: string(),
 		feedEvents: optional(nonempty(array(EventStreamKind))),
 	})),
+
 	_rss: optional(record(string(), unknown())), // [tagName]: value
 	_atom: optional(record(string(), unknown())),
 	_sitemap: optional(record(string(), unknown())),
+	
 	__analysis: optional(record(string(), unknown())), // [pluginName]: {someObject or value}
 	__enhancement: optional(record(string(), unknown())), // [pluginName]: {someObject or value}
 });
@@ -468,7 +470,7 @@ export const computableToJson = async (_ast: PromiseOr<ThunkOrJsonAST>): Promise
 					url: await rezVal(i.url),
 					id: await rezVal(i.id),
 					authors: await rezVal(i.authors),
-					expires: await rezVal(i.expires),
+					expiresIn: await rezVal(i.expiresIn),
 					attachments: await rezVal(i.attachments),
 					content: {
 						html: content.html,

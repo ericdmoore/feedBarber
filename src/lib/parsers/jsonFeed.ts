@@ -266,71 +266,77 @@ export const JsonFeed = ((
 					prevUrl: '',
 					itemCount: c.items.length,
 				}),
-				authors: Array.isArray(c.authors) && c.authors?.length > 0 ? c.authors : [
-					{
-						name: c.author?.name ?? '>> no name provided <<',
-						url: c.author?.url,
+				authors: [...c.authors ?? []].concat(c.author ? [c.author] : [])
+					.map( a => ({ 
+						name: a?.name ?? '>> no name provided <<',
+						url: a?.url,
 						email: undefined,
-						imageURL: c.author?.avatar ??
+						imageURL: a?.avatar ?? 
 							`https://randomuser.me/api/portraits/lego/${Math.random() * 9}.jpg`,
-					},
-				],
+					}) ),
 				sourceFeedMeta: {},
 				item: {
 					next: async () => [],
-					list: c.items.map((i: typeof JsonFeedItem.TYPE) => ({
-						id: i.id,
-						url: i.url,
-						title: i.title,
-						summary: i.summary,
-						language: i.language ?? 'en-US',
-
-						authors: Array.isArray(i.authors)
-							? i.authors.map((a) => ({
-								name: a.name,
-								email: undefined,
-								imageUrl: a.avatar,
-								url: a.url,
-							}))
-							: i.author
-							? [{
-								name: i.author.name,
-								imageUrl: i.author.avatar,
-								url: i.author.url,
-								email: undefined,
-							}]
-							: [{ name: '', imageUrl: undefined, url: undefined, email: undefined }],
-						content: {
-							html: i.content_html,
-							makrdown: i.content_makrdown,
-							text: i.content_text,
-						},
-						dates: {
-							modified: i.date_modified ? (new Date(i.date_modified)).getTime() : Date.now(),
-							published: i.date_published ? (new Date(i.date_published)).getTime() : Date.now(),
-						},
-						images: async () => ({
-							bannerImage: '',
-							indexImage: '',
-						}),
-						links: {
-							category: '',
-							externalURLs: [],
-							nextPost: '',
-							prevPost: '',
-						},
-						expires: undefined,
-						attachments: async () =>
-							(i.attachments ?? []).map((a) => {
-								return {
-									url: a.url,
-									title: a.title,
-									mimeType: a.mime_type,
-									sizeInBytes: a.size_in_bytes,
-									durationInSeconds: a.duration_in_seconds,
-								};
+					list: async () => c.items.map((i: typeof JsonFeedItem.TYPE) => {
+						const jsonAuthors = [...c.authors ?? []].concat(c.author ? [c.author] : [])
+						const itemAuthors = (i.authors ?? []).concat(
+							// add the singular element via concat by wrapping it 
+							i.author 
+								? [i.author] 
+								// but if we had a list, concat nothing 
+								// else (no item list, no item single) fallback to hedaer value list
+								: (i.authors ?? []).length > 0 
+									? []
+									: jsonAuthors 
+						)
+						// console.log("itemauthors.len,", itemAuthors.length)
+						
+						return {
+							id: i.id,
+							url: i.url,
+							title: i.title,
+							summary: i.summary,
+							language: i.language ?? 'en-US',
+							authors: itemAuthors.map((a) => {
+									return {
+										name: a?.name ?? '>> no name provided <<',
+										imageUrl: a?.avatar,
+										url: a?.url,
+										email: undefined,
+									}
+								}),
+							content: {
+								html: i.content_html,
+								makrdown: i.content_makrdown,
+								text: i.content_text,
+							},
+							dates: {
+								modified: i.date_modified ? (new Date(i.date_modified)).getTime() : Date.now(),
+								published: i.date_published ? (new Date(i.date_published)).getTime() : Date.now(),
+							},
+							images: async () => ({
+								bannerImage: i.banner_image,
+								indexImage: i.image
 							}),
-					})),
+							links: {
+								category: undefined,
+								externalURLs: [],
+								nextPost: '',
+								prevPost: '',
+							},
+							expires: undefined,
+							attachments: async () =>
+								(i.attachments ?? []).map((a) => {
+									return {
+										url: a.url,
+										title: a.title,
+										mimeType: a.mime_type,
+										sizeInBytes: a.size_in_bytes,
+										durationInSeconds: a.duration_in_seconds,
+									};
+								}),
+						}
+					})
 				},
 			};
 		},

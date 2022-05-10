@@ -64,14 +64,13 @@ export const urls = {
 			.concat(atom)
 			.concat(jf)
 			.map(
-				(url) =>
-					fetchAndValidateIntoAST(url)
+				(url) => fetchAndValidateIntoAST({url})
 						.then((d) => {
 							console.log({
 								url,
 								title: d.title,
 								links: d.links,
-								length: d.items,
+								length: d.item.list,
 							});
 							return d;
 						})

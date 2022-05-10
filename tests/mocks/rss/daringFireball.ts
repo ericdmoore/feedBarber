@@ -1,7 +1,4 @@
-// curl https://daringfireball.net/feeds/json >> tests/mocks/jsonFeed/daringFireball.json
-import dfb from './daringFireball.json' assert { type: 'json' };
 
-export const jsonFeed = JSON.stringify(dfb)
 export const rss = `
 <?xml version="1.0" encoding="utf-8"?>
 <feed xmlns="http://www.w3.org/2005/Atom">
@@ -2063,4 +2060,4 @@ expertise can explain why this is, let me know.</p>
 <!-- THE END -->
 `
 
-export default { rss, jsonFeed };
+export default { rss };
