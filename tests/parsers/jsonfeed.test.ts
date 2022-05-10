@@ -113,9 +113,7 @@ const compareASTtoJSFitems = (ast: ASTjson, jsData: RespStruct)=>{
 	})
 }
 
-Deno.test(
-	'DFB header Values',
-	async () => {
+Deno.test( 'DFB header Values', async () => {
 		const fakeUrl = 'https://daringfireball.net/feeds/json';
 		const c1 = await parseAndValidate({ url: fakeUrl, txt: dfbJS });
 		const jsData = c1.data as RespStruct
@@ -124,9 +122,7 @@ Deno.test(
 	}
 )
 
-Deno.test(
-	'DFB Item Checks <Except: Not the Content>',
-	async () => {
+Deno.test( 'DFB Feed Items - but no content', async () => {
 		const fakeUrl = 'https://daringfireball.net/feeds/json';
 		const c1 = (await parseAndValidate({ url: fakeUrl, txt: dfbJS })).data as RespStruct
 		const ast = await computableToJson(JsonFeed<RespStruct>(c1, fakeUrl).toAST());
@@ -134,9 +130,7 @@ Deno.test(
 	}
 )
 
-Deno.test(
-	'FMeat header Values',
-	async () => {
+Deno.test( 'FMeat header Values', async () => {
 		const fakeUrl = 'https://daringfireball.net/feeds/json';
 		const c1 = (await parseAndValidate({ url: fakeUrl, txt: fmJS }))
 		const jsData = c1.data as RespStruct
@@ -145,9 +139,7 @@ Deno.test(
 	}
 )
 
-Deno.test(
-	'FMeat Item Checks <No Content>',
-	async () => {
+Deno.test( 'FMeat Item Checks <No Content>', async () => {
 		const fakeUrl = 'https://daringfireball.net/feeds/json';
 		const c1 = (await parseAndValidate({ url: fakeUrl, txt: fmJS })).data as RespStruct
 		const ast = await computableToJson(JsonFeed<RespStruct>(c1, fakeUrl).toAST());
@@ -155,9 +147,7 @@ Deno.test(
 	}
 )
 
-Deno.test(
-	'HyperCritical Feed Headers',
-	async()=>{ 
+Deno.test( 'HyperCritical Feed Headers', async()=>{ 
 		const { url, txt } = { txt:hyperCrit,  url: 'https://hypercritical.co/feeds/main.json' };
 		const c1 = (await parseAndValidate({ url, txt }))
 		const jsData = c1.data as RespStruct
@@ -166,9 +156,7 @@ Deno.test(
 	}
 )
 
-Deno.test(
-	'HyperCritical Feed Items',
-	async()=>{
+Deno.test( 'HyperCritical Feed Items', async()=>{
 		const { url, txt } = { txt:hyperCrit,  url: 'https://hypercritical.co/feeds/main.json' };
 		const c1 = (await parseAndValidate({ url, txt }))
 		const jsData = c1.data as RespStruct
@@ -177,9 +165,7 @@ Deno.test(
 	}
 )
 
-Deno.test(
-	'MaybePizza Feed Headers',
-	async()=>{ 
+Deno.test( 'MaybePizza Feed Headers', async()=>{ 
 		const { url, txt } = { txt: maybePizza,  url:'http://maybepizza.com/feed.json' };
 		const c1 = (await parseAndValidate({ url, txt }))
 		const jsData = c1.data as RespStruct
@@ -199,9 +185,7 @@ Deno.test(
 	}
 )
 
-Deno.test(
-	'ShapeOf Feed Headers',
-	async()=>{ 
+Deno.test( 'ShapeOf Feed Headers', async()=>{ 
 		const { url, txt } = { txt: shapeOf,  url:'http://shapeof.com/feed.json' };
 		const c1 = (await parseAndValidate({ url, txt }))
 		const jsData = c1.data as RespStruct
@@ -210,9 +194,7 @@ Deno.test(
 	}
 )
 
-Deno.test(
-	'ShapeOf Feed Items',
-	async()=>{
+Deno.test('ShapeOf Feed Items', async() => {
 		const { url, txt } = { txt:shapeOf,  url:'http://shapeof.com/feed.json' };
 		const c1 = (await parseAndValidate({ url, txt }))
 		const jsData = c1.data as RespStruct
@@ -220,6 +202,21 @@ Deno.test(
 		compareASTtoJSFitems(ast, jsData);
 	}
 )
+
+Deno.test('string input will not validate', async ()=>{
+	const wontValidate = JsonFeed('will not validate', 'url')
+	const rej = await wontValidate.validate().catch(()=> null)
+	assertEquals(rej, null)
+})
+
+Deno.test('null input throws', async ()=>{
+	const wontValidate = JsonFeed(null, 'url')
+	const rej = await wontValidate.validate().catch(()=> null)
+	assertEquals(rej, null)
+})
+
+
+
 
 
 // Deno.test(skip(

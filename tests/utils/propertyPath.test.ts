@@ -1,5 +1,5 @@
 // deno-lint-ignore no-unused-vars
-import skip from '../helpers.ts';
+// import skip from '../helpers.ts';
 import { assertEquals } from 'https://deno.land/std@0.123.0/testing/asserts.ts';
 import { getPath, setPath } from '../../src/lib/utils/propertyPath.ts';
 
@@ -8,6 +8,13 @@ Deno.test('getPath - Basic Object', async () => {
 	const expected = true;
 	assertEquals(actual, expected);
 });
+
+Deno.test('getPath - Basic Object', async () => {
+	const actual = getPath(['a','b','c','d'], { a: { b: { c: { d: true } } } });
+	const expected = true;
+	assertEquals(actual, expected);
+});
+
 
 Deno.test('getPath - Basic Array', async () => {
 	const actual = getPath('a.1.e.with', { a: [{ b: 2 }, { c: 3, d: 4, e: { with: '5' } }] });
@@ -24,6 +31,12 @@ Deno.test('Simple Path Miss', async () => {
 Deno.test('getPath - Long Path Miss', async () => {
 	const actual = getPath('a.e.c.d', { a: { b: { c: { d: true } } } });
 	const expected = undefined;
+	assertEquals(actual, expected);
+});
+
+Deno.test('getPath - Array Index', async () => {
+	const actual = getPath('a.b.c.d.1.e', { a: { b: { c: { d: [0,{ e:'f' },2] } } } });
+	const expected = 'f';
 	assertEquals(actual, expected);
 });
 

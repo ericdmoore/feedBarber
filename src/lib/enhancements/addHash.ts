@@ -15,8 +15,6 @@ export const addHash = (_i?: unknown) =>
 			return { type, hash: content ? await cidStr(content) : undefined };
 		}));
 
-		// console.log({itemHashes})
-
 		const concatValidHashses = itemHashes.filter((v) => v).map((i) => i.hash).join('');
 
 		return {
@@ -32,7 +30,6 @@ export const addHash = (_i?: unknown) =>
 				},
 			},
 			item: {
-				next: async () => [],
 				list: await Promise.all(list.map(async (item, i) => {
 					const c = await rezVal(item.content);
 					return {

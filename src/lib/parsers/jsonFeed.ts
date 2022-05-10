@@ -256,17 +256,17 @@ export const JsonFeed = ((
 					};
 				},
 				images: async () => ({
-					favicon: c.favicon ?? '',
-					icon: c.icon ?? '',
-					bannerImage: c.icon ?? '',
+					favicon: c.favicon,
+					icon: c.icon,
+					bannerImage: c.icon,
 				}),
-				entitlements: [],
 				paging: async () => ({
-					nextUrl: '',
-					prevUrl: '',
 					itemCount: c.items.length,
 				}),
-				authors: [...c.authors ?? []].concat(c.author ? [c.author] : [])
+				entitlements: [],
+				sourceFeedMeta: async () => { return {} },
+				authors: 
+					[...c.authors ?? []].concat(c.author ? [c.author] : [])
 					.map( a => ({ 
 						name: a?.name ?? '>> no name provided <<',
 						url: a?.url,
@@ -274,7 +274,6 @@ export const JsonFeed = ((
 						imageURL: a?.avatar ?? 
 							`https://randomuser.me/api/portraits/lego/${Math.random() * 9}.jpg`,
 					}) ),
-				sourceFeedMeta: {},
 				item: {
 					next: async () => [],
 					list: async () => c.items.map((i: typeof JsonFeedItem.TYPE) => {
@@ -289,7 +288,6 @@ export const JsonFeed = ((
 									? []
 									: jsonAuthors 
 						)
-						// console.log("itemauthors.len,", itemAuthors.length)
 						
 						return {
 							id: i.id,
@@ -300,7 +298,8 @@ export const JsonFeed = ((
 							authors: itemAuthors.map((a) => {
 									return {
 										name: a?.name ?? '>> no name provided <<',
-										imageUrl: a?.avatar,
+										imageUrl: a?.avatar ?? 
+											`https://randomuser.me/api/portraits/lego/${Math.random() * 9}.jpg`,
 										url: a?.url,
 										email: undefined,
 									}
