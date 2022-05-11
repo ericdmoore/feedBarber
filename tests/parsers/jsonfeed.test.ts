@@ -209,36 +209,31 @@ Deno.test('string input will not validate', async ()=>{
 	assertEquals(rej, null)
 })
 
+
+Deno.test('Bad Input with no items - will not validate', async ()=>{
+	const wontValidate = JsonFeed({}, 'url')
+	const rej = await wontValidate.validate().catch(()=> null)
+	assertEquals(rej, null)
+})
+
+
+Deno.test('Bad Input with items - will not validate', async ()=>{
+	const wontValidate = JsonFeed({items:[]}, 'url')
+	const rej = await wontValidate.validate().catch(()=> null)
+	assertEquals(rej, null)
+})
+
+
+Deno.test('Bad Input- will not validate', async ()=>{
+	const wontValidate = JsonFeed({items:[]}, 'url')
+	const rej = await wontValidate.validate().catch(()=> null)
+	assertEquals(rej, null)
+})
+
+
 Deno.test('null input throws', async ()=>{
 	const wontValidate = JsonFeed(null, 'url')
 	const rej = await wontValidate.validate().catch(()=> null)
 	assertEquals(rej, null)
 })
 
-
-
-
-
-// Deno.test(skip(
-// 	'JsonFeed -> AST -> JsonFeed',
-// 	async () => {
-// 		const fakeUrl = 'http://world.hey.com/dhh/feed.json';
-// 		const c1 = await parseAndValidate({ txt: dfbJS, url: fakeUrl });
-// 		const ast = await JsonFeed(c1.data, fakeUrl).toAST();
-// 		const astJson = await computableToJson(ast);
-// 		const c2 = await JsonFeed<RespStruct>({}, fakeUrl).fromAST(astJson);
-// 		assertEquals(c1.data, c2);
-// 	},
-// ));
-
-// Deno.test(skip(
-// 	'JsonFeed -> AST -> Rss',
-// 	async () => {
-// 	},
-// ));
-
-// Deno.test(skip(
-// 	'JsonFeed -> AST -> Atom',
-// 	async () => {
-// 	},
-// ));

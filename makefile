@@ -1,6 +1,7 @@
 .PHONY: start fmt test list cli server scratch ls cov
-covDir = .cov
-lcovFile = lines.lcov
+covDir=.cov
+covOutput=.nyc_output
+lcovFile=lines.lcov
 
 ls: list
 
@@ -11,14 +12,18 @@ list:
 
 
 test:
-	rm -rf .cov;
-	rm -rf .nyc_output;
-	deno test -j=3 --coverage=.cov ./tests/**/*
+	rm -rf $(covDir);
+	rm -rf $(covOutput);
+	mkdir $(covDir)
+	mkdir $(covOutput)
+	deno test -j=3 --coverage=$(covDir) ./tests/**/*
 
 cov:
-	deno coverage $(covDir) --lcov --output=.nyc_output/$(lcovFile) ;
-	genhtml -o .nyc_output/html .nyc_output/$(lcovFile) ; 
-	open .nyc_output/html/index.html ;
+	deno coverage $(covDir) --lcov --output=$(covOutput)/$(lcovFile) ;
+
+reportCov:
+	genhtml -o $(covOutput)/html $(covOutput)/$(lcovFile) ; 
+	open $(covOutput)/html/index.html ;
 
 
 server:
