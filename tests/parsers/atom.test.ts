@@ -1,9 +1,11 @@
+import { assertEquals } from 'https://deno.land/std@0.123.0/testing/asserts.ts';
+
 import { skip } from '../helpers.ts';
-import { atom as dhhAtom } from '../mocks/atom/dhh_hey.ts';
 import { parseAndValidate } from '../../src/lib/start.ts';
 import { computableToJson } from '../../src/lib/parsers/ast.ts';
 import { Atom, RespStruct } from '../../src/lib/parsers/atom.ts';
-import { assertEquals } from 'https://deno.land/std@0.123.0/testing/asserts.ts';
+
+import { atom as dhhAtom } from '../mocks/atom/dhh_hey.ts'
 
 Deno.test(skip(	
 	'Atom -> AST -> Atom',
@@ -24,6 +26,16 @@ Deno.test(skip(
 		assertEquals(a1.data, a2);
 	},
 ));
+
+Deno.test( 'DFB header Values', async () => {
+	const {txt, url} = { url: 'http://world.hey.com/dhh/atom.xml', txt: dhhAtom }
+	const c1 = await parseAndValidate({ url, txt });
+	// const jsData = c1.data as RespStruct
+	const ast = await computableToJson(Atom<RespStruct>(c1.data, url).toAST());	
+	const c2 = await Atom({}, url).fromAST(ast) as RespStruct
+	assertEquals(c1.data, c2)
+})
+
 
 Deno.test(skip(
 	'Atom -> AST -> Rss',
