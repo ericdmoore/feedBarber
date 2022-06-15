@@ -286,6 +286,8 @@ const sigMaker = (accessKeyId: string, secretAccessKey: string, region: string, 
 const finishUpReq = async (r: Request | Promise<Request>) => {
     // @todo
     // 1.add content-length for POST
+	// const req = await r 
+	// req.headers.set('content-length',`${}`)
     return r
 }
 
@@ -340,14 +342,14 @@ export const pollyClient = (
 		GetLexicon: (LexiconName: string) => {
 			const req = new Request(`${base}/lexicons/${LexiconName}`, {
 				method: 'GET',
-				headers: { },
+				// headers: {},
 			});
 			return final<GetLexiconResponse>(addSig(req));
 		},
 		GetSpeechSynthesisTask: (taskID: string) => {
 			const req = new Request(`${base}'/synthesisTasks'/${taskID}`, {
 				method: 'GET',
-				headers: { },
+				// headers: { },
 			});
 			return final(addSig(req));
 		},
@@ -355,7 +357,7 @@ export const pollyClient = (
             const qs = NextToken ? `?${qsStringify({NextToken})}` : ''
 			const req = new Request(`${base}/lexicons${qs}`, {
 				method: 'GET',
-				headers: { }
+				// headers: { }
 			});
 			return final<ListLexiconsResponse>(addSig(req));
 		},
@@ -363,7 +365,7 @@ export const pollyClient = (
 			const qs = Object.keys(opts).length >0 ? `?${qsStringify(opts)}` : ''
             const req = new Request(`${base}/synthesisTasks${qs}`, {
 				method: 'GET',
-				headers: {}
+				// headers: {}
 			});
 			return final<ListSpeechSynthesisTasks>(addSig(req));
 		},
@@ -371,14 +373,22 @@ export const pollyClient = (
 			const req = new Request(`${base}/lexicons/${LexiconName}`, {
 				method: 'PUT',
                 body: encoder.encode(JSON.stringify({ Content })),
-				headers: { },
+				// headers: {},
 			});
 			return final(addSig(req));
 		},
-		StartSpeechSynthesisTask: (reqd:StartSpeechTaskRequired, opts: Partial<SynthesisTaskRequest> = { VoiceId: 'Matthew', Engine: 'neural' , LanguageCode:'en-US'}) => {
+		StartSpeechSynthesisTask: (reqd:StartSpeechTaskRequired, opts?: Partial<SynthesisTaskRequest> ) => {
+			const defaultOps = { 
+				VoiceId: 'Matthew', 
+				Engine: 'neural' , 
+				LanguageCode:'en-US', 
+				OutputFormat:'mp3', 
+				...opts
+			} as Partial<SynthesisTaskRequest>
+
 			const req = new Request(`${base}/synthesisTasks`, {
 				method: 'POST',
-                body : encoder.encode(JSON.stringify({...opts, ...reqd})),
+                body : encoder.encode(JSON.stringify({...defaultOps, ...reqd})),
 				headers: { 'content-type': 'application/json' },
 			});
 			return final<SpeechSynthesisTaskResponse>(addSig(req));

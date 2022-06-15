@@ -46,27 +46,6 @@ Deno.test('StartSpeechSynthesisTask Create Request', async ()=>{
     assertEquals(authHdr?.includes('Signature='), true)
 })
 
-Deno.test(skip('StartSpeechSynthesisTask Issue Request', async ()=>{
-    const aws_env = await (await import('../.env.json', {assert:{type:'json'}})).default
-    const pc = pollyClient(aws_env.AWS_KEY, aws_env.AWS_SECRET)
-    const req = {
-        OutputS3BucketName: aws_env.pollybucket,
-        OutputS3KeyPrefix: 'helloWorld',
-        Text: 'Hello World! I some text that you can both read and hear.',
-    }
-    const decoder =  new TextDecoder()
-    const resp = await pc.StartSpeechSynthesisTask(req).response()
-    // console.log(resp.body)
-    console.log(await resp.text())
-    console.log(resp)
-    
-    // const response = await pc.StartSpeechSynthesisTask(req).response()   
-    // console.log(response)
-
-    // assertEquals(respObj?.SynthesisTask && true, true)
-    // assertEquals(response.status, 200)
-}))
-
 Deno.test('ListSpeechSynthesisTasks', async ()=>{
     const aws_env = await (await import('../.env.json', {assert:{type:'json'}})).default
     const pc = pollyClient(aws_env.AWS_KEY, aws_env.AWS_SECRET)
@@ -87,6 +66,29 @@ Deno.test('ListSpeechSynthesisTasks', async ()=>{
     const rjson = await pc.ListSpeechSynthesisTasks().json()
     console.log('rjson: \n' ,rjson)
 })
+
+Deno.test('StartSpeechSynthesisTask Issue Request', async ()=>{
+    const aws_env = await (await import('../.env.json', {assert:{type:'json'}})).default
+    const pc = pollyClient(aws_env.AWS_KEY, aws_env.AWS_SECRET)
+    const req = {
+        OutputS3BucketName: aws_env.pollybucket,
+        OutputS3KeyPrefix: 'helloWorld',
+        Text: 'Hello World! I some text that you can both read and hear.',
+    }
+    
+    const resp = await pc.StartSpeechSynthesisTask(req).response()
+    assertEquals(resp.status, 200)
+    
+    console.log(await resp.text())
+    console.log(resp)
+    
+    // const response = await pc.StartSpeechSynthesisTask(req).response()   
+    // console.log(response)
+
+    // assertEquals(respObj?.SynthesisTask && true, true)
+    
+})
+
 
 Deno.test(skip('SynthesizeSpeech', async ()=>{
 
