@@ -286,8 +286,10 @@ const sigMaker = (accessKeyId: string, secretAccessKey: string, region: string, 
 const finishUpReq = async (r: Request | Promise<Request>) => {
     // @todo
     // 1.add content-length for POST
+
 	// const req = await r 
 	// req.headers.set('content-length',`${}`)
+
     return r
 }
 
@@ -342,14 +344,12 @@ export const pollyClient = (
 		GetLexicon: (LexiconName: string) => {
 			const req = new Request(`${base}/lexicons/${LexiconName}`, {
 				method: 'GET',
-				// headers: {},
 			});
 			return final<GetLexiconResponse>(addSig(req));
 		},
 		GetSpeechSynthesisTask: (taskID: string) => {
 			const req = new Request(`${base}'/synthesisTasks'/${taskID}`, {
 				method: 'GET',
-				// headers: { },
 			});
 			return final(addSig(req));
 		},
@@ -357,7 +357,6 @@ export const pollyClient = (
             const qs = NextToken ? `?${qsStringify({NextToken})}` : ''
 			const req = new Request(`${base}/lexicons${qs}`, {
 				method: 'GET',
-				// headers: { }
 			});
 			return final<ListLexiconsResponse>(addSig(req));
 		},
@@ -365,7 +364,6 @@ export const pollyClient = (
 			const qs = Object.keys(opts).length >0 ? `?${qsStringify(opts)}` : ''
             const req = new Request(`${base}/synthesisTasks${qs}`, {
 				method: 'GET',
-				// headers: {}
 			});
 			return final<ListSpeechSynthesisTasks>(addSig(req));
 		},
@@ -373,7 +371,6 @@ export const pollyClient = (
 			const req = new Request(`${base}/lexicons/${LexiconName}`, {
 				method: 'PUT',
                 body: encoder.encode(JSON.stringify({ Content })),
-				// headers: {},
 			});
 			return final(addSig(req));
 		},
@@ -389,9 +386,8 @@ export const pollyClient = (
 			const req = new Request(`${base}/synthesisTasks`, {
 				method: 'POST',
                 body : encoder.encode(JSON.stringify({...defaultOps, ...reqd})),
-				headers: { 'content-type': 'application/json' },
 			});
-			return final<SpeechSynthesisTaskResponse>(addSig(req));
+			return final(addSig(req));
 		},
 		SynthesizeSpeech: (opts:SynthesisRequest) => {
 			const req = new Request(`${base}/lexicons`, {
