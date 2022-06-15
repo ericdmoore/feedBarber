@@ -85,18 +85,19 @@ Deno.test('StartSpeechSynthesisTask Create Request', async ()=>{
     assertEquals(authHdr?.includes('Signature='), true)
 })
 
-Deno.test('StartSpeechSynthesisTask Issue Request', async ()=>{
+// skip since the multi-step test accomplsihes the same goal 
+Deno.test(skip('StartSpeechSynthesisTask Issue Request', async ()=>{
     const envs = await envData()
     const pc = pollyClient(envs.AWS_KEY, envs.AWS_SECRET)
     const req = {
         OutputS3BucketName: envs.pollybucket,
-        OutputS3KeyPrefix: 'helloWorld',
+        OutputS3KeyPrefix: 'deleteMe-fromTest',
         Text: 'Hello World! I some text that you can both read and hear.',
     }
     
     const r = await pc.StartSpeechSynthesisTask(req).json()
     assertEquals(r.SynthesisTask && true, true)
-})
+}))
 
 Deno.test('Observe a task in-flight (within the queue)', async (t) =>{
     const envs = await envData()
@@ -115,7 +116,7 @@ Deno.test('Observe a task in-flight (within the queue)', async (t) =>{
         const r =  await pc.StartSpeechSynthesisTask(req).json()
         status = r.SynthesisTask.TaskStatus
         TaskID = r.SynthesisTask.TaskId
-        console.log({task:r, TaskID, status})
+        // console.log({task:r, TaskID, status})
         assertEquals(status.includes('inProgress') || status.includes('scheduled') ,true)
     })
 
@@ -123,7 +124,7 @@ Deno.test('Observe a task in-flight (within the queue)', async (t) =>{
         const r =  await pc.ListSpeechSynthesisTasks({Status: status as Status }).json()
         const list = r.SynthesisTasks.filter(t=>t.TaskId ===  TaskID)
         assertEquals(list.length > 0 ,true)
-        console.log(list)
+        // console.log(list)
     })
 })
 
