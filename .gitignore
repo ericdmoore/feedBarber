@@ -9,9 +9,6 @@ lerna-debug.log*
 .env
 .env*.*
 
-# .env.json
-# .env2.json
-
 # Diagnostic reports (https://nodejs.org/api/report.html)
 report.[0-9]*.[0-9]*.[0-9]*.[0-9]*.json
 

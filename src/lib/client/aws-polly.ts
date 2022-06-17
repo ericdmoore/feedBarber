@@ -1,4 +1,4 @@
-import { awsV4Sig } from './aws-url-signer.ts'
+import { awsV4Sig } from './aws-url-signer.ts';
 import { stringify as qsStringify } from 'https://deno.land/x/querystring@v1.0.2/mod.js';
 
 // #region types
@@ -35,7 +35,6 @@ export type LanguageName = string;
  * Specifies which engines (standard or neural) that are supported by a given voice.
  */
 export type SupportedEngines = Engine[];
-
 
 export interface GetLexiconResponse {
 	Lexicon: {
@@ -80,11 +79,11 @@ export interface SynthesisRequest {
 }
 
 export type SynthesisTaskRequest = SynthesisRequest & {
-    OutputS3BucketName: string
-    OutputS3KeyPrefix: string
-    SnsTopicArn?: string;
-}
-	
+	OutputS3BucketName: string;
+	OutputS3KeyPrefix: string;
+	SnsTopicArn?: string;
+};
+
 export interface SynthesisTaskResponse {
 	CreationTime: number;
 	Engine: Engine;
@@ -102,7 +101,6 @@ export interface SynthesisTaskResponse {
 	TextType: TextType;
 	VoiceId: VoiceId;
 }
-
 
 export interface SpeechSynthesisTaskResponse {
 	SynthesisTask: SynthesisTaskResponse;
@@ -130,7 +128,7 @@ export interface ListSpeechSynthesisTasks {
 	NextToken: string;
 }
 
-export type LanguageCode = 
+export type LanguageCode =
 	| 'arb'
 	| 'cmn-CN'
 	| 'cy-GB'
@@ -230,23 +228,23 @@ export type VoiceId =
 	| 'Zeina'
 	| 'Zhiyu';
 
-export interface ResponseOptions<T = unknown>{
-	response: ()=>Promise<Response>,
-	request: ()=>Promise<Request>,
-	json: ()=>Promise<T>,
-	text: ()=>Promise<string>,
+export interface ResponseOptions<T = unknown> {
+	response: () => Promise<Response>;
+	request: () => Promise<Request>;
+	json: () => Promise<T>;
+	text: () => Promise<string>;
 }
 
-export interface StartSpeechTaskRequired{
-	Text: string, 
-	OutputS3BucketName: string, 
-	OutputS3KeyPrefix: string
+export interface StartSpeechTaskRequired {
+	Text: string;
+	OutputS3BucketName: string;
+	OutputS3KeyPrefix: string;
 }
 
-export interface ListSpeechTasks{
-	MaxResults: number; 
-	NextToken: string; 
-	Status: Status 
+export interface ListSpeechTasks {
+	MaxResults: number;
+	NextToken: string;
+	Status: Status;
 }
 
 export interface VoiceFilters {
@@ -257,63 +255,64 @@ export interface VoiceFilters {
 }
 
 export interface PollyClientInterface {
-	DeleteLexicon: (LexiconName: string) => ResponseOptions,
-	DescribeVoices: (filters?: VoiceFilters) => ResponseOptions<DescribeVoicesResponse>,
-	GetLexicon: (LexiconName: string) => ResponseOptions<GetLexiconResponse>,
-	GetSpeechSynthesisTask: (taskID: string) => ResponseOptions,
-	ListLexicons: (NextToken?: string) => ResponseOptions,
-	ListSpeechSynthesisTasks: (opts?: Partial<ListSpeechTasks>) => ResponseOptions<ListSpeechSynthesisTasks>,
-	PutLexicon: (LexiconName: string, Content: string) => ResponseOptions,
-	StartSpeechSynthesisTask: (reqd: StartSpeechTaskRequired, opts?: Partial<SynthesisTaskRequest>) => ResponseOptions<SpeechSynthesisTaskResponse>,
-	SynthesizeSpeech: (opts:SynthesisRequest) => ResponseOptions
+	DeleteLexicon: (LexiconName: string) => ResponseOptions;
+	DescribeVoices: (filters?: VoiceFilters) => ResponseOptions<DescribeVoicesResponse>;
+	GetLexicon: (LexiconName: string) => ResponseOptions<GetLexiconResponse>;
+	GetSpeechSynthesisTask: (taskID: string) => ResponseOptions;
+	ListLexicons: (NextToken?: string) => ResponseOptions;
+	ListSpeechSynthesisTasks: (opts?: Partial<ListSpeechTasks>) => ResponseOptions<ListSpeechSynthesisTasks>;
+	PutLexicon: (LexiconName: string, Content: string) => ResponseOptions;
+	StartSpeechSynthesisTask: (
+		reqd: StartSpeechTaskRequired,
+		opts?: Partial<SynthesisTaskRequest>,
+	) => ResponseOptions<SpeechSynthesisTaskResponse>;
+	SynthesizeSpeech: (opts: SynthesisRequest) => ResponseOptions;
 }
-
 
 // #endregion types
 
 const encoder = new TextEncoder();
 
 const sigMaker = (accessKeyId: string, secretAccessKey: string, region: string, service: string) => {
-	const sign = awsV4Sig({ 
-		region, 
+	const sign = awsV4Sig({
+		region,
 		service,
 		awsAccessKeyId: accessKeyId,
-		awsSecretKey: secretAccessKey 
+		awsSecretKey: secretAccessKey,
 	});
 	return async (req: Request) => sign(req);
-}
+};
 
 const finishUpReq = async (r: Request | Promise<Request>) => {
-    // @todo
-    // 1.add content-length for POST
+	// @todo
+	// 1.add content-length for POST
 
-	// const req = await r 
+	// const req = await r
 	// req.headers.set('content-length',`${}`)
 
-    return r
-}
+	return r;
+};
 
 const final = <T>(r: Request | Promise<Request>) => {
-    return {
+	return {
 		response: async () => {
-			const resp = await fetch(await finishUpReq(r))
-			await resp.body?.cancel()
-			return resp
+			const resp = await fetch(await finishUpReq(r));
+			await resp.body?.cancel();
+			return resp;
 		},
 		request: async () => await finishUpReq(r),
-		json: async () =>  (await fetch(await finishUpReq(r))).json() as  Promise<T>,
+		json: async () => (await fetch(await finishUpReq(r))).json() as Promise<T>,
 		text: async () => (await fetch(await finishUpReq(r))).text(),
 	};
 };
 
-
 export const pollyClient = (
 	awsKey: string,
 	awsSecret: string,
-    region = 'us-west-2',
+	region = 'us-west-2',
 	// iamUSer?: string,
 	useFips = false,
-): PollyClientInterface=> {
+): PollyClientInterface => {
 	const service = useFips ? 'polly-fips' : 'polly';
 	const domain = 'amazonaws.com';
 	const basePath = '/v1';
@@ -323,7 +322,7 @@ export const pollyClient = (
 		DeleteLexicon: (LexiconName: string) => {
 			const req = new Request(`${base}/lexicons/${LexiconName}`, {
 				method: 'DELETE',
-				headers: { }
+				headers: {},
 			});
 			return final(addSig(req));
 		},
@@ -335,7 +334,7 @@ export const pollyClient = (
 				NextToken?: string;
 			} = { Engine: 'neural', LanguageCode: 'en-US' },
 		) => {
-            const qs = Object.keys(filters).length> 0 ? `?${qsStringify(filters)}` : ''
+			const qs = Object.keys(filters).length > 0 ? `?${qsStringify(filters)}` : '';
 			const req = new Request(`${base}/voices${qs}`, {
 				method: 'GET',
 			});
@@ -354,15 +353,15 @@ export const pollyClient = (
 			return final(addSig(req));
 		},
 		ListLexicons: (NextToken?: string) => {
-            const qs = NextToken ? `?${qsStringify({NextToken})}` : ''
+			const qs = NextToken ? `?${qsStringify({ NextToken })}` : '';
 			const req = new Request(`${base}/lexicons${qs}`, {
 				method: 'GET',
 			});
 			return final<ListLexiconsResponse>(addSig(req));
 		},
 		ListSpeechSynthesisTasks: (opts: { MaxResults?: number; NextToken?: string; Status?: Status } = { MaxResults: 100 }) => {
-			const qs = Object.keys(opts).length >0 ? `?${qsStringify(opts)}` : ''
-            const req = new Request(`${base}/synthesisTasks${qs}`, {
+			const qs = Object.keys(opts).length > 0 ? `?${qsStringify(opts)}` : '';
+			const req = new Request(`${base}/synthesisTasks${qs}`, {
 				method: 'GET',
 			});
 			return final<ListSpeechSynthesisTasks>(addSig(req));
@@ -370,29 +369,29 @@ export const pollyClient = (
 		PutLexicon: (LexiconName: string, Content: string) => {
 			const req = new Request(`${base}/lexicons/${LexiconName}`, {
 				method: 'PUT',
-                body: encoder.encode(JSON.stringify({ Content })),
+				body: encoder.encode(JSON.stringify({ Content })),
 			});
 			return final(addSig(req));
 		},
-		StartSpeechSynthesisTask: (reqd:StartSpeechTaskRequired, opts?: Partial<SynthesisTaskRequest> ) => {
-			const defaultOps = { 
-				VoiceId: 'Matthew', 
-				Engine: 'neural' , 
-				LanguageCode:'en-US', 
-				OutputFormat:'mp3', 
-				...opts
-			} as Partial<SynthesisTaskRequest>
+		StartSpeechSynthesisTask: (reqd: StartSpeechTaskRequired, opts?: Partial<SynthesisTaskRequest>) => {
+			const defaultOps = {
+				VoiceId: 'Matthew',
+				Engine: 'neural',
+				LanguageCode: 'en-US',
+				OutputFormat: 'mp3',
+				...opts,
+			} as Partial<SynthesisTaskRequest>;
 
 			const req = new Request(`${base}/synthesisTasks`, {
 				method: 'POST',
-                body : encoder.encode(JSON.stringify({...defaultOps, ...reqd})),
+				body: encoder.encode(JSON.stringify({ ...defaultOps, ...reqd })),
 			});
 			return final(addSig(req));
 		},
-		SynthesizeSpeech: (opts:SynthesisRequest) => {
+		SynthesizeSpeech: (opts: SynthesisRequest) => {
 			const req = new Request(`${base}/lexicons`, {
 				method: 'POST',
-                body : encoder.encode(JSON.stringify(opts)),
+				body: encoder.encode(JSON.stringify(opts)),
 				headers: { 'content-type': 'application/json' },
 			});
 			return final<Uint8Array>(addSig(req));
@@ -403,7 +402,7 @@ export const pollyClient = (
 // (async () => {
 // 	const env = (await import('../../../tests/.env.json',  {assert: { type: 'json' }})).default
 //     // console.log( ' key:', env['AWS_KEY'],'\n', 'secret:', env['AWS_SECRET'],'\n');
-    
+
 //     const pc = pollyClient(env['AWS_KEY'], env['AWS_SECRET'])
 //     const r = await pc.StartSpeechSynthesisTask({Text:'Text', OutputS3BucketName:'bucket', OutputS3KeyPrefix:'prefix'}).request()
 //     // console.log(r)

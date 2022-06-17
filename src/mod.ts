@@ -37,6 +37,10 @@ export { remarkRehype } from 'https://denopkg.com/ericdmoore/remark-rehype@main/
 // export * as spellingDict from 'https://esm.sh/dictionary-en?dts';
 // export * as retextReadability from 'https://esm.sh/retext-readability?dts';
 
+
+// DOTENV
+// "https://deno.land/std/dotenv/mod.ts";
+
 interface ABPRuleInit {
 	protocol?: string;
 	username?: string;

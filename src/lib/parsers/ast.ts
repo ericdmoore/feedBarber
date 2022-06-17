@@ -331,7 +331,7 @@ export const ASTKindJson = type({
 	_rss: optional(record(string(), unknown())), // [tagName]: value
 	_atom: optional(record(string(), unknown())),
 	_sitemap: optional(record(string(), unknown())),
-	
+
 	__analysis: optional(record(string(), unknown())), // [pluginName]: {someObject or value}
 	__enhancement: optional(record(string(), unknown())), // [pluginName]: {someObject or value}
 });

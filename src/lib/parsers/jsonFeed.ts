@@ -264,78 +264,78 @@ export const JsonFeed = ((
 					itemCount: c.items.length,
 				}),
 				entitlements: [],
-				sourceFeedMeta: async () => { return {} },
-				authors: 
-					[...c.authors ?? []].concat(c.author ? [c.author] : [])
-					.map( a => ({ 
+				sourceFeedMeta: async () => {
+					return {};
+				},
+				authors: [...c.authors ?? []].concat(c.author ? [c.author] : [])
+					.map((a) => ({
 						name: a?.name ?? '>> no name provided <<',
 						url: a?.url,
 						email: undefined,
-						imageURL: a?.avatar ?? 
+						imageURL: a?.avatar ??
 							`https://randomuser.me/api/portraits/lego/${Math.random() * 9}.jpg`,
-					}) ),
+					})),
 				item: {
 					next: async () => [],
-					list: async () => c.items.map((i: typeof JsonFeedItem.TYPE) => {
-						const jsonAuthors = [...c.authors ?? []].concat(c.author ? [c.author] : [])
-						const itemAuthors = (i.authors ?? []).concat(
-							// add the singular element via concat by wrapping it 
-							i.author 
-								? [i.author] 
-								// but if we had a list, concat nothing 
+					list: async () =>
+						c.items.map((i: typeof JsonFeedItem.TYPE) => {
+							const jsonAuthors = [...c.authors ?? []].concat(c.author ? [c.author] : []);
+							const itemAuthors = (i.authors ?? []).concat(
+								// add the singular element via concat by wrapping it
+								i.author ? [i.author] : // but if we had a list, concat nothing
 								// else (no item list, no item single) fallback to hedaer value list
-								: (i.authors ?? []).length > 0 
+									(i.authors ?? []).length > 0
 									? []
-									: jsonAuthors 
-						)
-						
-						return {
-							id: i.id,
-							url: i.url,
-							title: i.title,
-							summary: i.summary,
-							language: i.language ?? 'en-US',
-							authors: itemAuthors.map((a) => {
+									: jsonAuthors,
+							);
+
+							return {
+								id: i.id,
+								url: i.url,
+								title: i.title,
+								summary: i.summary,
+								language: i.language ?? 'en-US',
+								authors: itemAuthors.map((a) => {
 									return {
 										name: a?.name ?? '>> no name provided <<',
-										imageUrl: a?.avatar ?? 
+										imageUrl: a?.avatar ??
 											`https://randomuser.me/api/portraits/lego/${Math.random() * 9}.jpg`,
 										url: a?.url,
 										email: undefined,
-									}
-								}),
-							content: {
-								html: i.content_html,
-								makrdown: i.content_makrdown,
-								text: i.content_text,
-							},
-							dates: {
-								modified: i.date_modified ? (new Date(i.date_modified)).getTime() : Date.now(),
-								published: i.date_published ? (new Date(i.date_published)).getTime() : Date.now(),
-							},
-							images: async () => ({
-								bannerImage: i.banner_image,
-								indexImage: i.image
-							}),
-							links: {
-								category: undefined,
-								externalURLs: [],
-								nextPost: '',
-								prevPost: '',
-							},
-							expires: undefined,
-							attachments: async () =>
-								(i.attachments ?? []).map((a) => {
-									return {
-										url: a.url,
-										title: a.title,
-										mimeType: a.mime_type,
-										sizeInBytes: a.size_in_bytes,
-										durationInSeconds: a.duration_in_seconds,
 									};
 								}),
-						}
-					})
+								content: {
+									html: i.content_html,
+									makrdown: i.content_makrdown,
+									text: i.content_text,
+								},
+								dates: {
+									modified: i.date_modified ? (new Date(i.date_modified)).getTime() : Date.now(),
+									published: i.date_published ? (new Date(i.date_published)).getTime() : Date.now(),
+								},
+								images: async () => ({
+									bannerImage: i.banner_image,
+									indexImage: i.image,
+								}),
+								links: {
+									category: undefined,
+									externalURLs: [],
+									nextPost: '',
+									prevPost: '',
+								},
+								expires: undefined,
+								attachments: async () =>
+									(i.attachments ?? []).map((a) => {
+										return {
+											url: a.url,
+											title: a.title,
+											mimeType: a.mime_type,
+											sizeInBytes: a.size_in_bytes,
+											durationInSeconds: a.duration_in_seconds,
+										};
+									}),
+							};
+						}),
 				},
 			};
 		},

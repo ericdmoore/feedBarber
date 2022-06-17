@@ -16,7 +16,7 @@ test:
 	rm -rf $(covOutput);
 	mkdir $(covDir)
 	mkdir $(covOutput)
-	deno test -j=3 --coverage=$(covDir) --allow-read --allow-net --alllow-env ./tests/**/*
+	deno test --allow-read --allow-net --allow-env --coverage=$(covDir) -j=3 ./tests/**/*
 
 cov:
 	deno coverage $(covDir) --lcov --output=$(covOutput)/$(lcovFile) ;
