@@ -1,3 +1,4 @@
+
 import { awsV4Sig } from './aws-url-signer.ts';
 import { stringify as qsStringify } from 'https://deno.land/x/querystring@v1.0.2/mod.js';
 
@@ -303,6 +304,7 @@ const final = <T>(r: Request | Promise<Request>) => {
 		request: async () => await finishUpReq(r),
 		json: async () => (await fetch(await finishUpReq(r))).json() as Promise<T>,
 		text: async () => (await fetch(await finishUpReq(r))).text(),
+		__mockedResponse: async (testingResponse: unknown) => testingResponse
 	};
 };
 
@@ -398,13 +400,3 @@ export const pollyClient = (
 		},
 	};
 };
-
-// (async () => {
-// 	const env = (await import('../../../tests/.env.json',  {assert: { type: 'json' }})).default
-//     // console.log( ' key:', env['AWS_KEY'],'\n', 'secret:', env['AWS_SECRET'],'\n');
-
-//     const pc = pollyClient(env['AWS_KEY'], env['AWS_SECRET'])
-//     const r = await pc.StartSpeechSynthesisTask({Text:'Text', OutputS3BucketName:'bucket', OutputS3KeyPrefix:'prefix'}).request()
-//     // console.log(r)
-//     // console.log({r})
-// })();

@@ -18,7 +18,7 @@
 //  which seems like the type best suited for our use-case
 
 // initial load (UNSEEN) - creates the job task
-// subsequent loads - update the status
+// subsequent load of feed - can update attachments based on their task status
 // use attachment.url -> use A
 // A) data url to SVG that says scheduled, inprogress, or the real URL
 // mimeType: text/svg
@@ -36,7 +36,6 @@
 // add the URL to the attachments
 // upload task meta - JSON string hash(hash map)
 // incase we do this same set again - all the data is ready to parse
-
 // 3 States:
 
 // check S3
@@ -56,15 +55,9 @@
 
 import { PromiseOr } from '../../types.ts';
 import { superstruct as s } from '../../mod.ts';
-import { readToString, streamToString } from '../utils/pumpReader.ts';
+import { streamToString } from '../utils/pumpReader.ts';
 
-import { 
-	type ASTcomputable, 
-	type ASTFeedItemJson, 
-	type ASTjson, 
-	computableToJson, 
-	rezVal 
-} from '../parsers/ast.ts';
+import { type ASTcomputable, ASTFeedItemJson, type ASTjson, computableToJson, rezVal } from '../parsers/ast.ts';
 import {
 	type OutputFormat,
 	pollyClient,
@@ -76,10 +69,32 @@ import {
 } from '../client/aws-polly.ts';
 
 import { S3Bucket } from 'https://deno.land/x/s3@0.5.0/mod.ts';
-import { createClient, DynamoDBClient } from 'https://denopkg.com/chiefbiiko/dynamodb@master/mod.ts';
+import { createClient, DynamoDBClient } from 'https://denopkg.com/ericdmoore/dynamodb-deno@v1.1.0/mod.ts';
+
+// import { DynamoDBClient, BatchExecuteStatementCommand } from "http://esm.sh/@aws-sdk/client-dynamodb"; 
+//
+// has build/type errors during install/compile
+// uses unstable Deno.spawn
+// + Route53 stuff got pulled in...
+
 import { hmac } from 'https://deno.land/x/hmac@v2.0.1/mod.ts';
 
 type AST = ASTjson | ASTcomputable;
+
+interface BreadcrumbCache {
+	sk: string;
+	pk: string;
+	item: typeof ASTFeedItemJson.TYPE;
+	task: SpeechSynthesisTaskResponse;
+}
+
+interface pollyConfig {
+	VoiceId: VoiceId;
+	OutputFormat: OutputFormat;
+	SampleRate: string;
+	useNeuralEngine: true;
+	isPlainText: true;
+}
 
 const encoder = new TextEncoder();
 
@@ -130,20 +145,12 @@ const defCfgType = s.object({
 	}),
 });
 
-interface pollyConfig {
-	VoiceId: VoiceId;
-	OutputFormat: OutputFormat;
-	SampleRate: string;
-	useNeuralEngine: true;
-	isPlainText: true;
-}
-
 /**
  * Text To Voice
  * @param params
  * @param ast
  */
-export const textToVoice = (userParams: s.Infer<typeof text2VoiceParams>, pc?: PollyClientInterface, s3c?: S3Bucket) =>
+export const textToVoice = (userParams: s.Infer<typeof text2VoiceParams>, pc?: PollyClientInterface, s3c?: S3Bucket, dynC?: DynamoDBClient) =>
 	async (_ast: PromiseOr<AST>): Promise<ASTjson> => {
 		// check key,secret permissions
 		// s3: read, write
@@ -174,7 +181,7 @@ export const textToVoice = (userParams: s.Infer<typeof text2VoiceParams>, pc?: P
 		const [err] = defCfgType.validate(defCfg);
 		if (err) return Promise.reject({ msg: 'Input Validate Error', err, code: 400 });
 
-		const items: typeof ASTFeedItemJson.TYPE[] = ast.items;
+		
 		const handleItem = makeItemHandler(
 			defCfg,
 			pc ?? pollyClient(
@@ -188,7 +195,7 @@ export const textToVoice = (userParams: s.Infer<typeof text2VoiceParams>, pc?: P
 				accessKeyID: defCfg.aws.key,
 				secretKey: defCfg.aws.secret,
 			}),
-			createClient({
+			dynC ?? createClient({
 				region: defCfg.aws.region,
 				credentials: {
 					accessKeyId: defCfg.aws.key,
@@ -197,12 +204,9 @@ export const textToVoice = (userParams: s.Infer<typeof text2VoiceParams>, pc?: P
 			}),
 		);
 
-		// mutate items
-		for (let i = 0; i < items.length; i++) {
-			items[i] = await handleItem(items[i], i, items);
-		}
-
-		return { ...ast, items };
+		return { ...ast,
+			items: await Promise.all(ast.items.map(handleItem)) 
+		};
 	};
 
 const inProgressPlaceholderURL = (msg: string, x = 0, y = 15): string => `
@@ -227,34 +231,23 @@ export const makeKey = async (config: unknown, itemText: string) => {
 	return `k01--${await sig(configHMAC + dataHMAC)}`;
 };
 
-type DoubleNestedDict = { task: { [key: string]: string }; [key: string]: { [key: string]: string } };
-
 export const haveEverStarted = async (
 	itemKey: string,
 	s3c: S3Bucket,
 	dynC?: DynamoDBClient,
-): Promise<DoubleNestedDict | null> => {
+): Promise<BreadcrumbCache | null> => {
 	if (dynC) {
-		const dynoResp = await dynC.get({ pk: itemKey, sk: itemKey }).catch(() => null) as DoubleNestedDict | null;
+		const dynoResp = await dynC.getItem({ pk: itemKey, sk: itemKey }).catch(() => null) as BreadcrumbCache | null;
 		return dynoResp;
 	} else {
-		const s3cache = await s3c.getObject(itemKey + '.json').catch(() => null);
-		// if(s3cache){
-		// 	const sw = new StringWriter()
-		// 	await s3cache.body
-		// 		.pipeThrough(new TextDecoderStream())
-		// 		// .pipeTo()
-		// }else{
-		// 	console.log('')
-		// }
-		
-		// // console.log(streamDecoder.)
-		return s3cache ? JSON.parse(await streamToString(s3cache.body)) : null as DoubleNestedDict | null;
+		const s3CacheCrumb = await s3c.getObject(itemKey + '.json').catch(() => null);
+		return s3CacheCrumb ? JSON.parse(await streamToString(s3CacheCrumb.body)) as BreadcrumbCache : null;
 	}
 };
 
-export const isMediaFinished = async (cacheObject: { task: { [key: string]: string } }): Promise<boolean> => {
-	if (cacheObject?.task?.TaskStatus.toLowerCase() === 'completed') {
+export const isMediaFinished = async (cacheObject: { task: SpeechSynthesisTaskResponse }): Promise<boolean> => {
+	// console.log({ cacheHit: cacheObject });
+	if (cacheObject?.task.SynthesisTask.TaskStatus === 'completed') {
 		return true;
 	} else {
 		return false;
@@ -268,11 +261,6 @@ export const cacheOurBreadcrumbs = async (
 	s3c: S3Bucket,
 	dynC?: DynamoDBClient,
 ) => {
-	// r.SynthesisTask?.TaskId
-	// r.SynthesisTask?.CreationTime
-	// r.SynthesisTask?.TaskStatus
-	// r.SynthesisTask?.OutputUri
-	// cache all this ^ too
 	const saved = { sk: itemKey, pk: itemKey, item, task: taskOutput };
 	if (dynC) {
 		const r = await dynC.PutItem(saved);
@@ -293,6 +281,7 @@ export const makeItemHandler = (
 		_itemNumber: number,
 		_list: typeof ASTFeedItemJson.TYPE[],
 	): Promise<typeof ASTFeedItemJson.TYPE> => {
+
 		const c = await rezVal(item.content);
 		const chosenText = c.text ?? c.markdown ?? c.article ?? c.html ?? c.raw ?? 'no text provided';
 		const k = await makeKey(config, chosenText);
@@ -340,41 +329,3 @@ export const makeItemHandler = (
 	};
 
 export default { f: textToVoice, param: JSON.stringify(text2VoiceParams) };
-
-// const speechTasksForPage =  await Promise.all(
-//         list.map(
-//             async item => {
-//                 const content = await rezVal(item.content)
-//                 const taskCommand = new StartSpeechSynthesisTaskCommand({
-//                     Text: content.text ?? content.markdown,
-//                     OutputFormat: defCfg.polly.OutputFormat,
-//                     OutputS3BucketName: defCfg.s3.bucket,
-//                     OutputS3KeyPrefix: defCfg.s3.prefix,
-//                     VoiceId: defCfg.polly.VoiceId,
-//                     SampleRate: defCfg.polly.SampleRate,
-//                     TextType: defCfg.polly.isPlainText ? TextType.TEXT : TextType.SSML,
-//                     Engine: defCfg.polly.useNeuralEngine ? Engine.NEURAL : Engine.STANDARD,
-//                     ...(defCfg.polly.onCompletion?.snsTopic ? {SnsTopicArn: defCfg.polly.onCompletion?.snsTopic} : {}),
-//                 })
-//                 return pollyClient.send(taskCommand)
-//         }
-//     )
-// )
-
-// const speechTasksForPage =  await Promise.all( list.map( async item => {
-//             const content = await rezVal(item.content)
-//             const taskCommand = new StartSpeechSynthesisTaskCommand({
-//                 Text: content.text ?? content.markdown,
-//                 OutputFormat: defCfg.polly.OutputFormat,
-//                 OutputS3BucketName: defCfg.s3.bucket,
-//                 OutputS3KeyPrefix: defCfg.s3.prefix,
-//                 VoiceId: defCfg.polly.VoiceId,
-//                 SampleRate: defCfg.polly.SampleRate,
-//                 TextType: defCfg.polly.isPlainText ? TextType.TEXT : TextType.SSML,
-//                 Engine: defCfg.polly.useNeuralEngine ? Engine.NEURAL : Engine.STANDARD,
-//                 ...(defCfg.polly.onCompletion?.snsTopic ? {SnsTopicArn: defCfg.polly.onCompletion?.snsTopic} : {}),
-//             })
-//             return pollyClient.send(taskCommand)
-//         }
-//     )
-// )
