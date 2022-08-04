@@ -232,10 +232,11 @@ const ItemContent = object({
 
 const ItemLinks = type({
 	category: optional(string()),
-	tags: optional(array(string())),
-	externalURLs: optional(array(string())),
 	nextPost: optional(string()),
 	prevPost: optional(string()),
+	tags: array(string()),
+	externalURLs: array(string()),
+	relLinks : record(string(), record(string(), string()))
 });
 
 const ItemImages = object({
@@ -266,9 +267,11 @@ export const ASTFeedItemJson = type({
 	_rss: optional(record(string(), unknown())),
 	_atom: optional(record(string(), unknown())),
 	_sitemap: optional(record(string(), unknown())),
-	__analysis: optional(record(string(), unknown())),
-	__enhancement: optional(record(string(), unknown())),
+	__analysis: optional(record(string(), record(string(), unknown()))),
+	__enhancement: optional(record(string(), record(string(), unknown())),)
 });
+
+export type ASTFeedItemJsonTYPE = typeof ASTFeedItemJson.TYPE
 
 export const ASTFeedItemThunk = type({
 	id: eitherThunkOr(string()), // can also be the permalink
@@ -376,6 +379,8 @@ export const rezVal = async <T>(i: T | ThunkType<T>) => typeof i === 'function' 
 export const isAstJson = (ast: ASTcomputable | ASTjson): ast is ASTjson => {
 	return typeof ast._meta === 'function' || ast._meta._type === 'computable' ? false : true;
 };
+
+export const isAstComputable = (ast: ASTcomputable | ASTjson): ast is ASTcomputable => !isAstJson(ast)
 
 export const jsonToComputable = async (_ast: PromiseOr<ASTcomputable | ASTjson>): Promise<ASTcomputable> => {
 	const ast = await _ast as ASTcomputable | ASTjson;
@@ -490,10 +495,11 @@ export const computableToJson = async (_ast: PromiseOr<ThunkOrJsonAST>): Promise
 					},
 					links: {
 						category: links.category,
-						tags: links.tags,
 						nextPost: links.nextPost,
 						prevPost: links.prevPost,
-						externalURLs: links.externalURLs,
+						tags: links.tags ?? [],
+						externalURLs: links.externalURLs ?? [],
+						relLinks: links.relLinks ?? {}
 					},
 				} as s.Infer<typeof ASTFeedItemJson>;
 			})),

@@ -5,6 +5,12 @@ import { stringify as qsStringify } from 'https://deno.land/x/querystring@v1.0.2
 // #region types
 export type Engine = 'neural' | 'standard';
 export type OutputFormat = 'json' | 'mp3' | 'ogg_vorbis' | 'pcm';
+export enum OutputFormatMimeEnum {
+	json = 'application/json',
+	mp3 = 'audio/mp3',
+	ogg_vorbis = 'audio/ogg',
+	pcm = 'audio/pcma'
+}
 export type SpeechMarkTypes = ('sentence' | 'ssml' | 'viseme' | 'word')[];
 export type Gender = 'Female' | 'Male';
 export type Status = 'scheduled' | 'inProgress' | 'completed' | 'failed';
@@ -85,26 +91,31 @@ export type SynthesisTaskRequest = SynthesisRequest & {
 	SnsTopicArn?: string;
 };
 
-export interface SynthesisTaskResponse {
-	CreationTime: number;
+export interface SynthesisTaskConfig{
 	Engine: Engine;
 	LanguageCode: LanguageCode;
 	LexiconNames: Name[];
 	OutputFormat: OutputFormat;
-	OutputUri: string;
-	RequestCharacters: number;
 	SampleRate: SampleRate;
 	SnsTopicArn: string;
 	SpeechMarkTypes: SpeechMarkTypes;
-	TaskId: string;
-	TaskStatus: Status;
-	TaskStatusReason: string;
 	TextType: TextType;
 	VoiceId: VoiceId;
 }
 
+export interface SynthesisTaskIdentifiers{
+	RequestCharacters: number;
+	CreationTime: number;
+	OutputUri: string;
+	TaskId: string;
+	TaskStatus: Status;
+	TaskStatusReason: string;
+}
+
+export type SynthesisTaskResponse = SynthesisTaskConfig & SynthesisTaskIdentifiers;
+
 export interface SpeechSynthesisTaskResponse {
-	SynthesisTask: SynthesisTaskResponse;
+	SynthesisTask: SynthesisTaskResponse
 }
 
 export interface ListLexiconsResponse {
@@ -259,7 +270,7 @@ export interface PollyClientInterface {
 	DeleteLexicon: (LexiconName: string) => ResponseOptions;
 	DescribeVoices: (filters?: VoiceFilters) => ResponseOptions<DescribeVoicesResponse>;
 	GetLexicon: (LexiconName: string) => ResponseOptions<GetLexiconResponse>;
-	GetSpeechSynthesisTask: (taskID: string) => ResponseOptions;
+	GetSpeechSynthesisTask: (taskID: string) => ResponseOptions<SpeechSynthesisTaskResponse>;
 	ListLexicons: (NextToken?: string) => ResponseOptions;
 	ListSpeechSynthesisTasks: (opts?: Partial<ListSpeechTasks>) => ResponseOptions<ListSpeechSynthesisTasks>;
 	PutLexicon: (LexiconName: string, Content: string) => ResponseOptions;
@@ -269,6 +280,9 @@ export interface PollyClientInterface {
 	) => ResponseOptions<SpeechSynthesisTaskResponse>;
 	SynthesizeSpeech: (opts: SynthesisRequest) => ResponseOptions;
 }
+
+type PromiseOr<T> = T | Promise<T>
+
 
 // #endregion types
 
@@ -284,7 +298,7 @@ const sigMaker = (accessKeyId: string, secretAccessKey: string, region: string, 
 	return async (req: Request) => sign(req);
 };
 
-const finishUpReq = async (r: Request | Promise<Request>) => {
+const middleware = async (r: PromiseOr<Request>) => {
 	// @todo
 	// 1.add content-length for POST
 
@@ -294,16 +308,16 @@ const finishUpReq = async (r: Request | Promise<Request>) => {
 	return r;
 };
 
-const final = <T>(r: Request | Promise<Request>) => {
+const final = <T>(r: PromiseOr<Request>) => {
 	return {
 		response: async () => {
-			const resp = await fetch(await finishUpReq(r));
+			const resp = await fetch(await middleware(r));
 			await resp.body?.cancel();
 			return resp;
 		},
-		request: async () => await finishUpReq(r),
-		json: async () => (await fetch(await finishUpReq(r))).json() as Promise<T>,
-		text: async () => (await fetch(await finishUpReq(r))).text(),
+		request: async () => await middleware(r),
+		json: async () => (await fetch(await middleware(r))).json() as Promise<T>,
+		text: async () => (await fetch(await middleware(r))).text(),
 		__mockedResponse: async (testingResponse: unknown) => testingResponse
 	};
 };
@@ -318,6 +332,7 @@ export const pollyClient = (
 	const service = useFips ? 'polly-fips' : 'polly';
 	const domain = 'amazonaws.com';
 	const basePath = '/v1';
+	// @see: https://docs.aws.amazon.com/general/latest/gr/rande.html
 	const base = `https://${service}.${region}.${domain}${basePath}`;
 	const addSig = sigMaker(awsKey, awsSecret, region, service);
 	return {

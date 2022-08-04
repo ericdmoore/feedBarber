@@ -88,11 +88,16 @@ export const pickType = (i: { url: string; data: Record<string, unknown> }): IDi
 };
 
 export const parseAndPickType = (i: { url: string; txt: string }): IDictUnionOfPayloadTypes => {
-	try {
+	try { 
 		return pickType({ url: i.url, data: JSON.parse(i.txt) });
-	} catch (_) {
+	} catch (_) { 
 		return pickType({ url: i.url, data: fromXml.xml2js(i.txt, { compact: true }) });
 	}
+};
+
+export const urlToAST = async (i: { url: string; txt: string }): Promise<ASTComputable> => {
+	const picked = parseAndPickType(i)
+    return picked.parser(picked.data, picked.url).toAST()
 };
 
 export const typedValidation = async (

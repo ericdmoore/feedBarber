@@ -421,6 +421,7 @@ export const Rss: TypedValidator = ((
 									? [txtorCData('', i.category)]
 									: [],
 								externalURLs: [],
+								relLinks: {}
 							},
 							_rss: {
 								'atom:link': i['atom:link'],

@@ -273,7 +273,7 @@ export const JsonFeed = ((
 						url: a?.url,
 						email: undefined,
 						imageURL: a?.avatar ??
-							`https://randomuser.me/api/portraits/lego/${Math.random() * 9}.jpg`,
+							`https://randomuser.me/api/portraits/lego/${Math.round(Math.random() * 9)}.jpg`,
 					})),
 				item: {
 					next: async () => [],
@@ -319,9 +319,11 @@ export const JsonFeed = ((
 								}),
 								links: {
 									category: undefined,
-									externalURLs: [],
 									nextPost: '',
 									prevPost: '',
+									externalURLs: [],
+									tags:[],
+									relLinks:{}
 								},
 								expires: undefined,
 								attachments: async () =>

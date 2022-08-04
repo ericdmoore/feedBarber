@@ -4,10 +4,12 @@
  * -u is a URL
  */
 
-import { parse } from 'https://deno.land/std/flags/mod.ts';
+import { parse } from "https://deno.land/std@0.123.0/flags/mod.ts";
+import { green, red, yellow } from 'https://deno.land/x/nanocolors@0.1.12/mod.ts';
+
 import { parseFunctions } from '../lib/parsers/enhancementFunctions.ts';
 import flags from './cli_flags.ts';
-import { green, red, yellow } from 'https://deno.land/x/nanocolors@0.1.12/mod.ts';
+
 
 (async () => {
 	const sleep = (n: number): Promise<number> =>
