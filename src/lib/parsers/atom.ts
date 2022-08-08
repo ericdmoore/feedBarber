@@ -381,7 +381,7 @@ export const Atom = ((
 							prevPost: '',
 							tags: [],
 							externalURLs: [],
-							relLinks:{}
+							relLinks: {},
 						},
 						content: {
 							html: i.content?._attributes.type === 'html' ? i.content?._text : i.content?._cdata,
