@@ -258,7 +258,7 @@ export const haveEverStarted = async (
 	dyn?: { c: DynamoDBClient; table: string },
 ): Promise<BreadcrumbCache | null> => {
 	if (dyn) {
-		console.log('using dynmao - not s3');
+		console.log('using dynamo - not s3');
 
 		const dynoResp = await dyn.c.getItem({
 			TableName: dyn.table,
@@ -358,7 +358,7 @@ async (
 		const s3urlparts = splitBucketItemURL(config.s3.bucket, bc.taskIDs.OutputUri)
 		const url =  s3url({ bucketName: s3urlparts.bucket, region: s3urlparts.region, objectPath: s3urlparts.key,  })
 		
-		console.log('s3url:', url)
+		// console.log('s3url:', url)
 
 		return {
 			title: item.title ?? 'AWS/Polly Audio for: ' + chosenText.slice(0, 20) + '...',
@@ -385,7 +385,7 @@ async (
 
 	if (cacheItem) {
 		if (isMediaFinished(cacheItem)) {
-			console.log('...media is finished, update the cache >> ', cacheItem);
+			// console.log('...media is finished, update the cache >> ', cacheItem);
 
 			// complete but somehow missed thge 
 			if(!cacheItem.meta?.item){
@@ -420,15 +420,10 @@ async (
 				return item;
 			}	
 		} else {
-			console.log('...updating the cache >> ', cacheItem);
-			console.log({ taskID: cacheItem.taskIDs.TaskId });
-
-			// const respText = await pc.GetSpeechSynthesisTask(cacheItem.taskIDs.TaskId).text()
-			// console.log({respText})
+			// console.log('...updating the cache >> ', cacheItem);
+			// console.log({ taskID: cacheItem.taskIDs.TaskId });
 
 			const resp = await pc.GetSpeechSynthesisTask(cacheItem.taskIDs.TaskId).json();
-			console.log({ resp });
-
 			const { taskIDs, ...tcfg } = splitSynthTaskResponse(resp.SynthesisTask);
 			const breadcrumbs = await cacheOurBreadcrumbs(item, k, tcfg.config, taskIDs, s3c, dyn);
 			// console.log({ breadcrumbs });
@@ -455,7 +450,7 @@ async (
 			...(config.polly.onCompletion?.snsTopic ? { SnsTopicArn: config.polly.onCompletion?.snsTopic } : {}),
 		};
 
-		console.log('nice to meet you, Ill create some audio for ya!');
+		// console.log('nice to meet you, Ill create some audio for ya!');
 
 		const commandResponse = await pc.StartSpeechSynthesisTask(taskCommandReqd, taskCommandOpts).json();
 		// console.log(434, { commandResponse });

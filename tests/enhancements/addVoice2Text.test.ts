@@ -1,5 +1,5 @@
 import { skip } from '../helpers.ts';
-import { assertEquals, assertNotEquals, assertRejects } from 'https://deno.land/std@0.144.0/testing/asserts.ts';
+import { assertEquals, assertNotEquals, assertRejects, assert } from 'https://deno.land/std@0.144.0/testing/asserts.ts';
 import { S3Bucket } from 'https://denopkg.com/ericdmoore/s3_deno@main/mod.ts';
 import { readableStreamFromReader } from 'https://deno.land/std@0.144.0/streams/conversion.ts';
 import { StringReader } from 'https://deno.land/std@0.144.0/io/mod.ts';
@@ -24,7 +24,7 @@ import {
 	type ASTcomputable,
 	type ASTjson,
 	ASTFeedItemJson,
-	ASTKindComputable,
+	ASTKindJson,
 	computableToJson,
 	rezVal,
 } from '../../src/lib/parsers/ast.ts';
@@ -62,27 +62,42 @@ const runAssertions = (...ASTassertionFns: ASTAllAssertion[]) =>
 			
 			itemAssertionFns.forEach((fItemAssert) => {
 				_ast.items.forEach(async (item, i) => {
-					console.log({ i, 'Len(attachedList)': item.attachments.length, item })
+					// console.log({ i, 'Len(attachedList)': item.attachments.length, item })
 					await fItemAssert(item)
 				} )
 			})
 };
 
-const testItemsHavettachments = async (item: ASTItem) => {
-	const attachmentList = await rezVal(item.attachments);
-	if (attachmentList.length === 0) console.log('>>> missing attachment: ', item);
-	assertEquals(attachmentList.length > 0, true, 'All items should have attachment');
-};
+const allAttachmentsShouldHave = (p:string)=>`All attachments should have a ${p}`
+const assertPropertyPresensce = (prop:string, msg:(prop:string)=>string) => (obj:{[key:string]:unknown}) => assert(obj[prop], msg(prop))
+const dynamicPresenceAssertion = (prop:string) => assertPropertyPresensce(prop, allAttachmentsShouldHave)
 
-const testItemsHaveValidAttachments = async (item: ASTItem) => {
-	// console.log({item})
+const propertyAssertions = {
+	url: dynamicPresenceAssertion,
+	title: dynamicPresenceAssertion,
+	mimeType: dynamicPresenceAssertion,
+	sizeInBytes: dynamicPresenceAssertion,
+	durationInSeconds: dynamicPresenceAssertion
+}
+
+const buildDynamicAssertions = (assertionMap:{[prop:string]:(prop:string)=>(obj:{[key:string]:unknown})=>void }) => ( obj:{[key:string]:unknown})=>{
+	Object.entries(assertionMap).forEach(([prop, assertionFn])=>{
+		assertionFn(prop)(obj)
+	})
+}
+
+const testItemsHaveValidAttachments = async (item: ASTItem) => {	
 	const attachentList = await rezVal(item.attachments);
+	const dynamicAssertions = buildDynamicAssertions(propertyAssertions)
+	assertEquals(attachentList.length > 0, true, 'All ast items should have attachment');
+
 	for (const attach of attachentList) {
-		assertEquals('url' in attach && attach.url && true, true, 'All items should have a url');
-		assertEquals('title' in attach && attach.title && true, true, 'All items should have attachment');
-		assertEquals('mimeType' in attach && attach.mimeType && true, true, 'All items should have attachment');
-		assertEquals(attach.sizeInBytes ?? 0 >= 0, true, 'All items should have attachment');
-		// assertEquals(attach.durationInSeconds ?? 0 >=0 , true, 'All items should have attachment')
+		dynamicAssertions(attach)
+		// assert(attach.url, 'All attachments should have a url');
+		// assert(attach.title, 'All attachments should have a title');
+		// assert(attach.mimeType, 'All attachments should have mimeType');
+		// assert(attach.sizeInBytes, 'All attachments should have sizeInBytes');
+		// assert(attach.durationInSeconds, 'All attachments should have durationInSeconds')
 	}
 };
 
@@ -108,24 +123,27 @@ Deno.test('readToString', async () => {
 Deno.test({
 	name: 'Valid Attachment For Each Entry ',
 	permissions: {net: true},
-	only: true,
+	// only: true,
 	fn: async () => {
 		const addTextFn = textToVoice(config);
 		const ast = await computableToJson(urlToAST({ url: jsonFeedUrl, txt: jsonFeed }))
-
-		const astWithAttachment = await addTextFn(ast);
-		runAssertions() /* All AST assertions */(testItemsHavettachments, testItemsHaveValidAttachments)(astWithAttachment);
+		const astWithAttachment = await computableToJson(addTextFn(ast))		
+		runAssertions() /* All AST assertions */(testItemsHaveValidAttachments)(astWithAttachment);
 	}
 });
 
-Deno.test(skip('Homomorphic Enhancement', async () => {
-	const ast = urlToAST({ url: jsonFeedUrl, txt: jsonFeed });
-	const addTextFn = textToVoice(config);
-	const astWithAttachment = await computableToJson(addTextFn(ast));
-	const [err, data] = ASTKindComputable.validate(astWithAttachment);
-	assertEquals(err, undefined);
-	assertEquals(data && true, true);
-}));
+Deno.test({
+	name: 'Homomorphic Enhancement', 
+	fn: async () => {
+		const ast = urlToAST({ url: jsonFeedUrl, txt: jsonFeed });
+		const addTextFn = textToVoice(config);
+		const astWithAttachment = await computableToJson(addTextFn(ast));
+		// console.log(JSON.stringify(astWithAttachment, null, 2))
+		const [err, data] = ASTKindJson.validate(astWithAttachment);
+		assertEquals(err, undefined);
+		assert(data, 'The AST should now be validated - and thus not undefined');
+	}
+});
 
 Deno.test('Enhancement Validates S3 Params', async () => {
 	const ast = urlToAST({ url: jsonFeedUrl, txt: jsonFeed });

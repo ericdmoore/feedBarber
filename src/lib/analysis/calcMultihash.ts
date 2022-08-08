@@ -37,6 +37,8 @@ export const cidHash = async (i: string | Record<string, unknown>, hahser: 'sha2
 		: multi.CID.create(1, json().code, await sha512.digest(json().encode(i)));
 };
 
-export const cidStr = async (i: string | Record<string, unknown>) => {
-	return (await cidHash(i)).toString();
+export const cidStr = async (i: (string | Record<string, unknown>), hashlen : 'sha256' | 'sha512' = 'sha256' ) => {
+	return (await cidHash(i, hashlen)).toString();
 };
+
+export const hashUsingCID = cidStr

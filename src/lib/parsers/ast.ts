@@ -148,11 +148,11 @@ export const eventDefinition = (
 	},
 });
 
-const ASTSource = type({
+export const ASTSource = type({
 	t: number(),
 	url: string(),
 	hash: string(),
-	from: enums(['html', 'text', 'markdown', 'article', 'raw', 'blend']),
+	from: enums(['html', 'text', 'markdown', 'article', 'raw', 'blend', 'unknown']),
 });
 
 export const ASTAuthor = type({
@@ -226,7 +226,6 @@ const ItemContent = object({
 	markdown: optional(string()),
 	raw: optional(string()),
 	article: optional(string()),
-
 	source: optional(ASTSource),
 });
 
@@ -389,9 +388,9 @@ export const jsonToComputable = async (_ast: PromiseOr<ASTcomputable | ASTjson>)
 			...ast,
 			_meta: {
 				_type: 'computable',
+				reference: 'https://github.com/ericdmoore/feedBarber/wiki/AST-Reference',
+				version: 'https://github.com/ericdmoore/feedBarber/wiki/AST.v2022-08-01',
 				source: ast._meta.source,
-				reference: '',
-				version: '',
 			},
 			item: {
 				next: async () => ast.paging.nextUrl ? (await fetch(ast.paging.nextUrl)).json() : [],
@@ -432,8 +431,8 @@ export const computableToJson = async (_ast: PromiseOr<ThunkOrJsonAST>): Promise
 				_type: 'application/json+cityfeed',
 				reference: _meta.reference,
 				version: _meta.version,
+				comment: _meta.comment ?? '',	
 				source: _meta.source,
-				comment: _meta.comment ?? '',
 			},
 			images: {
 				bannerImage: _images.bannerImage,
@@ -444,6 +443,7 @@ export const computableToJson = async (_ast: PromiseOr<ThunkOrJsonAST>): Promise
 				feedUrl: _links.feedUrl,
 				homeUrl: _links.homeUrl,
 				list: _links.list,
+				sourceURL: _links.sourceURL
 			},
 			paging: {
 				itemCount: _paging.itemCount,
@@ -481,9 +481,9 @@ export const computableToJson = async (_ast: PromiseOr<ThunkOrJsonAST>): Promise
 						html: content.html,
 						markdown: content.markdown,
 						text: content.text,
-						source: content.source,
 						article: content.article,
 						raw: content.raw,
+						source: content.source,
 					},
 					images: {
 						bannerImage: images.bannerImage,
