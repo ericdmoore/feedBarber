@@ -6,11 +6,11 @@ import { StringReader } from 'https://deno.land/std@0.144.0/io/mod.ts';
 
 import { readToString, streamToString } from '../../src/lib/utils/pumpReader.ts';
 import {
-	splitSynthTaskResponse,
 	cacheOurBreadcrumbs,
 	haveEverStarted,
 	isMediaFinished,
 	makeKey,
+	splitSynthTaskResponse,
 	textToVoice,
 } from '../../src/lib/enhancements/addVoice2text.ts';
 
@@ -40,15 +40,11 @@ const encoder = new TextEncoder();
 const s3stateGlobal = new Map<string, Uint8Array>();
 
 const config = {
-	aws: { key: cfg.AWS_KEY, 
-		secret: cfg.AWS_SECRET, 
-		region: cfg.REGION },
+	aws: { key: cfg.AWS_KEY, secret: cfg.AWS_SECRET, region: cfg.REGION },
 	config: {
-		s3: { bucket: cfg.pollybucket, 
-			prefix: cfg.pollyPrefix 
-		},
-	}
-}
+		s3: { bucket: cfg.pollybucket, prefix: cfg.pollyPrefix },
+	},
+};
 
 const runAssertions = (...ASTassertionFns: ASTAllAssertion[]) =>
 	(...itemAssertionFns: ASTItemAssertion[]) =>
@@ -56,19 +52,19 @@ const runAssertions = (...ASTassertionFns: ASTAllAssertion[]) =>
 			// console.log('ast: ', ast)
 			const _ast = await computableToJson(ast);
 
-			ASTassertionFns.forEach(async fASTAssert => await fASTAssert(ast))
-			
+			ASTassertionFns.forEach(async (fASTAssert) => await fASTAssert(ast));
+
 			itemAssertionFns.forEach((fItemAssert) => {
 				_ast.items.forEach(async (item, i) => {
-					console.log({ i, 'Len(attachedList)': item.attachments.length, item })
-					await fItemAssert(item)
-				} )
-			})
-};
+					console.log({ i, 'Len(attachedList)': item.attachments.length, item });
+					await fItemAssert(item);
+				});
+			});
+		};
 
 const testItemsHavettachments = async (item: ASTItem) => {
 	const attachmentList = await rezVal(item.attachments);
-	if(attachmentList.length === 0) console.log('>>> missing attachment: ', item)
+	if (attachmentList.length === 0) console.log('>>> missing attachment: ', item);
 	assertEquals(attachmentList.length > 0, true, 'All items should have attachment');
 };
 
@@ -83,7 +79,6 @@ const testItemsHaveValidAttachments = async (item: ASTItem) => {
 		// assertEquals(attach.durationInSeconds ?? 0 >=0 , true, 'All items should have attachment')
 	}
 };
-
 
 Deno.test('streamToString', async () => {
 	const data = { a: 1, b: 2, c: 'c', d: { e: 5, f: null } };
@@ -109,23 +104,21 @@ Deno.test('readToString', async () => {
 	assertEquals(input, collected);
 });
 
-
 Deno.test({
 	name: 'Valid Attachment For Each Entry ',
-	permissions: {net: true},
-	only: true,
+	permissions: { net: true },
+	// only: true,
 	fn: async () => {
 		const addTextFn = textToVoice(config);
-		const ast = await computableToJson(urlToAST({ url: jsonFeedUrl, txt: jsonFeed }))
-
+		const ast = await computableToJson(urlToAST({ url: jsonFeedUrl, txt: jsonFeed }));
 		const astWithAttachment = await addTextFn(ast);
 		runAssertions() /* All AST assertions */(testItemsHavettachments, testItemsHaveValidAttachments)(astWithAttachment);
-	}
+	},
 });
 
 Deno.test(skip('Homomorphic Enhancement', async () => {
 	const ast = urlToAST({ url: jsonFeedUrl, txt: jsonFeed });
-	const addTextFn = textToVoice(config)
+	const addTextFn = textToVoice(config);
 	const astWithAttachment = await computableToJson(addTextFn(ast));
 	const [err, data] = ASTKindComputable.validate(astWithAttachment);
 	assertEquals(err, undefined);
@@ -137,39 +130,39 @@ Deno.test('Enhancement Validates Params', async () => {
 	const addTextFn = textToVoice({
 		aws: { key: 'sillyExample', region: 'us-west-2', secret: 'somethingNotTooEmbarrasing' },
 		config: { s3: { bucket: 5, prefix: '' } },
-	}as any);
-	assertRejects(()=>addTextFn(ast))
+	} as any);
+	assertRejects(() => addTextFn(ast));
 });
 
 Deno.test('Validates S3 Params', async () => {
 	const ast = urlToAST({ url: jsonFeedUrl, txt: jsonFeed });
 	const addTextFn = textToVoice({
-		aws: { 
-			key: 'sillyExample', 
-			region: 'us-west-2', 
-			secret: 'somethingNotTooEmbarrasing' 
-		}, 
-		config: { 
+		aws: {
+			key: 'sillyExample',
+			region: 'us-west-2',
+			secret: 'somethingNotTooEmbarrasing',
+		},
+		config: {
 			s3: { bucket: 42, prefix: '' },
-		}
+		},
 	} as any);
-	assertRejects(()=>addTextFn(ast))
+	assertRejects(() => addTextFn(ast));
 });
 
 Deno.test('Validates Dynamo Params', async () => {
 	const ast = urlToAST({ url: jsonFeedUrl, txt: jsonFeed });
 	const addTextFn = textToVoice({
-		aws: { 
+		aws: {
 			key: 'sillyExample',
 			region: 'us-west-2',
-			secret: 'somethingNotTooEmbarrasing'
-		}, 
+			secret: 'somethingNotTooEmbarrasing',
+		},
 		config: {
 			s3: { bucket: '42', prefix: 'prefix' },
-			dynamo: { table: undefined }
-		}
+			dynamo: { table: undefined },
+		},
 	} as any);
-	assertRejects(()=>addTextFn(ast))
+	assertRejects(() => addTextFn(ast));
 });
 
 Deno.test('makeKey changes for config + corpus', async () => {
@@ -220,15 +213,15 @@ Deno.test('haveEverStarted is based on breadcrumbs', async () => {
 		item,
 		key,
 		{
-				OutputFormat: 'mp3',			
-				Engine: 'neural',
-				LanguageCode: 'en-US',
-				LexiconNames: ['english'],
-				SampleRate: '24000',
-				VoiceId: 'Matthew',
-				SnsTopicArn: '',	
-				SpeechMarkTypes: ['sentence'],
-				TextType:'text'
+			OutputFormat: 'mp3',
+			Engine: 'neural',
+			LanguageCode: 'en-US',
+			LexiconNames: ['english'],
+			SampleRate: '24000',
+			VoiceId: 'Matthew',
+			SnsTopicArn: '',
+			SpeechMarkTypes: ['sentence'],
+			TextType: 'text',
 		},
 		{
 			CreationTime: (new Date().getTime()),
@@ -260,7 +253,7 @@ Deno.test('isMediaFinished is based on bread crumbs', async () => {
 				'Some Text that will end up in an S3 bucket... but their will also be a meta data object that exists in another s3 location',
 		},
 		images: { bannerImage: '', indexImage: '' },
-		links: { category: '', nextPost: '', prevPost: '', externalURLs: [], tags: [], relLinks:{} },
+		links: { category: '', nextPost: '', prevPost: '', externalURLs: [], tags: [], relLinks: {} },
 		attachments: [],
 		dates: { modified: Date.now(), published: Date.now() },
 	};
@@ -287,7 +280,7 @@ Deno.test('isMediaFinished is based on bread crumbs', async () => {
 	};
 
 	const key = await makeKey(item, item.content.text);
-	const {taskIDs, ...tcfg} = splitSynthTaskResponse(synthTask.SynthesisTask)
+	const { taskIDs, ...tcfg } = splitSynthTaskResponse(synthTask.SynthesisTask);
 	const breadCrumbs = await cacheOurBreadcrumbs(item, key, tcfg.config, taskIDs, s3m);
 	const hasStarted = await haveEverStarted(key, s3m);
 
@@ -318,7 +311,7 @@ Deno.test('isMediaFinished is now complete', async () => {
 				'Some Text that will end up in an S3 bucket... but their will also be a meta data object that exists in another s3 location',
 		},
 		images: { bannerImage: '', indexImage: '' },
-		links: { category: '', nextPost: '', prevPost: '', externalURLs: [], tags: [], relLinks:{} },
+		links: { category: '', nextPost: '', prevPost: '', externalURLs: [], tags: [], relLinks: {} },
 		attachments: [],
 		dates: { modified: Date.now(), published: Date.now() },
 	};
@@ -346,7 +339,7 @@ Deno.test('isMediaFinished is now complete', async () => {
 
 	const key = await makeKey(item, item.content.text);
 
-	const {taskIDs, ...tcfg} = splitSynthTaskResponse(synthTask.SynthesisTask)
+	const { taskIDs, ...tcfg } = splitSynthTaskResponse(synthTask.SynthesisTask);
 	const breadCrumbs = await cacheOurBreadcrumbs(item, key, tcfg.config, taskIDs, s3m);
 	const hasStarted = await haveEverStarted(key, s3m);
 
