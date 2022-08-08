@@ -3,7 +3,7 @@ import mh from 'https://cdn.skypack.dev/minhash@v0.0.9?dts';
 export const compareDocSimilarity = async (
 	docA: string,
 	docB: string,
-	tokenizer: ((d: string) => string[]) = (d) => d.split(' '),
+	tokenizer: (d: string) => string[] = (d) => d.split(' '),
 ) => {
 	const d1 = new mh.Minhash();
 	const d2 = new mh.Minhash();

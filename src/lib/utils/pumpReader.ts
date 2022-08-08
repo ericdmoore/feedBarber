@@ -2,9 +2,9 @@
 // import { copy, writerFromStreamWriter } from "https://deno.land/std@0.144.0/streams/mod.ts";
 
 import { StringReader } from 'https://deno.land/std@0.144.0/io/mod.ts';
-import { Buffer } from "https://deno.land/std@0.144.0/io/buffer.ts";
+import { Buffer } from 'https://deno.land/std@0.144.0/io/buffer.ts';
 // import { type Reader } from "https://deno.land/std@0.144.0/io/types.d.ts"
-import { copy, readerFromStreamReader ,readableStreamFromReader } from 'https://deno.land/std@0.144.0/streams/conversion.ts';
+import { copy, readableStreamFromReader, readerFromStreamReader } from 'https://deno.land/std@0.144.0/streams/conversion.ts';
 
 const dec = new TextDecoder();
 
@@ -50,9 +50,9 @@ export const stringToStream = (input: string): ReadableStream<Uint8Array> =>
 	readableStreamFromReader(new StringReader(input));
 
 export const drainStream = async (input: ReadableStream<Uint8Array>): Promise<Uint8Array> => {
-	const buf = new Buffer()
-	await copy( readerFromStreamReader(input.getReader()), buf )
-	return buf.bytes()
-}
+	const buf = new Buffer();
+	await copy(readerFromStreamReader(input.getReader()), buf);
+	return buf.bytes();
+};
 
 export default readToString;

@@ -1,6 +1,6 @@
 import type { ASTComputable } from '../../types.ts';
-import determineKeywords from '../analysis/determineKeywords.ts';
-import convertToMD from '../analysis/convertHTMLtoMD.ts';
+// import determineKeywords from '../analysis/determineKeywords.ts';
+// import convertToMD from '../analysis/convertHTMLtoMD.ts';
 import { rezVal } from '../parsers/ast.ts';
 
 export const enhanceWithKeywords = async (
@@ -18,23 +18,23 @@ export const enhanceWithKeywords = async (
 						const content = await rezVal(i.content);
 						let md: string | undefined;
 						if (!content.markdown) {
-							const html = content?.html;
-							md = await convertToMD(html);
+							// const html = content?.html;
+							// md = await convertToMD(html);
 						} else {
 							md = content.markdown;
 						}
 
-						const kw = await determineKeywords(md);
+						// const kw = await determineKeywords(md);
 						return {
 							...i,
 							content: {
 								...i.content,
 								markdown: md,
-								text: kw.bodyTextVersion,
+								// text: kw.bodyTextVersion,
 							},
 							__analysis: {
-								keywords: [...kw.keywords ?? []],
-								keyphrases: [...kw.keyphrases ?? []],
+								// keywords: [...kw.keywords ?? []],
+								// keyphrases: [...kw.keyphrases ?? []],
 							},
 						};
 					},

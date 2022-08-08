@@ -11,9 +11,7 @@ const encoder = new TextEncoder();
 
 export const hex = (input: string | Uint8Array): string =>
 	Buffer.from(
-		typeof input === 'string' 
-			? encoder.encode(input).buffer 
-			: input.buffer,
+		typeof input === 'string' ? encoder.encode(input).buffer : input.buffer,
 	).toString('hex');
 
 export async function sha256(input: string | Uint8Array): Promise<string> {

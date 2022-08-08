@@ -1,3 +1,6 @@
+// whatabout pupeteer?
+// https://deno.land/x/puppeteer@14.1.1
+
 import { ASTComputable, PromiseOr } from '../../types.ts';
 import { rezVal } from '../parsers/ast.ts';
 import { DenoDom } from '../../mod.ts';
@@ -11,8 +14,8 @@ const pickArticle = async (raw: string, css: string): Promise<string | undefined
 	return articleNode?.outerHTML;
 };
 
-export const addLoadRawAndArticle = (input: { articleCss: string }) =>
-	async (ast_: PromiseOr<ASTComputable>): Promise<ASTComputable> => {
+export const addLoadRawAndArticle =
+	(input: { articleCss: string }) => async (ast_: PromiseOr<ASTComputable>): Promise<ASTComputable> => {
 		input.articleCss = atob(input.articleCss);
 		const ast = await ast_;
 		return {

@@ -1,5 +1,5 @@
 import { skip } from '../helpers.ts';
-import { assertEquals, assertNotEquals, assertRejects } from 'https://deno.land/std@0.144.0/testing/asserts.ts';
+import { assertEquals, assertNotEquals, assertRejects, assert} from 'https://deno.land/std@0.144.0/testing/asserts.ts';
 import { S3Bucket } from 'https://denopkg.com/ericdmoore/s3_deno@main/mod.ts';
 import { readableStreamFromReader } from 'https://deno.land/std@0.144.0/streams/conversion.ts';
 import { StringReader } from 'https://deno.land/std@0.144.0/io/mod.ts';
@@ -11,23 +11,22 @@ import {
 	haveEverStarted,
 	isMediaFinished,
 	makeKey,
+	splitBucketItemURL,
 	textToVoice,
 } from '../../src/lib/enhancements/addVoice2text.ts';
 
 import {
 	type ASTcomputable,
-	ASTFeedItemJson,
 	type ASTjson,
+	ASTFeedItemJson,
 	ASTKindComputable,
 	computableToJson,
 	rezVal,
 } from '../../src/lib/parsers/ast.ts';
 import { urlToAST } from '../../src/lib/start.ts';
 import { s3Mock } from '../mocks/s3/s3Mock.ts';
+import { jsonFeed, jsonFeedUrl } from '../mocks/jsonFeed/daringFireball.elon.ts';
 import cfg from '../.env.ts';
-
-import { jsonFeed } from '../mocks/jsonFeed/daringFireball.elon.ts';
-const jsonFeedUrl = 'https://daringfireball.net/feeds/json';
 
 type AST = ASTjson | ASTcomputable;
 type ASTItem = typeof ASTFeedItemJson.TYPE;
@@ -44,9 +43,11 @@ const config = {
 		secret: cfg.AWS_SECRET, 
 		region: cfg.REGION },
 	config: {
+		dynamo: undefined, // {table: cfg.dynamoTable}
 		s3: { bucket: cfg.pollybucket, 
-			prefix: cfg.pollyPrefix 
+			  prefix: cfg.pollyPrefix 
 		},
+		
 	}
 }
 
@@ -55,14 +56,15 @@ const runAssertions = (...ASTassertionFns: ASTAllAssertion[]) =>
 		async (ast: AST) => {
 			// console.log('ast: ', ast)
 			const _ast = await computableToJson(ast);
-
 			ASTassertionFns.forEach(async fASTAssert => await fASTAssert(ast))
 			
-			itemAssertionFns.forEach((fItemAssert) => {
-				_ast.items.forEach(async (item, i) => {
-					console.log({ i, 'Len(attachedList)': item.attachments.length, item })
+			_ast.items.forEach((item, i) => {
+				console.log({ i, 'Len(attachedList)': item.attachments.length, item })
+				
+				itemAssertionFns.forEach(async (fItemAssert) => {
 					await fItemAssert(item)
-				} )
+					// .catch((er) => console.error(er))
+				})
 			})
 };
 
@@ -75,15 +77,34 @@ const testItemsHavettachments = async (item: ASTItem) => {
 const testItemsHaveValidAttachments = async (item: ASTItem) => {
 	// console.log({item})
 	const attachentList = await rezVal(item.attachments);
-	for (const attach of attachentList) {
-		assertEquals('url' in attach && attach.url && true, true, 'All items should have a url');
-		assertEquals('title' in attach && attach.title && true, true, 'All items should have attachment');
-		assertEquals('mimeType' in attach && attach.mimeType && true, true, 'All items should have attachment');
-		assertEquals(attach.sizeInBytes ?? 0 >= 0, true, 'All items should have attachment');
-		// assertEquals(attach.durationInSeconds ?? 0 >=0 , true, 'All items should have attachment')
+	for (const attached of attachentList) {
+		assertEquals('url' in attached && attached.url && true, true, 'All attachments should have a url');
+		assertEquals('title' in attached && attached.title && true, true, 'All attachments should have title');
+		assertEquals('mimeType' in attached && attached.mimeType && true, true, 'All attachments should have a mimeType');
+		assert(attached.sizeInBytes, 'All attachments should have sizeInBytes');
+		assert(attached.durationInSeconds, 'All items should have attachment')
 	}
 };
 
+Deno.test('S3 URL parse', ()=>{
+	const r1 = splitBucketItemURL(
+		'My.FavBucket',
+		"https://s3.us-west-2.amazonaws.com/My.FavBucket/__deleteMe.57db37b7-9bd4-491d-9733-99.mp3"
+	)
+	assertEquals(r1.bucket, 'My.FavBucket')
+	assertEquals(r1.region, 'us-west-2')
+	assertEquals(r1.key, '__deleteMe.57db37b7-9bd4-491d-9733-99.mp3')
+	assertEquals(r1.ext, '.mp3')
+
+	const r2 = splitBucketItemURL(
+		'MyFavBucket',
+		"https://MyFavBucket.s3.us-west-2.amazonaws.com/__deleteMe.57db37b7-9bd4-491d-9733-99.mp3"
+	)
+	assertEquals(r2.bucket, 'MyFavBucket')
+	assertEquals(r2.region, 'us-west-2')
+	assertEquals(r2.key, '__deleteMe.57db37b7-9bd4-491d-9733-99.mp3')
+	assertEquals(r2.ext, '.mp3')
+})
 
 Deno.test('streamToString', async () => {
 	const data = { a: 1, b: 2, c: 'c', d: { e: 5, f: null } };
@@ -92,14 +113,8 @@ Deno.test('streamToString', async () => {
 	const rs0 = readableStreamFromReader(strR);
 
 	const s0 = await streamToString(rs0);
-	// console.log('await streamToString(rs)', s0 )
-
 	const o0 = JSON.parse(s0);
-	// console.log(o0)
 	assertEquals(o0, data);
-
-	// console.log('await readToString(rs)', await readToString(rs1))
-	// console.log("await readStream(rs)", await readStream(rs2))
 });
 
 Deno.test('readToString', async () => {
@@ -109,17 +124,15 @@ Deno.test('readToString', async () => {
 	assertEquals(input, collected);
 });
 
-
 Deno.test({
 	name: 'Valid Attachment For Each Entry ',
-	permissions: {net: true},
-	only: true,
+	// only: true,
 	fn: async () => {
-		const addTextFn = textToVoice(config);
 		const ast = await computableToJson(urlToAST({ url: jsonFeedUrl, txt: jsonFeed }))
+		const addTextFn = textToVoice(config);
 
-		const astWithAttachment = await addTextFn(ast);
-		runAssertions() /* All AST assertions */(testItemsHavettachments, testItemsHaveValidAttachments)(astWithAttachment);
+		const astWithAttachments = await addTextFn(ast);
+		runAssertions() /* All AST assertions */(testItemsHavettachments, testItemsHaveValidAttachments)(astWithAttachments);
 	}
 });
 
@@ -132,7 +145,7 @@ Deno.test(skip('Homomorphic Enhancement', async () => {
 	assertEquals(data && true, true);
 }));
 
-Deno.test('Enhancement Validates Params', async () => {
+Deno.test('Enhancement Validates S3 Params', async () => {
 	const ast = urlToAST({ url: jsonFeedUrl, txt: jsonFeed });
 	const addTextFn = textToVoice({
 		aws: { key: 'sillyExample', region: 'us-west-2', secret: 'somethingNotTooEmbarrasing' },
@@ -169,6 +182,7 @@ Deno.test('Validates Dynamo Params', async () => {
 			dynamo: { table: undefined }
 		}
 	} as any);
+
 	assertRejects(()=>addTextFn(ast))
 });
 
@@ -226,14 +240,15 @@ Deno.test('haveEverStarted is based on breadcrumbs', async () => {
 				LexiconNames: ['english'],
 				SampleRate: '24000',
 				VoiceId: 'Matthew',
-				SnsTopicArn: '',	
+				
 				SpeechMarkTypes: ['sentence'],
 				TextType:'text'
 		},
 		{
 			CreationTime: (new Date().getTime()),
 			TaskStatus: 'inProgress',
-			TaskId: '',
+			SnsTopicArn: '',
+			TaskId: 'some-uuid-that-has-hypens-and-numbers',
 			OutputUri: 'mock://data',
 			TaskStatusReason: '',
 			RequestCharacters: 42,

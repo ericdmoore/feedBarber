@@ -357,7 +357,7 @@ export const Sitemap: TypedValidator = ((
 								category: 'uncategorized',
 								tags: [],
 								externalURLs: [],
-								relLinks: {}
+								relLinks: {},
 							}),
 							attachments: async () => {
 								return [];

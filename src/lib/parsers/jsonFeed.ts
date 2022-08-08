@@ -322,8 +322,8 @@ export const JsonFeed = ((
 									nextPost: '',
 									prevPost: '',
 									externalURLs: [],
-									tags:[],
-									relLinks:{}
+									tags: [],
+									relLinks: {},
 								},
 								expires: undefined,
 								attachments: async () =>

@@ -1,4 +1,3 @@
-
 import { awsV4Sig } from './aws-url-signer.ts';
 import { stringify as qsStringify } from 'https://deno.land/x/querystring@v1.0.2/mod.js';
 
@@ -9,7 +8,7 @@ export enum OutputFormatMimeEnum {
 	json = 'application/json',
 	mp3 = 'audio/mp3',
 	ogg_vorbis = 'audio/ogg',
-	pcm = 'audio/pcma'
+	pcm = 'audio/pcma',
 }
 export type SpeechMarkTypes = ('sentence' | 'ssml' | 'viseme' | 'word')[];
 export type Gender = 'Female' | 'Male';
@@ -91,19 +90,19 @@ export type SynthesisTaskRequest = SynthesisRequest & {
 	SnsTopicArn?: string;
 };
 
-export interface SynthesisTaskConfig{
+export interface SynthesisTaskConfig {
 	Engine: Engine;
 	LanguageCode: LanguageCode;
 	LexiconNames: Name[];
 	OutputFormat: OutputFormat;
 	SampleRate: SampleRate;
-	SnsTopicArn: string;
 	SpeechMarkTypes: SpeechMarkTypes;
 	TextType: TextType;
 	VoiceId: VoiceId;
 }
 
-export interface SynthesisTaskIdentifiers{
+export interface SynthesisTaskIdentifiers {
+	SnsTopicArn: string;
 	RequestCharacters: number;
 	CreationTime: number;
 	OutputUri: string;
@@ -115,7 +114,7 @@ export interface SynthesisTaskIdentifiers{
 export type SynthesisTaskResponse = SynthesisTaskConfig & SynthesisTaskIdentifiers;
 
 export interface SpeechSynthesisTaskResponse {
-	SynthesisTask: SynthesisTaskResponse
+	SynthesisTask: SynthesisTaskResponse;
 }
 
 export interface ListLexiconsResponse {
@@ -281,8 +280,7 @@ export interface PollyClientInterface {
 	SynthesizeSpeech: (opts: SynthesisRequest) => ResponseOptions;
 }
 
-type PromiseOr<T> = T | Promise<T>
-
+type PromiseOr<T> = T | Promise<T>;
 
 // #endregion types
 
@@ -310,15 +308,11 @@ const middleware = async (r: PromiseOr<Request>) => {
 
 const final = <T>(r: PromiseOr<Request>) => {
 	return {
-		response: async () => {
-			const resp = await fetch(await middleware(r));
-			await resp.body?.cancel();
-			return resp;
-		},
 		request: async () => await middleware(r),
+		response: async () => fetch(await middleware(r)),
 		json: async () => (await fetch(await middleware(r))).json() as Promise<T>,
 		text: async () => (await fetch(await middleware(r))).text(),
-		__mockedResponse: async (testingResponse: unknown) => testingResponse
+		__mockedResponse: async (testingResponse: unknown) => testingResponse,
 	};
 };
 
@@ -364,7 +358,7 @@ export const pollyClient = (
 			return final<GetLexiconResponse>(addSig(req));
 		},
 		GetSpeechSynthesisTask: (taskID: string) => {
-			const req = new Request(`${base}'/synthesisTasks'/${taskID}`, {
+			const req = new Request(`${base}/synthesisTasks/${taskID}`, {
 				method: 'GET',
 			});
 			return final(addSig(req));

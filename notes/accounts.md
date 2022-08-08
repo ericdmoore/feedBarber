@@ -38,3 +38,19 @@
  utility pricing per post - 15k free
  Access To `Feed Composer` & exisitng Paid + Public feedSalon
  All Salon Credits are Bankable Credit
+
+
+
+# Register Keys and Secrets
+
+AWS:
+  - Key
+  - Secret
+
+Google
+  - Key
+  - Secret
+
+Azure
+  - Key
+  - Secret

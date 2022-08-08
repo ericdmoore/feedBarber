@@ -1,14 +1,13 @@
 import { join } from 'https://deno.land/std@0.125.0/path/mod.ts';
-import { DOMParser } from 'https://deno.land/x/deno_dom/deno-dom-wasm.ts';
+import { DOMParser } from 'https://deno.land/x/deno_dom@v0.1.33-alpha/deno-dom-wasm.ts';
 // import puppeteer from "https://deno.land/x/puppeteer@9.0.2/mod.ts";
 
-const grabFromNode = (initURL: URL, propName: string) =>
-	(n: unknown): string => {
-		const _n = n as { attributes: { [key: string]: string } };
-		return (_n.attributes?.[propName] ?? '').startsWith('http')
-			? _n.attributes?.[propName]
-			: join(initURL.href, _n.attributes?.[propName]);
-	};
+const grabFromNode = (initURL: URL, propName: string) => (n: unknown): string => {
+	const _n = n as { attributes: { [key: string]: string } };
+	return (_n.attributes?.[propName] ?? '').startsWith('http')
+		? _n.attributes?.[propName]
+		: join(initURL.href, _n.attributes?.[propName]);
+};
 
 type IDiscoverInputType = { url: string | URL; body?: PromiseLike<string> };
 
