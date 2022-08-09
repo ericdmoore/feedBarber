@@ -475,9 +475,10 @@ const sigMaker = (accessKeyId: string, secretAccessKey: string, region: string, 
 	return async (req: Request | Promise<Request>) => sign(await req);
 };
 
-const middleware = (fns: ((r: Request | Promise<Request>) => Promise<Request>)[]) => (r: Request | Promise<Request>) => {
-	return fns.reduce(async (p, f) => f(p), Promise.resolve(r));
-};
+const middleware = (fns: ((r: Request | Promise<Request>) => Promise<Request>)[]) =>
+	(r: Request | Promise<Request>) => {
+		return fns.reduce(async (p, f) => f(p), Promise.resolve(r));
+	};
 
 const sendIt = <T>(r: Request | Promise<Request>) => {
 	return {

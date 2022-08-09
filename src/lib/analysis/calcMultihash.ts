@@ -3,8 +3,8 @@ import * as multi from 'https://cdn.skypack.dev/multiformats?dts';
 const textEncoder = new TextEncoder();
 const textDecoder = new TextDecoder();
 
-const sha = (name: AlgorithmIdentifier) => async (data: Uint8Array) =>
-	new Uint8Array(await crypto.subtle.digest(name, data));
+const sha = (name: AlgorithmIdentifier) =>
+	async (data: Uint8Array) => new Uint8Array(await crypto.subtle.digest(name, data));
 
 const sha256 = multi.hasher.from({
 	name: 'sha2-256',
@@ -37,8 +37,8 @@ export const cidHash = async (i: string | Record<string, unknown>, hahser: 'sha2
 		: multi.CID.create(1, json().code, await sha512.digest(json().encode(i)));
 };
 
-export const cidStr = async (i: (string | Record<string, unknown>), hashlen : 'sha256' | 'sha512' = 'sha256' ) => {
+export const cidStr = async (i: (string | Record<string, unknown>), hashlen: 'sha256' | 'sha512' = 'sha256') => {
 	return (await cidHash(i, hashlen)).toString();
 };
 
-export const hashUsingCID = cidStr
+export const hashUsingCID = cidStr;

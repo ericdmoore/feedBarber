@@ -1,6 +1,7 @@
 import { skip } from '../helpers.ts'
 import { pollyClient, type Status } from '../../src/lib/client/aws-polly.ts'
 import { assertEquals, assert, assertNotEquals, assertObjectMatch } from 'https://deno.land/std@0.123.0/testing/asserts.ts';
+// import ENVS from '../../src/lib/utils/vars.ts'
 import envs from '../.env.ts'
 
 // priority actions
@@ -16,9 +17,9 @@ Deno.test('DescribeVoices', async ()=>{
     assertEquals(authHdr?.includes('SignedHeaders='), true)
     assertEquals(authHdr?.includes('Signature='), true)
 
-    const response = await pc.DescribeVoices().response()   
-    assertEquals(response.status, 200)
-    await response.body?.cancel
+    // const response = await pc.DescribeVoices().response()   
+    // await response.body?.cancel
+    // assertEquals(response.status, 200)
 
     const respObj = await pc.DescribeVoices().json()    
     assertEquals(respObj.Voices && true, true)
@@ -27,7 +28,7 @@ Deno.test('DescribeVoices', async ()=>{
 Deno.test('Inpsect Request - GetSpeechSynthesisTask', async() => {
     const pc = pollyClient(envs.AWS_KEY, envs.AWS_SECRET)
     const req = await pc.GetSpeechSynthesisTask('task-Id-42').request()
-    console.log({req})
+    // console.log({req})
     assert(req.url)
 })
 
@@ -65,8 +66,9 @@ Deno.test('ListSpeechSynthesisTasks', async ()=>{
     const r = await pc.ListSpeechSynthesisTasks().response()
     // console.log('r: ' ,r)
     assertEquals(r.status, 200)
+    await r.body?.cancel
 
-    const rjson = await pc.ListSpeechSynthesisTasks().json()
+    // const rjson = await pc.ListSpeechSynthesisTasks().json()
     // console.log('rjson: \n' ,rjson)
 })
 
@@ -148,7 +150,7 @@ Deno.test('Observe a task in-flight (within the queue)', async (t) =>{
 
     await t.step('Observe All Tasks in Queue', async ()=>{
         const r =  await pc.ListSpeechSynthesisTasks({Status: status as Status }).json()
-        const list = r.SynthesisTasks.filter(t=>t.TaskId ===  TaskID)
+        const list = r.SynthesisTasks.filter(t => t.TaskId === TaskID)
         assertEquals(list.length > 0 ,true)
     })
 })

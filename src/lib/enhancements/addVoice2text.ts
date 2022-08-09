@@ -24,6 +24,8 @@ import { getSignedUrl } from 'https://deno.land/x/aws_s3_presign@1.3.0/mod.ts';
 
 import {
 	type OutputFormat,
+	OutputFormatMimeEnum,
+	pollyClient,
 	type PollyClientInterface,
 	type StartSpeechTaskRequired,
 	type Status,
@@ -32,8 +34,6 @@ import {
 	type SynthesisTaskIdentifiers,
 	type SynthesisTaskResponse,
 	type VoiceId,
-	OutputFormatMimeEnum,
-	pollyClient,
 } from '../client/aws-polly.ts';
 
 import { identicon } from '../client/svg-avatars.ts';
@@ -139,8 +139,12 @@ export const splitSynthTaskResponse = (
 };
 
 const signS3Urlsigner = (
-	i: { accessKeyId: string; secretAccessKey: string}, method: 'GET' | 'PUT' = 'GET', expiresIn = 3600,) =>
-	(j: { bucketName: string; region: string; objectPath: string }, date = new Date()) => getSignedUrl({ ...i, ...j, method, expiresIn, date });
+	i: { accessKeyId: string; secretAccessKey: string },
+	method: 'GET' | 'PUT' = 'GET',
+	expiresIn = 3600,
+) =>
+	(j: { bucketName: string; region: string; objectPath: string }, date = new Date()) =>
+		getSignedUrl({ ...i, ...j, method, expiresIn, date });
 
 export const splitBucketItemURL = (bucket: string, s3uri: string) => {
 	const s3url = new URL(s3uri);
@@ -153,7 +157,6 @@ export const splitBucketItemURL = (bucket: string, s3uri: string) => {
 	};
 };
 
-
 /**
  * Text To Voice
  * @param params
@@ -165,82 +168,84 @@ export const textToVoice = (
 	s3c?: S3Bucket,
 	dynC?: DynamoDBClient,
 ) =>
-async (_ast: PromiseOr<AST>): Promise<ASTjson> => {
-	// check key,secret permissions
-	// s3: read, write
-	// polly send, sendTask
+	async (_ast: PromiseOr<AST>): Promise<ASTjson> => {
+		// check key,secret permissions
+		// s3: read, write
+		// polly send, sendTask
 
-	const ast = await computableToJson(_ast);
+		const ast = await computableToJson(_ast);
 
-	const defCfg = {
-		aws: { ...userParams.aws },
-		s3: {
-			prefix: '',
-			...userParams.config.s3,
-		},
-		dynamo: userParams.config.dynamo,
-		cloudfront: userParams.config.cloudfront,
-		polly: {
-			voiceId: 'Matthew' as VoiceId,
-			outputFormat: 'mp3' as OutputFormat,
-			sampleRate: '24000',
-			useNeuralEngine: true,
-			isPlainText: true,
-			...userParams.config.polly,
-		} as typeof userParams.config.polly,
+		const defCfg = {
+			aws: { ...userParams.aws },
+			s3: {
+				prefix: '',
+				...userParams.config.s3,
+			},
+			dynamo: userParams.config.dynamo,
+			cloudfront: userParams.config.cloudfront,
+			polly: {
+				voiceId: 'Matthew' as VoiceId,
+				outputFormat: 'mp3' as OutputFormat,
+				sampleRate: '24000',
+				useNeuralEngine: true,
+				isPlainText: true,
+				...userParams.config.polly,
+			} as typeof userParams.config.polly,
+		};
+
+		const [err, validatedData] = defCfgType.validate(defCfg);
+		if (err) return Promise.reject({ msg: 'Input Validate Error', err, code: 400 });
+
+		const handleItem = makeItemHandler(
+			validatedData,
+			pc ?? pollyClient(
+				defCfg.aws.key,
+				defCfg.aws.secret,
+				defCfg.aws.region,
+			),
+			s3c ?? new S3Bucket({
+				bucket: defCfg.s3.bucket,
+				region: defCfg.aws.region,
+				accessKeyID: defCfg.aws.key,
+				secretKey: defCfg.aws.secret,
+			}),
+			dynC
+				? {
+					table: userParams.config.dynamo?.table ?? '>> MISSING TABLE',
+					c: createClient({
+						region: defCfg.aws.region,
+						credentials: {
+							accessKeyId: defCfg.aws.key,
+							secretAccessKey: defCfg.aws.secret,
+						},
+					}),
+				}
+				: dynC,
+		);
+
+		return {
+			...ast,
+			items: await Promise.all(ast.items.map(handleItem)),
+		};
 	};
 
-	const [err, validatedData] = defCfgType.validate(defCfg);
-	if (err) return Promise.reject({ msg: 'Input Validate Error', err, code: 400 });
-
-	const handleItem = makeItemHandler(
-		validatedData,
-		pc ?? pollyClient(
-			defCfg.aws.key,
-			defCfg.aws.secret,
-			defCfg.aws.region,
-		),
-		s3c ?? new S3Bucket({
-			bucket: defCfg.s3.bucket,
-			region: defCfg.aws.region,
-			accessKeyID: defCfg.aws.key,
-			secretKey: defCfg.aws.secret,
-		}),
-		dynC
-			? {
-				table: userParams.config.dynamo?.table ?? '>> MISSING TABLE',
-				c: createClient({
-					region: defCfg.aws.region,
-					credentials: {
-						accessKeyId: defCfg.aws.key,
-						secretAccessKey: defCfg.aws.secret,
-					},
-				}),
-			}
-			: dynC,
-	);
-
-	return {
-		...ast,
-		items: await Promise.all(ast.items.map(handleItem)),
-	};
-};
-
-const inProgressPlaceholderURL = (statusMsg: string) => (rectStr: string, fill: string) => {
-	return `
+const inProgressPlaceholderURL = (statusMsg: string) =>
+	(rectStr: string, fill: string) => {
+		return `
 		<svg xmlns="http://www.w3.org/2000/svg" viewBox="-1.5 -1.5 8 8" width="100" height="100" ${fill}>
 			${rectStr}
 			<text x="2" y="6" font-size="1.3" fill="red" transform="rotate(-30 -2, 8)" >${statusMsg}</text>
 		</svg>`;
-};
+	};
 
-const scheduledPlaceholderURL = (statusMsg: string) => (rectStr: string, fill: string) => {
-	return `
+const scheduledPlaceholderURL = (statusMsg: string) =>
+	(rectStr: string, fill: string) => {
+		return `
 		<svg xmlns="http://www.w3.org/2000/svg" height="60" width="200" ${fill}>
 			${rectStr}
 			<text x="2" y="6" font-size="1.3" fill="red" transform="rotate(-30 -2, 8)" >${statusMsg}</text>
 	</svg>`;
-};
+	};
 
 const placeholderURL = (status: Status) =>
 	status === 'inProgress' ? inProgressPlaceholderURL('In Progress') : scheduledPlaceholderURL('Scheduled');
@@ -269,8 +274,9 @@ export const haveEverStarted = async (
 	} else {
 		// https://docs.aws.amazon.com/AmazonS3/latest/userguide/object-keys.html
 		const s3CacheCrumb = await s3c.getObject(
-			itemKey.replace('://', '.!!') + '.json')
-		.catch(() => null);
+			itemKey.replace('://', '.!!') + '.json',
+		)
+			.catch(() => null);
 
 		if (s3CacheCrumb) {
 			const s3Str = await streamToString(s3CacheCrumb?.body);
@@ -281,8 +287,7 @@ export const haveEverStarted = async (
 	}
 };
 
-export const isMediaFinished = (bc: BreadcrumbCache) =>
-	bc.taskIDs.TaskStatus?.toLowerCase() === 'completed';
+export const isMediaFinished = (bc: BreadcrumbCache) => bc.taskIDs.TaskStatus?.toLowerCase() === 'completed';
 
 export const cacheOurBreadcrumbs = async (
 	item: ASTFeedItemJsonTYPE,
@@ -323,86 +328,108 @@ export const makeItemHandler = (
 	s3c: S3Bucket,
 	dyn?: { c: DynamoDBClient; table: string },
 ) =>
-async (
-	item: ASTFeedItemJsonTYPE,
-	_itemNumber: number,
-	_list: ASTFeedItemJsonTYPE[],
-): Promise<ASTFeedItemJsonTYPE> => {
-	const s3url = signS3Urlsigner({
-		accessKeyId: config.aws.key,
-		secretAccessKey: config.aws.secret,
-	});
-	
+	async (
+		item: ASTFeedItemJsonTYPE,
+		_itemNumber: number,
+		_list: ASTFeedItemJsonTYPE[],
+	): Promise<ASTFeedItemJsonTYPE> => {
+		const s3url = signS3Urlsigner({
+			accessKeyId: config.aws.key,
+			secretAccessKey: config.aws.secret,
+		});
 
-	const content = await rezVal(item.content);
-	const chosenText = content.text ??
-		content.markdown ??
-		content.article ??
-		content.html ??
-		content.raw ??
-		'no text provided';
+		const content = await rezVal(item.content);
+		const chosenText = content.text ??
+			content.markdown ??
+			content.article ??
+			content.html ??
+			content.raw ??
+			'no text provided';
 
-	const k = await makeKey(config.polly, chosenText);
+		const k = await makeKey(config.polly, chosenText);
 
-	const downStreamStatus = (bc: BreadcrumbCache) => ({
-		addVoice2Text: { [`${bc.pk}-${bc.sk}`]: bc.taskIDs.TaskStatus },
-	});
+		const downStreamStatus = (bc: BreadcrumbCache) => ({
+			addVoice2Text: { [`${bc.pk}-${bc.sk}`]: bc.taskIDs.TaskStatus },
+		});
 
-	const addAttachment = (item: ASTFeedItemJsonTYPE, bc: BreadcrumbCache, k: string) => {
-		const icon = identicon(k);
-		const sizeInBytes = Number.parseInt(
-			bc.meta.item?.['Content-Length'] 
-			?? (bc.taskIDs.RequestCharacters * 12).toString(),
-		);
-		const durationInSeconds = sizeInBytes / 6050 // magic number averaged out from 5 samples below
-		const s3urlparts = splitBucketItemURL(config.s3.bucket, bc.taskIDs.OutputUri)
-		const url =  s3url({ bucketName: s3urlparts.bucket, region: s3urlparts.region, objectPath: s3urlparts.key,  })
-		
-		// console.log('s3url:', url)
+		const addAttachment = (item: ASTFeedItemJsonTYPE, bc: BreadcrumbCache, k: string) => {
+			const icon = identicon(k);
+			const sizeInBytes = Number.parseInt(
+				bc.meta.item?.['Content-Length'] ??
+					(bc.taskIDs.RequestCharacters * 12).toString(),
+			);
+			const durationInSeconds = sizeInBytes / 6050; // magic number averaged out from 5 samples below
+			const s3urlparts = splitBucketItemURL(config.s3.bucket, bc.taskIDs.OutputUri);
+			const url = s3url({ bucketName: s3urlparts.bucket, region: s3urlparts.region, objectPath: s3urlparts.key });
 
-		return {
-			title: item.title ?? 'AWS/Polly Audio for: ' + chosenText.slice(0, 20) + '...',
-			url, 
-			sizeInBytes,
-			durationInSeconds,
-			characters: bc.taskIDs.RequestCharacters,
-			status: bc.taskIDs.TaskStatus,
-			etag: bc.meta.item?.ETag ?? null,
-			mimeType: OutputFormatMimeEnum[config.polly.outputFormat],
-			_: {
-				meta: bc.meta.item,
-				imageUrls: {
-					base64: `data:image/svg+xml;base64,${btoa(placeholderURL(bc.taskIDs.TaskStatus)(icon.rectStr, icon.fill))}`,
-					svgText: `data:image/svg+xml;${
-						encodeURIComponent(placeholderURL(bc.taskIDs.TaskStatus)(icon.rectStr, icon.fill))
-					}`,
+			// console.log('s3url:', url)
+
+			return {
+				title: item.title ?? 'AWS/Polly Audio for: ' + chosenText.slice(0, 20) + '...',
+				url,
+				sizeInBytes,
+				durationInSeconds,
+				characters: bc.taskIDs.RequestCharacters,
+				status: bc.taskIDs.TaskStatus,
+				etag: bc.meta.item?.ETag ?? null,
+				mimeType: OutputFormatMimeEnum[config.polly.outputFormat],
+				_: {
+					meta: bc.meta.item,
+					imageUrls: {
+						base64: `data:image/svg+xml;base64,${btoa(placeholderURL(bc.taskIDs.TaskStatus)(icon.rectStr, icon.fill))}`,
+						svgText: `data:image/svg+xml;${
+							encodeURIComponent(placeholderURL(bc.taskIDs.TaskStatus)(icon.rectStr, icon.fill))
+						}`,
+					},
 				},
-			},
+			};
 		};
-	};
 
-	const cacheItem = await haveEverStarted(k, s3c, dyn);
+		const cacheItem = await haveEverStarted(k, s3c, dyn);
 
-	if (cacheItem) {
-		if (isMediaFinished(cacheItem)) {
-			// console.log('...media is finished, update the cache >> ', cacheItem);
+		if (cacheItem) {
+			if (isMediaFinished(cacheItem)) {
+				// console.log('...media is finished, update the cache >> ', cacheItem);
 
-			// complete but somehow missed thge 
-			if(!cacheItem.meta?.item){
-				const s3parts = splitBucketItemURL(config.s3.bucket, cacheItem.taskIDs.OutputUri);
-				const s3r = await s3c.headObject(s3parts.key).catch(() => null);
-				// console.log({ s3r });
-	
-				const meta = {
-					ETag: s3r?.etag ?? 'etag:missing',
-					'Content-Length': s3r?.contentLength ?? 'contentLength:missing',
-					'Content-Type': s3r?.contentType ?? 'contentType:missing',
-					'Last-Modified': s3r?.lastModified ?? 'lastModified:missing',
-					'Cache-Control': s3r?.cacheControl,
-					'Content-Encoding': s3r?.contentEncoding,
-				} as BreadCrumbCacheMeta;
-	
-				const breadcrumbs = await cacheOurBreadcrumbs(item, k, cacheItem.task, cacheItem.taskIDs, s3c, dyn, meta);
+				// complete but somehow missed thge
+				if (!cacheItem.meta?.item) {
+					const s3parts = splitBucketItemURL(config.s3.bucket, cacheItem.taskIDs.OutputUri);
+					const s3r = await s3c.headObject(s3parts.key).catch(() => null);
+					// console.log({ s3r });
+
+					const meta = {
+						ETag: s3r?.etag ?? 'etag:missing',
+						'Content-Length': s3r?.contentLength ?? 'contentLength:missing',
+						'Content-Type': s3r?.contentType ?? 'contentType:missing',
+						'Last-Modified': s3r?.lastModified ?? 'lastModified:missing',
+						'Cache-Control': s3r?.cacheControl,
+						'Content-Encoding': s3r?.contentEncoding,
+					} as BreadCrumbCacheMeta;
+
+					const breadcrumbs = await cacheOurBreadcrumbs(item, k, cacheItem.task, cacheItem.taskIDs, s3c, dyn, meta);
+
+					item.__enhancement = {
+						...item.__enhancement,
+						...downStreamStatus(breadcrumbs),
+					};
+					item.attachments.push(addAttachment(item, breadcrumbs, k));
+					return item;
+				} else {
+					item.__enhancement = {
+						...item.__enhancement,
+						...downStreamStatus(cacheItem),
+					};
+					item.attachments.push(addAttachment(item, cacheItem, k));
+					return item;
+				}
+			} else {
+				// console.log('...updating the cache >> ', cacheItem);
+				// console.log({ taskID: cacheItem.taskIDs.TaskId });
+
+				const resp = await pc.GetSpeechSynthesisTask(cacheItem.taskIDs.TaskId).json();
+				const { taskIDs, ...tcfg } = splitSynthTaskResponse(resp.SynthesisTask);
+				const breadcrumbs = await cacheOurBreadcrumbs(item, k, tcfg.config, taskIDs, s3c, dyn);
+				// console.log({ breadcrumbs });
 
 				item.__enhancement = {
 					...item.__enhancement,
@@ -410,21 +437,28 @@ async (
 				};
 				item.attachments.push(addAttachment(item, breadcrumbs, k));
 				return item;
-
-			}else{
-				item.__enhancement = {
-					...item.__enhancement,
-					...downStreamStatus(cacheItem),
-				};
-				item.attachments.push(addAttachment(item, cacheItem, k));
-				return item;
-			}	
+			}
 		} else {
-			// console.log('...updating the cache >> ', cacheItem);
-			// console.log({ taskID: cacheItem.taskIDs.TaskId });
+			const taskCommandReqd: StartSpeechTaskRequired = {
+				Text: chosenText,
+				OutputS3BucketName: config.s3.bucket,
+				OutputS3KeyPrefix: config.s3.prefix,
+			};
+			const taskCommandOpts: Partial<SynthesisRequest> = {
+				OutputFormat: config.polly.outputFormat,
+				VoiceId: config.polly.voiceId as VoiceId,
+				SampleRate: config.polly.sampleRate,
+				TextType: config.polly.isPlainText ? 'text' : 'ssml',
+				Engine: config.polly.useNeuralEngine ? 'neural' : 'standard',
+				...(config.polly.onCompletion?.snsTopic ? { SnsTopicArn: config.polly.onCompletion?.snsTopic } : {}),
+			};
 
-			const resp = await pc.GetSpeechSynthesisTask(cacheItem.taskIDs.TaskId).json();
-			const { taskIDs, ...tcfg } = splitSynthTaskResponse(resp.SynthesisTask);
+			// console.log('nice to meet you, Ill create some audio for ya!');
+
+			const commandResponse = await pc.StartSpeechSynthesisTask(taskCommandReqd, taskCommandOpts).json();
+			// console.log(434, { commandResponse });
+
+			const { taskIDs, ...tcfg } = splitSynthTaskResponse(commandResponse.SynthesisTask);
 			const breadcrumbs = await cacheOurBreadcrumbs(item, k, tcfg.config, taskIDs, s3c, dyn);
 			// console.log({ breadcrumbs });
 
@@ -433,42 +467,10 @@ async (
 				...downStreamStatus(breadcrumbs),
 			};
 			item.attachments.push(addAttachment(item, breadcrumbs, k));
+
 			return item;
 		}
-	} else {
-		const taskCommandReqd: StartSpeechTaskRequired = {
-			Text: chosenText,
-			OutputS3BucketName: config.s3.bucket,
-			OutputS3KeyPrefix: config.s3.prefix,
-		};
-		const taskCommandOpts: Partial<SynthesisRequest> = {
-			OutputFormat: config.polly.outputFormat,
-			VoiceId: config.polly.voiceId as VoiceId,
-			SampleRate: config.polly.sampleRate,
-			TextType: config.polly.isPlainText ? 'text' : 'ssml',
-			Engine: config.polly.useNeuralEngine ? 'neural' : 'standard',
-			...(config.polly.onCompletion?.snsTopic ? { SnsTopicArn: config.polly.onCompletion?.snsTopic } : {}),
-		};
-
-		// console.log('nice to meet you, Ill create some audio for ya!');
-
-		const commandResponse = await pc.StartSpeechSynthesisTask(taskCommandReqd, taskCommandOpts).json();
-		// console.log(434, { commandResponse });
-
-		const { taskIDs, ...tcfg } = splitSynthTaskResponse(commandResponse.SynthesisTask);
-		const breadcrumbs = await cacheOurBreadcrumbs(item, k, tcfg.config, taskIDs, s3c, dyn);
-		// console.log({ breadcrumbs });
-
-		item.__enhancement = {
-			...item.__enhancement,
-			...downStreamStatus(breadcrumbs),
-		};
-		item.attachments.push(addAttachment(item, breadcrumbs, k));
-
-		return item;
-	}
-};
-
+	};
 
 export default {
 	run: textToVoice,
@@ -494,7 +496,7 @@ export default {
 //     PolicyInputList:[],
 // }))
 
-/* 
+/*
 b032 <--> 69013
 69013:len = 293805
 69013:sec = 48s
@@ -526,5 +528,3 @@ Click on this link tomorrow:
 
 
 */
-
-

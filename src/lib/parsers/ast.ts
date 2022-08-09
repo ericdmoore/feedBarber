@@ -431,7 +431,7 @@ export const computableToJson = async (_ast: PromiseOr<ThunkOrJsonAST>): Promise
 				_type: 'application/json+cityfeed',
 				reference: _meta.reference,
 				version: _meta.version,
-				comment: _meta.comment ?? '',	
+				comment: _meta.comment ?? '',
 				source: _meta.source,
 			},
 			images: {
@@ -443,7 +443,7 @@ export const computableToJson = async (_ast: PromiseOr<ThunkOrJsonAST>): Promise
 				feedUrl: _links.feedUrl,
 				homeUrl: _links.homeUrl,
 				list: _links.list,
-				sourceURL: _links.sourceURL
+				sourceURL: _links.sourceURL,
 			},
 			paging: {
 				itemCount: _paging.itemCount,

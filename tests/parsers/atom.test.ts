@@ -27,14 +27,14 @@ Deno.test(skip(
 	},
 ));
 
-Deno.test( 'DFB header Values', async () => {
+Deno.test(skip( 'DFB header Values', async () => {
 	const {txt, url} = { url: 'http://world.hey.com/dhh/atom.xml', txt: dhhAtom }
 	const c1 = await parseAndValidate({ url, txt });
 	// const jsData = c1.data as RespStruct
 	const ast = await computableToJson(Atom<RespStruct>(c1.data, url).toAST());	
 	const c2 = await Atom({}, url).fromAST(ast) as RespStruct
 	assertEquals(c1.data, c2)
-})
+}))
 
 
 Deno.test(skip(

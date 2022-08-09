@@ -3,6 +3,8 @@
 import { fetchAndValidateIntoASTJson } from '../../lib/start.ts';
 import { Handler, json } from 'https://deno.land/x/sift@0.4.3/mod.ts';
 
+export const urlAST = '/ast/*';
+
 const buildSearchParams = (req: Request) => {
 	const searchParams = {} as { [paramName: string]: string | string[] };
 	const sp = new URL(req.url).searchParams;
@@ -21,7 +23,6 @@ const buildSearchParams = (req: Request) => {
 	return searchParams;
 };
 
-export const urlAST = '/ast/*';
 export const echoAST: Handler = async (req, param) => {
 	if (param?.url) {
 		const r = await fetchAndValidateIntoASTJson({ url: param.url }).catch(() => null);

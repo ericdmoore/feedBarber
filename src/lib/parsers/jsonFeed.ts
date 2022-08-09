@@ -4,7 +4,7 @@
 
 import type { IValidate } from '../../types.ts';
 import type { TypedValidator } from '../start.ts';
-import { hashUsingCID } from '../analysis/calcMultihash.ts'
+import { hashUsingCID } from '../analysis/calcMultihash.ts';
 import { ASTcomputable, ASTjson, computableToJson } from './ast.ts';
 import { superstruct as s } from '../../mod.ts';
 import er from './helpers/error.ts';
@@ -242,7 +242,7 @@ export const JsonFeed = ((
 						url: url,
 						t: Date.now(),
 						from: 'unknown',
-						hash: await hashUsingCID(JSON.stringify(compactParse)),	
+						hash: await hashUsingCID(JSON.stringify(compactParse)),
 					},
 				},
 				title: c.title,

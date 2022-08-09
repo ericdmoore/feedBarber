@@ -3,11 +3,12 @@ import { rezVal } from '../parsers/ast.ts';
 import { join } from 'https://deno.land/std@0.125.0/path/mod.ts';
 import { DOMParser, Node } from 'https://deno.land/x/deno_dom@v0.1.21-alpha/deno-dom-wasm.ts';
 
-const nodeToPath = (initURL: string) => (n: Node & { attributes?: { href: string } }) => {
-	return n.attributes?.href
-		? n.attributes?.href.startsWith('http') ? n.attributes?.href : join(initURL, n.attributes?.href)
-		: initURL;
-};
+const nodeToPath = (initURL: string) =>
+	(n: Node & { attributes?: { href: string } }) => {
+		return n.attributes?.href
+			? n.attributes?.href.startsWith('http') ? n.attributes?.href : join(initURL, n.attributes?.href)
+			: initURL;
+	};
 
 const loadPage = async (url: string): Promise<string> => await (await fetch(url)).text();
 
@@ -31,8 +32,8 @@ const loadUrlAndPluckCssPath = async (
 	};
 };
 
-export const addPostLinks =
-	(input: { nextPost: string; prevPost: string }) => async (_ast: PromiseOr<ASTComputable>): Promise<ASTComputable> => {
+export const addPostLinks = (input: { nextPost: string; prevPost: string }) =>
+	async (_ast: PromiseOr<ASTComputable>): Promise<ASTComputable> => {
 		const ast = await _ast;
 		input.nextPost = atob(input.nextPost);
 		input.prevPost = atob(input.prevPost);
