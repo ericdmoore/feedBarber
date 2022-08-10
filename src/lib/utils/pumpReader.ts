@@ -1,9 +1,5 @@
-// import { StringWriter } from 'https://deno.land/std@0.144.0/io/mod.ts';
-// import { copy, writerFromStreamWriter } from "https://deno.land/std@0.144.0/streams/mod.ts";
-
-import { StringReader } from 'https://deno.land/std@0.144.0/io/mod.ts';
 import { Buffer } from 'https://deno.land/std@0.144.0/io/buffer.ts';
-// import { type Reader } from "https://deno.land/std@0.144.0/io/types.d.ts"
+import { StringReader } from 'https://deno.land/std@0.144.0/io/mod.ts';
 import { copy, readableStreamFromReader, readerFromStreamReader } from 'https://deno.land/std@0.144.0/streams/conversion.ts';
 
 const dec = new TextDecoder();
@@ -16,7 +12,7 @@ export const readToString = async (
 	for await (const line of rs.pipeThrough(tds)) {
 		result = result + line;
 	}
-	return result; // init.toString();
+	return result;
 };
 
 export const streamToString = async (rs: ReadableStream<Uint8Array>, result = ''): Promise<string> => {
