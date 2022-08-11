@@ -26,6 +26,46 @@ With all Params Not Valid returns"
 - a form where all params are shown and are fillable
 - an ID for compact usage {{where this ID keeps all the params except URL}}
 
+## Enhancement Interface
+
+#### Run function 
+- runs over an AST data structure
+- does the computation
+
+#### Cloud Change Functions
+
+> Install Function
+
+- runs all provider install functions, based on validated inputs given
+- functions MUST be idempotent
+
+> Remove Function
+- functions MUST be idempotent
+- 
+
+> Provider Functions
+
+- `[providerName]:{install, remove}`
+- aws: {install, remove}
+- gcloud: {install, remove}
+- azure: {install, remove}
+
+> Params
+
+- run: JSON Schema
+- cloud:
+    - install: JSON Schema
+    - remove: JSON Schema
+    - aws: JSON Schema
+    - gcloud: JSON Schema
+    - azure: JSON Schema
+
+> Forms
+
+- embeddable markup, forms for inputting data
+- collect the data
+
+
 ## ShortCodes
 
 - addBody = 'addbody'
@@ -42,7 +82,7 @@ With all Params Not Valid returns"
 - scoreAsDuplicates = 'scoreDups'
 - preview = 'preview'
 
-http:////{{PROXYdomain}}/{{userID}}/{{Enchancement Composition}}/{{ URL }}
+http://{{PROXYdomain}}/{{userID}}/{{Enchancement Composition}}/{{ URL }}
 
 Feed Barber Preview
 
@@ -89,3 +129,4 @@ Compact URL:
 ### Console
 
 > Show Funciton Output
+

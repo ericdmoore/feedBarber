@@ -23,11 +23,15 @@ export const pageLayout = async (
 	hdr?: ILayoutHeader,
 	Neck?: JSXThunk,
 	Feet?: JSXThunk,
+	http?:{
+		status?: number,
+		headers?: HeadersInit,
+	}
 ): Promise<Response> => {
 	const Head = () => (
 		<head>
-			<title>{hdr?.title ?? 'TITLE'}</title>
 			<meta charSet='utf-8' />
+			<title>{hdr?.title ?? 'TITLE'}</title>
 			<meta name='description' content={hdr?.description ?? ''}></meta>
 			<meta name='viewport' content='width=device-width, initial-scale=1'></meta>
 
@@ -61,14 +65,11 @@ export const pageLayout = async (
 				<Body />
 				{Feet && <Feet></Feet>}
 			</html>
-		</>,
-	);
+		</>, {status:200});
 
-	const body = await pumpReader(ret.body, new StringWriter('<!DOCTYPE html>'));
-	return new Response(body, {
-		headers: ret.headers,
-		status: ret.status,
-		statusText: ret.statusText,
+	return new Response('<!DOCTYPE html>'+ await ret.text() , {
+		headers: http?.headers ?? ret.headers,
+		status: http?.status ?? ret.status,
 	});
 };
 

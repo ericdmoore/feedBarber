@@ -42,7 +42,7 @@ const setupAstPipeline = async (ast: ASTComputable, funcParms: FuncInterface[]):
 		// make a developer user name lookup
 		// use raw urls?
 		if (funcMap?.[fi.fname]) {
-			return funcMap[fi.fname].f(fi.params) as ASTChainFunc;
+			return funcMap[fi.fname].run(fi.params) as ASTChainFunc;
 		} else {
 			funcParms[i].messages = [
 				...(funcParms[i].messages ?? []),
