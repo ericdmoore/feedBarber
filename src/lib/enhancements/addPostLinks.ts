@@ -1,4 +1,6 @@
+
 import { ASTComputable, PromiseOr } from '../../types.ts';
+import type { EnhancementModule } from './index.ts'
 import { rezVal } from '../parsers/ast.ts';
 import { join } from 'https://deno.land/std@0.125.0/path/mod.ts';
 import { DOMParser, Node } from 'https://deno.land/x/deno_dom@v0.1.21-alpha/deno-dom-wasm.ts';
@@ -70,4 +72,9 @@ const paramSchema = {
 	additionalProperties: false,
 };
 
-export default { f: addPostLinks, param: JSON.stringify(paramSchema) };
+export default { 
+	run: addPostLinks,
+	params: {
+		run: JSON.stringify(paramSchema) 
+	}
+} as EnhancementModule

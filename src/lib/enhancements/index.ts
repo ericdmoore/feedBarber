@@ -11,11 +11,13 @@ import setPathExp from './setPath.ts';
 
 type Dict<T> = { [key: string]: T };
 type AST = ASTComputable | ASTJson
+
 export type ASTChainFunc = (i: unknown) => (ast: PromiseOr<AST>) => Promise<AST>;
 export type Enhancer = { f: ASTChainFunc; param: string };
+
 export interface EnhancementModule{
 	run: ASTChainFunc,
-	cloud: {
+	cloud?: {
 		install: (...inputs:unknown[]) => Promise<string>,
 		remove: (...inputs:unknown[]) => Promise<string>,
 		aws: {
@@ -33,7 +35,7 @@ export interface EnhancementModule{
 	}
 	params: {
 		run: string,
-		cloud: {
+		cloud?: {
 			install: string,
 			remove: string,
 			aws: string,
@@ -45,13 +47,13 @@ export interface EnhancementModule{
 
 export const funcMap = {
 	// URL string - {f: func, param: JSON Schema String}
-	// hash: addHashExp,
-	// h: addHashExp,
-	// article: loadRawAndArticleExp,
-	// a: loadRawAndArticleExp,
-	// postLinks: addPostLinksExp,
-	// pl: addPostLinksExp,
-	// set: setPathExp,
+	hash: addHashExp,
+	h: addHashExp,
+	article: loadRawAndArticleExp,
+	a: loadRawAndArticleExp,
+	postLinks: addPostLinksExp,
+	pl: addPostLinksExp,
+	set: setPathExp,
 	polly: polly
 } as Dict<EnhancementModule>;
 

@@ -15,6 +15,7 @@ import { type PromiseOr } from '../../types.ts';
 import { type ASTcomputable, type ASTFeedItemJsonTYPE, type ASTjson, computableToJson, rezVal } from '../parsers/ast.ts';
 import { type EnhancementModule } from './index.ts'
 import { jsonSchema as jSchema } from '../../mod.ts'
+import { aws, azure, gcloud, addVoice2text as voiceSchema } from '../schemas/index.ts'
 import { S3Bucket } from 'https://denopkg.com/ericdmoore/s3_deno@main/mod.ts';
 import { createClient, DynamoDBClient } from 'https://denopkg.com/ericdmoore/dynamodb-deno@v1.1.0/mod.ts';
 import { hmac } from 'https://deno.land/x/hmac@v2.0.1/mod.ts';
@@ -477,6 +478,7 @@ export const makeItemHandler = (
 
 
 const cloudParams_AWS = {
+	schema: aws.pollySchema,
 	struct: s.object({
 		key: s.string(),
 		secret: s.string(),
@@ -486,58 +488,48 @@ const cloudParams_AWS = {
 		dynamoTable: s.optional(s.string()),
 		useCDN: s.optional(s.boolean()),
 	}),
-	schema:{
-		type: jSchema.TypeName.Object,
-		required:['key', 'secret'],
-		properties:{
-			key: jSchema.TypeName.String,
-			secret: jSchema.TypeName.String,
-			region: jSchema.TypeName.String,
-			pollyBucket: jSchema.TypeName.String,
-			snsTopic: jSchema.TypeName.String,
-			dynamoTable: jSchema.TypeName.String,
-			useCDN: jSchema.TypeName.Boolean
-		},
-	} as jSchema.JSONSchema
 }
 
 const cloudParams_GCLOUD = {
+	schema: gcloud.pollySchema,
 	struct: s.object({
 		key: s.string(),
 		secret: s.string(),
 		region: s.optional(s.string())
-	}), 
-	schema:{
-		type: jSchema.TypeName.Object,
-		required:['key', 'secret'],
-		properties:{
-			key: jSchema.TypeName.String,
-			secret: jSchema.TypeName.String,
-			region: jSchema.TypeName.String,
-		},
-	} as jSchema.JSONSchema
+	})
 }
 
 const cloudParams_AZURE = {
+	schema: azure.pollySchema,
 	struct: s.object({
 		key: s.string(),
 		secret: s.string(),
 		region: s.optional(s.string())
-	}), 
-	schema:{
-		type: jSchema.TypeName.Object,
-		required:['key', 'secret'],
-		properties:{
-			key: jSchema.TypeName.String,
-			secret: jSchema.TypeName.String,
-			region: jSchema.TypeName.String,
-		},
-	} as jSchema.JSONSchema
+	})
 }
 
 const oneOrMoreCloudParams = {
-	struct: s.union([s.object({aws: cloudParams_AWS.struct}), s.object({gcloud: cloudParams_GCLOUD.struct}), s.object({azure: cloudParams_AZURE.struct})]),
-	schema:''
+	struct: s.union([
+		s.object({aws: cloudParams_AWS.struct}), 
+		s.object({gcloud: cloudParams_GCLOUD.struct}), 
+		s.object({azure: cloudParams_AZURE.struct})
+	]),
+	schema:{
+		anyOf: [
+			{	type: jSchema.TypeName.Object,
+				required:['aws'],
+				properties:{ aws: cloudParams_AWS.schema }
+			},
+			{ 	type: jSchema.TypeName.Object,
+				required:['azure'],
+				properties:{ azure: cloudParams_AZURE.schema }
+			},
+			{	type: jSchema.TypeName.Object,
+				required:['gcloud'],
+				properties:{ gcloud: cloudParams_GCLOUD.schema }
+			}
+		]
+	}
 }
 
 export const cloudParams = {
@@ -547,11 +539,6 @@ export const cloudParams = {
 	install: oneOrMoreCloudParams,
 	remove: oneOrMoreCloudParams,
 }
-
-const runJsonSchema = {
-	type: jSchema.TypeName.Object,
-} as jSchema.JSONSchema
-
 
 const enhancementModule = () => {
 	const awsInstall = async ( opts: typeof cloudParams.aws.struct.TYPE ) => {
@@ -597,7 +584,7 @@ const enhancementModule = () => {
 			gcloud: { install: gcloudInstall, remove: gcloudRemove },
 		},
 		params: {
-			run: JSON.stringify(runJsonSchema),
+			run: JSON.stringify(voiceSchema),
 			cloud: {
 				install: JSON.stringify(cloudParams.install.schema),
 				remove: JSON.stringify(cloudParams.remove.schema),

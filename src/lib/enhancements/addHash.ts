@@ -1,8 +1,9 @@
 /*
  *
  */
-
+import type { EnhancementModule } from './index.ts'
 import type { ASTComputable, PromiseOr } from '../../types.ts';
+import { jsonSchema as jSchema } from '../../mod.ts';
 import { rezVal } from '../parsers/ast.ts';
 import { cidStr } from '../analysis/calcMultihash.ts';
 
@@ -54,36 +55,13 @@ export const addHash = (_i?: unknown) =>
 	};
 
 const paramSchema = {
-	type: 'string',
 	nullable: true,
+	type: [ jSchema.TypeName.Null, jSchema.TypeName.Object, jSchema.TypeName.String ],
 };
 
 export default {
 	run: addHash,
-	cloud: {
-		install: async () => '',
-		remove: async () => '',
-		aws: {
-			install: async () => '',
-			remove: async () => '',
-		},
-		azure: {
-			install: async () => '',
-			remove: async () => '',
-		},
-		gcloud: {
-			install: async () => '',
-			remove: async () => ''
-		},
-	},
-	params: {
-		run: JSON.stringify(paramSchema),
-		cloud: {
-			install: JSON.stringify(null),
-			remove: JSON.stringify(null),
-			aws: JSON.stringify(null),
-			gcloud: JSON.stringify(null),
-			azure: JSON.stringify(null)
-		},
-	},
-};
+	params: { 
+		run: JSON.stringify(paramSchema) 
+	}
+} as EnhancementModule
