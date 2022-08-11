@@ -13,7 +13,8 @@
 
 import { type PromiseOr } from '../../types.ts';
 import { type ASTcomputable, type ASTFeedItemJsonTYPE, type ASTjson, computableToJson, rezVal } from '../parsers/ast.ts';
-
+import { type EnhancementModule } from './index.ts'
+import { jsonSchema as jSchema } from '../../mod.ts'
 import { S3Bucket } from 'https://denopkg.com/ericdmoore/s3_deno@main/mod.ts';
 import { createClient, DynamoDBClient } from 'https://denopkg.com/ericdmoore/dynamodb-deno@v1.1.0/mod.ts';
 import { hmac } from 'https://deno.land/x/hmac@v2.0.1/mod.ts';
@@ -472,20 +473,143 @@ export const makeItemHandler = (
 		}
 	};
 
-export default {
-	run: textToVoice,
-	cloud: {
-		createSqual: async () => {},
-		aws: {
-			install: async () => {},
-			remove: async () => {},
+
+
+
+const cloudParams_AWS = {
+	struct: s.object({
+		key: s.string(),
+		secret: s.string(),
+		region: s.optional(s.string()),
+		pollyBucket: s.optional(s.string()),
+		snsTopic: s.optional(s.string()),
+		dynamoTable: s.optional(s.string()),
+		useCDN: s.optional(s.boolean()),
+	}),
+	schema:{
+		type: jSchema.TypeName.Object,
+		required:['key', 'secret'],
+		properties:{
+			key: jSchema.TypeName.String,
+			secret: jSchema.TypeName.String,
+			region: jSchema.TypeName.String,
+			pollyBucket: jSchema.TypeName.String,
+			snsTopic: jSchema.TypeName.String,
+			dynamoTable: jSchema.TypeName.String,
+			useCDN: jSchema.TypeName.Boolean
 		},
-	},
-	params: {
-		run: JSON.stringify(text2VoiceParams),
-		cloudInit: {},
-	},
+	} as jSchema.JSONSchema
+}
+
+const cloudParams_GCLOUD = {
+	struct: s.object({
+		key: s.string(),
+		secret: s.string(),
+		region: s.optional(s.string())
+	}), 
+	schema:{
+		type: jSchema.TypeName.Object,
+		required:['key', 'secret'],
+		properties:{
+			key: jSchema.TypeName.String,
+			secret: jSchema.TypeName.String,
+			region: jSchema.TypeName.String,
+		},
+	} as jSchema.JSONSchema
+}
+
+const cloudParams_AZURE = {
+	struct: s.object({
+		key: s.string(),
+		secret: s.string(),
+		region: s.optional(s.string())
+	}), 
+	schema:{
+		type: jSchema.TypeName.Object,
+		required:['key', 'secret'],
+		properties:{
+			key: jSchema.TypeName.String,
+			secret: jSchema.TypeName.String,
+			region: jSchema.TypeName.String,
+		},
+	} as jSchema.JSONSchema
+}
+
+const oneOrMoreCloudParams = {
+	struct: s.union([s.object({aws: cloudParams_AWS.struct}), s.object({gcloud: cloudParams_GCLOUD.struct}), s.object({azure: cloudParams_AZURE.struct})]),
+	schema:''
+}
+
+export const cloudParams = {
+	aws: cloudParams_AWS,
+	gcloud: cloudParams_GCLOUD,
+	azure: cloudParams_AZURE,
+	install: oneOrMoreCloudParams,
+	remove: oneOrMoreCloudParams,
+}
+
+const runJsonSchema = {
+	type: jSchema.TypeName.Object,
+} as jSchema.JSONSchema
+
+
+const enhancementModule = () => {
+	const awsInstall = async ( opts: typeof cloudParams.aws.struct.TYPE ) => {
+		return `all resource IDs that are generated from the cloud - useful for deletion ${opts}`
+	}
+	const awsRemove = async ( opts: typeof cloudParams.aws.struct.TYPE, resourceManifest:string ) => {
+		return `confirm the resource IDs removed, or provide ACTIONable messages on how to resolve conflicts so that it can be removed ${opts} ${resourceManifest}`
+	}
+
+	const azureInstall = async ( opts: typeof cloudParams.azure.struct.TYPE ) => {
+		return `all resource IDs that are generated from the cloud - useful for deletion ${opts}`
+	}
+
+	const azureRemove = async ( opts: typeof cloudParams.azure.struct.TYPE, resourceManifest:string ) => {
+		return `confirm the resource IDs removed, or provide ACTIONable messages on how to resolve conflicts so that it can be removed ${opts} ${resourceManifest}`
+	}
+
+	const gcloudInstall = async ( opts: typeof cloudParams.gcloud.struct.TYPE) => {
+		return `all resource IDs that are generated from the cloud - useful for deletion ${opts}`
+	}
+
+	const gcloudRemove = async ( opts: typeof cloudParams.gcloud.struct.TYPE, resourceManifest:string ) => {
+		return `confirm the resource IDs removed, or provide ACTIONable messages on how to resolve conflicts so that it can be removed ${opts} ${resourceManifest}`
+	}
+
+	return {
+		run: textToVoice,
+		cloud: {
+			install: async (opts: typeof cloudParams.install.struct.TYPE)=>{
+				// return JSON string of resources that were created
+				return JSON.stringify({
+					...('aws' in opts ? {aws: await awsInstall(opts.aws) } : {}),
+					...('azure' in opts ? {azure: await awsInstall(opts.azure) } : {}),
+					...('gcloud' in opts ? {gcloud: await awsInstall(opts.gcloud) } : {})
+				})
+			},
+			remove: async (opts: typeof cloudParams.remove.struct.TYPE, resourceManifest:string)=>{ 
+				// run all cloud versions together 
+				return `message: that shows successful deletion / or conflict  ${opts} ${resourceManifest}`
+			},
+			aws: { install: awsInstall, remove: awsRemove },
+			azure: { install: azureInstall, remove: azureRemove },
+			gcloud: { install: gcloudInstall, remove: gcloudRemove },
+		},
+		params: {
+			run: JSON.stringify(runJsonSchema),
+			cloud: {
+				install: JSON.stringify(cloudParams.install.schema),
+				remove: JSON.stringify(cloudParams.remove.schema),
+				aws: JSON.stringify(cloudParams.aws.schema),
+				gcloud: JSON.stringify(cloudParams.gcloud.schema),
+				azure: JSON.stringify(cloudParams.azure.schema)
+			},
+		}
+	}
 };
+
+export default enhancementModule() as EnhancementModule
 
 // @todo figure this out in some proper sense
 // perhaps usiung STS + assumeRole
@@ -495,36 +619,3 @@ export default {
 //     ActionNames:[ 's3:PutObject',  's3:GetObject',  's3:ListObjectsV2' ],
 //     PolicyInputList:[],
 // }))
-
-/*
-b032 <--> 69013
-69013:len = 293805
-69013:sec = 48s
-factor: 6120
-
-be17 <--> 4be5b
-4be5b:len = 694125
-4be5b:sec = 115s
-factor:6035
-
-c9e3 <--> 807af
-807af:len = 419949B
-807af:sec = 69s
-factor: 6086
-
-c66d <--> f30d7
-f30d7:len = 283149
-f30d7:sec = 47s
-factor: 6024
-
-efaa <--> a8cf1
-a8cf1:len = 699021B
-a8cf1:sec = 116s
-factor: 6026
-
-
-Click on this link tomorrow:
- https://mirage-ericdmoore.origaudio.s3.amazonaws.com/__deleteMe.5ccf2c96-483c-47f0-add9-539c704c3d0a.mp3?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Credential=AKIA4KIDAQDWVDJD7GAE%2F20220806%2Fus-west-2%2Fs3%2Faws4_request&X-Amz-Date=20220806T035808Z&X-Amz-Expires=3600&X-Amz-SignedHeaders=host&X-Amz-Signature=0f5d01d823bb22ce19f754a8df262fe6d6c3bd02ee474697c5337eacc2aef5cf
-
-
-*/

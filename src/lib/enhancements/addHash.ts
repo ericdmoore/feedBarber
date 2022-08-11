@@ -58,4 +58,32 @@ const paramSchema = {
 	nullable: true,
 };
 
-export default { f: addHash, param: JSON.stringify(paramSchema) as string };
+export default {
+	run: addHash,
+	cloud: {
+		install: async () => '',
+		remove: async () => '',
+		aws: {
+			install: async () => '',
+			remove: async () => '',
+		},
+		azure: {
+			install: async () => '',
+			remove: async () => '',
+		},
+		gcloud: {
+			install: async () => '',
+			remove: async () => ''
+		},
+	},
+	params: {
+		run: JSON.stringify(paramSchema),
+		cloud: {
+			install: JSON.stringify(null),
+			remove: JSON.stringify(null),
+			aws: JSON.stringify(null),
+			gcloud: JSON.stringify(null),
+			azure: JSON.stringify(null)
+		},
+	},
+};

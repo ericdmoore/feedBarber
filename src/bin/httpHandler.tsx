@@ -15,13 +15,12 @@ import echoAST from './pages/ast.tsx';
 
 // @see  NOTES from '../../notes/accounts.md'
 
-const App = (title = 'Hello World!') =>
-	jsx(
-		<div>
-			<h1>{title}</h1>
-		</div>,
-		{ status: 200 },
-	);
+const Title = (title = 'Hello World!') =>jsx(
+	<div>
+		<h1>{title}</h1>
+	</div>,
+	{ status: 200 },
+);
 
 const NotFound = (req: Request) =>
 	jsx(
@@ -53,6 +52,7 @@ serve({
 
 	// '/:tokType(u|t)-:token/:outputFmt/:composition/preview': preview,
 	'/:tokType(u|t)-:token/:outputFmt/:composition/preview/:url(http.*)': preview, // might be
-	'/exhausted/:priorURL': () => App('Exhausted'), // Ask For Payment to bring it back
+	'/exhausted/:priorURL': () => Title('Exhausted'), // Ask For Payment to bring it back
 	404: (req, params) => NotFound(req),
 });
+ 

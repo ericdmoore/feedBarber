@@ -38,7 +38,7 @@ export const configure = (s = 'Configure Composition'): Handler =>
 				<h3 id='funcs'>Functions & Params</h3>
 				<pre>
 					{Object.entries(funcMap).map(([k, v]) => {
-						return `${k} : ${JSON.stringify(JSON.parse(v.param), null, 2)}`;
+						return `${k} : ${JSON.stringify(JSON.parse(v.params.run), null, 2)}`;
 					}).join('\n\n')}
 				</pre>
 			</div>
