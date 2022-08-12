@@ -6,7 +6,7 @@ import funcMap from '../../lib/enhancements/index.ts';
 import { parseFunctions } from '../../lib/parsers/enhancementFunctions.ts';
 
 import { setup, tw } from "https://esm.sh/twind@0.16.16";
-import { getStyleTag, virtualSheet } from "https://esm.sh/twind@0.16.16/sheets";
+import { getStyleTag, virtualSheet, getStyleTagProperties } from "https://esm.sh/twind@0.16.16/sheets";
 
 const sheet = virtualSheet();
 
@@ -61,7 +61,9 @@ export const configure = (s = 'Configure Composition'): Handler =>
 				</pre>
 			</div>
 		);
-		return pageLayout(() => body, header, undefined, getStyleTag(sheet));
+		const {id, textContent} = getStyleTagProperties(sheet)
+		const neck = ()=>(<style id={id}>{textContent}</style>)
+		return pageLayout(() => body, header, neck );
 	};
 
 export default configure;

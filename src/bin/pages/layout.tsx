@@ -22,7 +22,6 @@ export const pageLayout = async (
 	Body: JSXThunk,
 	hdr?: ILayoutHeader,
 	Neck?: JSXThunk,
-	HeadStr?: string,
 	Feet?: JSXThunk,
 	http?:{
 		status?: number,
@@ -51,7 +50,6 @@ export const pageLayout = async (
 			>
 			</link>
 			{Neck ? <Neck/> : <></>}
-			{HeadStr ? HeadStr: ''}
 			{/* <link rel='icon' type='image/svg+xml' href='/icon.svg' /> */}
 			{/* <link rel='apple-touch-icon' href='icon.png' /> */}
 			{/* <link rel='stylesheet' href='css/normalize.css' /> */}
