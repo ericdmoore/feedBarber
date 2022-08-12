@@ -5,13 +5,31 @@ import { ILayoutHeader, pageLayout } from './layout.tsx';
 import funcMap from '../../lib/enhancements/index.ts';
 import { parseFunctions } from '../../lib/parsers/enhancementFunctions.ts';
 
+import { setup, tw } from "https://esm.sh/twind@0.16.16";
+import { getStyleTag, virtualSheet } from "https://esm.sh/twind@0.16.16/sheets";
+
+const sheet = virtualSheet();
+
+setup({
+  theme: {
+    fontFamily: {
+      sans: ["Helvetica", "sans-serif"],
+      serif: ["Times", "serif"],
+    },
+  },
+  sheet,
+});
+
 export const configure = (s = 'Configure Composition'): Handler =>
 	async (req, pathParam) => {
-		const header: ILayoutHeader = { title: 'Feed City' };
+		const header: ILayoutHeader = { title: 'Feed City'};
 		const body = (
 			<div>
-				<h1>{s}</h1>
+				{/* this part is meant for a backtick string  */}
+				{/* perhaps not VNode/JSX */}
+				{/* Seems like problem #1 */}
 
+				<h1 class={tw`text(3xl blue-500)`}>{s}</h1>
 				<h4>Direct Path Params</h4>
 				<pre>
 					{Object.entries({ ...pathParam })
@@ -43,7 +61,7 @@ export const configure = (s = 'Configure Composition'): Handler =>
 				</pre>
 			</div>
 		);
-		return pageLayout(() => body, header);
+		return pageLayout(() => body, header, undefined, getStyleTag(sheet));
 	};
 
 export default configure;
