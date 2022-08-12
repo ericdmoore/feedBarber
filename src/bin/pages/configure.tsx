@@ -6,7 +6,7 @@ import funcMap from '../../lib/enhancements/index.ts';
 import { parseFunctions } from '../../lib/parsers/enhancementFunctions.ts';
 
 import { setup, tw } from "https://esm.sh/twind@0.16.16";
-import { getStyleTag, virtualSheet, getStyleTagProperties } from "https://esm.sh/twind@0.16.16/sheets";
+import { virtualSheet, getStyleTagProperties } from "https://esm.sh/twind@0.16.16/sheets";
 
 const sheet = virtualSheet();
 
