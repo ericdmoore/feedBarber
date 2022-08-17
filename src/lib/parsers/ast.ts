@@ -209,6 +209,12 @@ const ASTFeedMeta = partial(type({
 	})),
 }));
 
+// @todo: need more documentation on use cases here;
+// with some elapsed time, my memory is hazy on how this was going to work.
+// 
+// I think it was to support paid, and private city - content
+// each site might have a different process to handle paid content,
+// unless it is a city feed - which will need to follow the spec.
 const ASTEntitlement = type({
 	serverUrl: string(),
 	forKinds: array(string()),
@@ -320,8 +326,12 @@ export const ASTKindJson = type({
 	authors: nonempty(array(ASTAuthor)),
 	images: ASTimages,
 	paging: ASTpaging,
+	
 	links: ASTlinks,
+
 	entitlements: array(ASTEntitlement),
+	copyrights: optional(string()),
+	
 	sourceFeedMeta: ASTFeedMeta,
 	items: array(ASTFeedItemJson),
 
@@ -350,6 +360,8 @@ export const ASTKindComputable = object({
 	authors: union([Thunk<s.Infer<typeof ASTAuthor>[]>(), nonempty(array(ASTAuthor))]),
 	images: union([ASTimages, Thunk<s.Infer<typeof ASTimages>>()]),
 	paging: union([ASTpaging, Thunk<s.Infer<typeof ASTpaging>>()]),
+	copyrights: optional(string()),
+
 	entitlements: union([array(ASTEntitlement), Thunk<s.Infer<typeof ASTEntitlement>[]>()]),
 	links: union([ASTlinks, Thunk<s.Infer<typeof ASTlinks>>()]),
 	sourceFeedMeta: union([ASTFeedMeta, Thunk<typeof ASTFeedMeta.TYPE>()]),

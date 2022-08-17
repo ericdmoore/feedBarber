@@ -4,19 +4,25 @@
 
  */
 
-import { setup,   } from "https://esm.sh/twind@0.16.16";
-import { virtualSheet } from "https://esm.sh/twind@0.16.16/sheets";
+import { setup as setupExport, tw as TWexport, virtual } from "https://esm.sh/twind@1.0.0-next.38";
+// import { virtualSheet } from "https://esm.sh/twind@0.16.17/sheets";
 
-const sheet = virtualSheet();
+// 
+import presetAutoprefix from "https://esm.sh/@twind/preset-autoprefix@1.0.0-next.38"
+import presetExt from "https://esm.sh/@twind/preset-ext@1.0.0-next.38"
+import presetTailwind from "https://esm.sh/@twind/preset-tailwind@1.0.0-next.38"
+import presetTailwindForms from "https://esm.sh/@twind/preset-tailwind-forms@1.0.0-next.38"
 
-setup({
-  theme: {
-    fontFamily: {
-      sans: ["Helvetica", "sans-serif"],
-      serif: ["Times", "serif"],
-    },
-  },
-  sheet,
-});
+export const tw = TWexport
+export const setup = setupExport
+export const sheet = virtual()
+export const twind = setupExport( { presets: [
+  presetAutoprefix(), 
+  presetTailwind(), 
+  presetExt(), 
+  presetTailwindForms() 
+]},
+sheet
+)
 
-export default sheet
+export default twind

@@ -8,6 +8,10 @@ const EchoLink = (p: { href: string }) => (
 	</li>
 );
 
+
+// find: class="([a-zA-Z0-9 -:]+)"
+// replace: class={tw("$1")}
+
 export const header: Handler = async (req, param = {}) => {
 	const header: ILayoutHeader = { title: 'Feed City' };
 	const body = (
