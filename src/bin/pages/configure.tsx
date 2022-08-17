@@ -3,7 +3,7 @@
 import { Fragment, h, Handler, jsx, VNode } from 'https://deno.land/x/sift@0.4.3/mod.ts';
 import { ILayoutHeader, pageLayout } from './layout.tsx';
 import funcMap from '../../lib/enhancements/index.ts';
-import { parseFunctions } from '../../lib/parsers/enhancementFunctions.ts';
+import { parseFunctions, encodingFunctions } from '../../lib/parsers/enhancementFunctions.ts';
 
 import { setup, tw } from "https://esm.sh/twind@0.16.16";
 import { virtualSheet, getStyleTagProperties } from "https://esm.sh/twind@0.16.16/sheets";
