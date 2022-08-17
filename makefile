@@ -47,7 +47,7 @@ wait5:
 local_tests: local_db_start wait5 tests local_db_stop
 
 server:
-	open http://localhost:8000; deno run --allow-net --allow-env ./src/bin/httpHandler.tsx
+	open http://localhost:8000; denon run --allow-net --allow-env ./src/bin/httpHandler.tsx
 
 start:
 	deno run --allow-net src/bin/go.ts

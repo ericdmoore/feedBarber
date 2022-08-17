@@ -13,8 +13,6 @@ import user from './pages/user.tsx';
 import header from './pages/header.tsx';
 import echoAST from './pages/ast.tsx';
 
-// @see  NOTES from '../../notes/accounts.md'
-
 const Title = (title = 'Hello World!') =>jsx(
 	<div>
 		<h1>{title}</h1>
@@ -41,11 +39,11 @@ serve({
 	'/new': newCompositionForm,
 	'/ast/:url(http.*)': echoAST,
 	'/ast/:composition/:url(http.*)': echoAST,
-	'/t-:tempToken': token('Temp'),
-	'/u-:userToken': token('User'),
+	'/t-{:tempToken}': token('Temp'),
+	'/u-{:userToken}': token('User'),
 
-	'/:tokType(u|t)-:token/:outputFmt': configure('Configure From Scratch'), // builder
-	'/:tokType(u|t)-:token/:outputFmt/:composition': configure('Configure Params for Composition'), // missing url, so view config and preview a feed
+	'/:tokType(u|t)-:token/{:outputFmt}': configure('Configure From Scratch'), // builder
+	'/:tokType(u|t)-:token/:outputFmt/{:composition}': configure('Configure Params for Composition'), // missing url, so view config and preview a feed
 
 	'/:tokType(u|t)-:token/:outputFmt/:url(http.*)': proxy,
 	'/:tokType(u|t)-:token/:outputFmt/:composition/:url(http.*)': proxy, // merge ?

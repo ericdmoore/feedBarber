@@ -3,7 +3,7 @@
 import { Fragment, h, Handler, jsx, VNode } from 'https://deno.land/x/sift@0.4.3/mod.ts';
 import { ILayoutHeader, pageLayout } from './layout.tsx';
 import funcMap from '../../lib/enhancements/index.ts';
-import { parseFunctions } from '../../lib/parsers/enhancementFunctions.ts';
+import { parseFunctions, encodingFunctions } from '../../lib/parsers/enhancementFunctions.ts';
 
 import { setup, tw } from "https://esm.sh/twind@0.16.16";
 import { virtualSheet, getStyleTagProperties } from "https://esm.sh/twind@0.16.16/sheets";
@@ -13,8 +13,8 @@ const sheet = virtualSheet();
 setup({
   theme: {
     fontFamily: {
-      sans: ["Helvetica", "sans-serif"],
-      serif: ["Times", "serif"],
+      sans: ["Verdana", "sans-serif"],
+      serif: ["Georgia", "serif"],
     },
   },
   sheet,
@@ -24,12 +24,8 @@ export const configure = (s = 'Configure Composition'): Handler =>
 	async (req, pathParam) => {
 		const header: ILayoutHeader = { title: 'Feed City'};
 		const body = (
-			<div>
-				{/* this part is meant for a backtick string  */}
-				{/* perhaps not VNode/JSX */}
-				{/* Seems like problem #1 */}
-
-				<h1 class={tw`text(3xl blue-500)`}>{s}</h1>
+			<body >
+				<h1 class={tw(`font-serif text(3xl slate-500)`)}>{s}</h1>
 				<h4>Direct Path Params</h4>
 				<pre>
 					{Object.entries({ ...pathParam })
@@ -59,7 +55,7 @@ export const configure = (s = 'Configure Composition'): Handler =>
 						return `${k} : ${JSON.stringify(JSON.parse(v.params.run), null, 2)}`;
 					}).join('\n\n')}
 				</pre>
-			</div>
+			</body>
 		);
 		const {id, textContent} = getStyleTagProperties(sheet)
 		const neck = ()=>(<style id={id}>{textContent}</style>)
