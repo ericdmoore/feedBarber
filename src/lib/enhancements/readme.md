@@ -28,7 +28,8 @@ With all Params Not Valid returns"
 
 ## Enhancement Interface
 
-#### Run function 
+#### Run function
+
 - runs over an AST data structure
 - does the computation
 
@@ -40,8 +41,9 @@ With all Params Not Valid returns"
 - functions MUST be idempotent
 
 > Remove Function
+
 - functions MUST be idempotent
-- 
+-
 
 > Provider Functions
 
@@ -54,17 +56,16 @@ With all Params Not Valid returns"
 
 - run: JSON Schema
 - cloud:
-    - install: JSON Schema
-    - remove: JSON Schema
-    - aws: JSON Schema
-    - gcloud: JSON Schema
-    - azure: JSON Schema
+  - install: JSON Schema
+  - remove: JSON Schema
+  - aws: JSON Schema
+  - gcloud: JSON Schema
+  - azure: JSON Schema
 
 > Forms
 
 - embeddable markup, forms for inputting data
 - collect the data
-
 
 ## ShortCodes
 
@@ -129,4 +130,3 @@ Compact URL:
 ### Console
 
 > Show Funciton Output
-

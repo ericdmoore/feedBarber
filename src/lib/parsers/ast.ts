@@ -211,7 +211,7 @@ const ASTFeedMeta = partial(type({
 
 // @todo: need more documentation on use cases here;
 // with some elapsed time, my memory is hazy on how this was going to work.
-// 
+//
 // I think it was to support paid, and private city - content
 // each site might have a different process to handle paid content,
 // unless it is a city feed - which will need to follow the spec.
@@ -326,12 +326,12 @@ export const ASTKindJson = type({
 	authors: nonempty(array(ASTAuthor)),
 	images: ASTimages,
 	paging: ASTpaging,
-	
+
 	links: ASTlinks,
 
 	entitlements: array(ASTEntitlement),
 	copyrights: optional(string()),
-	
+
 	sourceFeedMeta: ASTFeedMeta,
 	items: array(ASTFeedItemJson),
 

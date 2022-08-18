@@ -13,12 +13,13 @@ import user from './pages/user.tsx';
 import header from './pages/header.tsx';
 import echoAST from './pages/ast.tsx';
 
-const Title = (title = 'Hello World!') =>jsx(
-	<div>
-		<h1>{title}</h1>
-	</div>,
-	{ status: 200 },
-);
+const Title = (title = 'Hello World!') =>
+	jsx(
+		<div>
+			<h1>{title}</h1>
+		</div>,
+		{ status: 200 },
+	);
 
 const NotFound = (req: Request) =>
 	jsx(
@@ -53,4 +54,3 @@ serve({
 	'/exhausted/:priorURL': () => Title('Exhausted'), // Ask For Payment to bring it back
 	404: (req, params) => NotFound(req),
 });
- 

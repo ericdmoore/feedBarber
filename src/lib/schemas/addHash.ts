@@ -1,36 +1,34 @@
-import { jsonSchema as jSchema } from '../../mod.ts'
-
-
+import { jsonSchema as jSchema } from '../../mod.ts';
 
 export const pollyRunSchema = {
 	$schema: jSchema.$schema,
-	$id:'https://feeds.city/schemas/addVoiceToText.run.json',
+	$id: 'https://feeds.city/schemas/addVoiceToText.run.json',
 	type: jSchema.TypeName.Object,
-	properties:{
+	properties: {
 		aws: {
 			type: jSchema.TypeName.Object,
-			required:['key','secret'],
-			properties:{
-				key:jSchema.TypeName.String,
-				secret:jSchema.TypeName.String,
-				region:jSchema.TypeName.String,
-			}
+			required: ['key', 'secret'],
+			properties: {
+				key: jSchema.TypeName.String,
+				secret: jSchema.TypeName.String,
+				region: jSchema.TypeName.String,
+			},
 		},
 		config: {
 			type: jSchema.TypeName.Object,
 			required: ['s3'],
-			properties:{
-				s3:{
+			properties: {
+				s3: {
 					type: jSchema.TypeName.Object,
-					required:['bucket'],
-					properties:{
+					required: ['bucket'],
+					properties: {
 						bucket: jSchema.TypeName.String,
 						prefix: jSchema.TypeName.String,
-					}
+					},
 				},
-				polly:{
+				polly: {
 					type: jSchema.TypeName.Object,
-					properties:{
+					properties: {
 						voiceId: jSchema.TypeName.String,
 						outputFormat: { enum: ['json', 'mp3', 'ogg_vorbis', 'pcm'] },
 						sampleRate: jSchema.TypeName.String,
@@ -38,27 +36,27 @@ export const pollyRunSchema = {
 						isPlainText: jSchema.TypeName.Boolean,
 						onCompletion: {
 							type: jSchema.TypeName.Object,
-							properties:{
-								snsTopic: jSchema.TypeName.String
-							}
+							properties: {
+								snsTopic: jSchema.TypeName.String,
+							},
 						},
 					},
 				},
-				cloudfront:{
+				cloudfront: {
 					type: jSchema.TypeName.Object,
 					required: ['host'],
-					properties:{
+					properties: {
 						host: jSchema.TypeName.String,
-						expiresAfterSeconds: jSchema.TypeName.Number
-					}
+						expiresAfterSeconds: jSchema.TypeName.Number,
+					},
 				},
-				dynamo:{
+				dynamo: {
 					type: jSchema.TypeName.Object,
-					properties:{ 
-						table: jSchema.TypeName.String 
-					}
-				}
-			}
-		}
-	}
-} as jSchema.JSONSchema
+					properties: {
+						table: jSchema.TypeName.String,
+					},
+				},
+			},
+		},
+	},
+} as jSchema.JSONSchema;

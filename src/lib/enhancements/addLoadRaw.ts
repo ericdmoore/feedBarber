@@ -1,6 +1,6 @@
 // whatabout pupeteer?
 // https://deno.land/x/puppeteer@14.1.1
-import type {EnhancementModule} from './index.ts'
+import type { EnhancementModule } from './index.ts';
 import { ASTComputable, PromiseOr } from '../../types.ts';
 import { rezVal } from '../parsers/ast.ts';
 import { DenoDom } from '../../mod.ts';
@@ -47,11 +47,11 @@ const paramSchema = {
 	required: ['articleCss'],
 	additionalProperties: false,
 	properties: {
-		articleCss: {  type: 'string',  contentEncoding: 'base64' } 
-	}
+		articleCss: { type: 'string', contentEncoding: 'base64' },
+	},
 };
 
-export default { 
+export default {
 	run: addLoadRawAndArticle,
-	params: {run: JSON.stringify(paramSchema) }
-} as EnhancementModule
+	params: { run: JSON.stringify(paramSchema) },
+} as EnhancementModule;

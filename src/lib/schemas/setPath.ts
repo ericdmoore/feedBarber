@@ -1,4 +1,4 @@
-import { jsonSchema as jSchema } from '../../mod.ts'
+import { jsonSchema as jSchema } from '../../mod.ts';
 
 export const setPathSchema = {
 	type: 'object',

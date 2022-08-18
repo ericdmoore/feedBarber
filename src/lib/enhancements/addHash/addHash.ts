@@ -2,7 +2,7 @@
  *
  */
 
-import type { EnhancementModule } from '../index.ts'
+import type { EnhancementModule } from '../index.ts';
 import type { ASTComputable, PromiseOr } from '../../../types.ts';
 import { jsonSchema as jSchema } from '../../../mod.ts';
 import { rezVal } from '../../parsers/ast.ts';
@@ -57,12 +57,12 @@ export const addHash = (_i?: unknown) =>
 
 const paramSchema = {
 	nullable: true,
-	type: [ jSchema.TypeName.Null, jSchema.TypeName.Object, jSchema.TypeName.String ],
+	type: [jSchema.TypeName.Null, jSchema.TypeName.Object, jSchema.TypeName.String],
 };
 
 export default {
 	run: addHash,
-	params: { 
-		run: JSON.stringify(paramSchema) 
-	}
-} as EnhancementModule
+	params: {
+		run: JSON.stringify(paramSchema),
+	},
+} as EnhancementModule;

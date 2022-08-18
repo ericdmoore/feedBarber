@@ -11,4 +11,4 @@ Analysis modules are pure, and `enhancements` create limited but useful side eff
 
 ### Developing the Command Line interface (CLI)
 
-Has been a back burner issue thus far, but when starting, look at `make start` 
+Has been a back burner issue thus far, but when starting, look at `make start`

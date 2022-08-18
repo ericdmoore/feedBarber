@@ -23,10 +23,10 @@ export const pageLayout = async (
 	hdr?: ILayoutHeader,
 	Neck?: JSXThunk,
 	Feet?: JSXThunk,
-	http?:{
-		status?: number,
-		headers?: HeadersInit,
-	}
+	http?: {
+		status?: number;
+		headers?: HeadersInit;
+	},
 ): Promise<Response> => {
 	const Head = () => (
 		<head>
@@ -49,7 +49,7 @@ export const pageLayout = async (
 				href='data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🏙</text></svg>'
 			>
 			</link>
-			{Neck ? <Neck/> : <></>}
+			{Neck ? <Neck /> : <></>}
 			{/* <link rel='icon' type='image/svg+xml' href='/icon.svg' /> */}
 			{/* <link rel='apple-touch-icon' href='icon.png' /> */}
 			{/* <link rel='stylesheet' href='css/normalize.css' /> */}
@@ -59,14 +59,17 @@ export const pageLayout = async (
 	);
 
 	const ret = jsx(
-		<>	<html lang='en-US' charSet='UTF-8'>
+		<>
+			<html lang='en-US' charSet='UTF-8'>
 				<Head />
 				<Body />
-				{Feet && <Feet/>}
+				{Feet && <Feet />}
 			</html>
-		</>, {status:200});
+		</>,
+		{ status: 200 },
+	);
 
-	return new Response('<!DOCTYPE html>'+ await ret.text() , {
+	return new Response('<!DOCTYPE html>' + await ret.text(), {
 		headers: http?.headers ?? ret.headers,
 		status: http?.status ?? ret.status,
 	});

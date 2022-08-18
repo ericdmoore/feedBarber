@@ -1,2 +1,1 @@
-Add Hash
-========
+# Add Hash

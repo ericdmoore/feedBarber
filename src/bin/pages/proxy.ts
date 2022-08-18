@@ -7,7 +7,7 @@ import { json } from 'https://deno.land/x/sift@0.4.3/mod.ts';
 import { fetchAndValidateIntoAST } from '../../lib/start.ts';
 
 import respondAs from '../utils/respondAs.ts';
-import {readToString, stringToStream} from '../../lib/utils/pumpReader.ts';
+import { readToString, stringToStream } from '../../lib/utils/pumpReader.ts';
 import parseFuncs from '../../lib/parsers/enhancementFunctions.ts';
 import funcMap from '../../lib/enhancements/index.ts';
 import er from '../../lib/parsers/helpers/error.ts';
