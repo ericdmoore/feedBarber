@@ -4,25 +4,30 @@
 import { Fragment, h, Handler, jsx, VNode } from 'https://deno.land/x/sift@0.4.3/mod.ts';
 import { ILayoutHeader, pageLayout } from './layout.tsx';
 import funcMap from '../../lib/enhancements/index.ts';
-import { encodingFunctions, parseFunctions } from '../../lib/parsers/enhancementFunctions.ts';
+import { encodingFns, parseFunctions } from '../../lib/parsers/enhancementFunctions.ts';
 
-import { tw, setup, theme, getStyleTagProperties } from './styles/base.tsx'
+import { getStyleTagProperties, setup, theme, tw } from './styles/base.tsx';
 import { type VirtualSheet, virtualSheet } from 'https://esm.sh/twind@0.16.16/sheets';
 
-const twInlineStyle = (sheet: VirtualSheet)=>{
+const twInlineStyle = (sheet: VirtualSheet) => {
 	const { id, textContent } = getStyleTagProperties(sheet);
-	return (<style id={id}>{textContent}</style>)
-}
+	return (
+		<>
+			{/* <style id={id}>{textContent}</style> */}
+			<script src='https://cdn.tailwindcss.com?plugins=forms,typography,aspect-ratio,line-clamp'></script>
+		</>
+	);
+};
 
 export const configure = (s = 'Configure Composition'): Handler =>
 	async (req, pathParam) => {
 		const sheet = virtualSheet();
 		setup({ sheet, theme });
 
-		const header: ILayoutHeader = { title: 'Feed City' };
 		const body = (
 			<body>
 				<h1 class={tw(`font-serif text(3xl slate-500)`)}>{s}</h1>
+				<h1 class='font-serif text(3xl slate-500)'>{s}</h1>
 				<h4>Direct Path Params</h4>
 				<pre>
 					{Object.entries({ ...pathParam })
@@ -31,13 +36,15 @@ export const configure = (s = 'Configure Composition'): Handler =>
 				</pre>
 
 				<h4>Funcs</h4>
-{				<pre>
-					{
-					// parseFunctions((pathParam ?? {})?.composition ?? 'none')
-					// 	.map((f) => JSON.stringify(f, null, 2))
-					// 	.join('\n')
+				{
+					<pre>
+						{
+							// parseFunctions((pathParam ?? {})?.composition ?? 'none')
+							// 	.map((f) => JSON.stringify(f, null, 2))
+							// 	.join('\n')
 						}
-				</pre>}
+					</pre>
+				}
 
 				<p>Here we will</p>
 				<ul>
@@ -56,8 +63,8 @@ export const configure = (s = 'Configure Composition'): Handler =>
 				</pre>
 			</body>
 		);
-		
-		return pageLayout(() => body, header, ()=>twInlineStyle(sheet) ) ;
+
+		return pageLayout(() => body, { title: 'Feed City' }, () => twInlineStyle(sheet));
 	};
 
 export default configure;
