@@ -1,4 +1,4 @@
-import { assert, assertEquals,  } from "https://deno.land/std@0.152.0/testing/asserts.ts"
+import { assert, assertEquals,  } from 'https://deno.land/std@0.152.0/testing/asserts.ts';
 
 import { 
     type FunctionPathBuilderInputDict,

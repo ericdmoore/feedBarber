@@ -1,7 +1,6 @@
 import { skip } from '../helpers.ts'
 import { pollyClient, type Status } from '../../src/lib/client/aws-polly.ts'
-import { assertEquals, assert, assertNotEquals, assertObjectMatch } from 'https://deno.land/std@0.123.0/testing/asserts.ts';
-// import ENVS from '../../src/lib/utils/vars.ts'
+import { assertEquals, assert } from 'https://deno.land/std@0.152.0/testing/asserts.ts';
 import envs from '../.env.ts'
 
 // priority actions
@@ -22,13 +21,12 @@ Deno.test('DescribeVoices', async ()=>{
     // assertEquals(response.status, 200)
 
     const respObj = await pc.DescribeVoices().json()    
-    assertEquals(respObj.Voices && true, true)
+    assert(respObj.Voices)
 })
 
 Deno.test('Inpsect Request - GetSpeechSynthesisTask', async() => {
     const pc = pollyClient(envs.AWS_KEY, envs.AWS_SECRET)
     const req = await pc.GetSpeechSynthesisTask('task-Id-42').request()
-    // console.log({req})
     assert(req.url)
 })
 
@@ -41,33 +39,32 @@ Deno.test('StartSpeechSynthesisTask Create Request', async ()=>{
     }
 
     const request = await pc.StartSpeechSynthesisTask(req).request()
-    assertEquals(request.headers.has('Authorization'), true)
-    assertEquals(request.body && true,true )
+    assert(request.headers.has('Authorization'))
+    assert(request.body)
     
     const authHdr = request.headers.get('Authorization')
-    assertEquals(authHdr?.includes('AWS4-HMAC-SHA256 '), true)
-    assertEquals(authHdr?.includes('Credential='), true)
-    assertEquals(authHdr?.includes('SignedHeaders='), true)
-    assertEquals(authHdr?.includes('Signature='), true)
+    assert(authHdr?.includes('AWS4-HMAC-SHA256 '))
+    assert(authHdr?.includes('Credential='))
+    assert(authHdr?.includes('SignedHeaders='))
+    assert(authHdr?.includes('Signature='))
 })
 
 Deno.test('ListSpeechSynthesisTasks', async ()=>{
     const pc = pollyClient(envs.AWS_KEY, envs.AWS_SECRET)
     
     const request = await pc.ListSpeechSynthesisTasks().request()
-    assertEquals(request.headers.has('Authorization'), true)
+    assert(request.headers.has('Authorization'))
     
     const authHdr = request.headers.get('Authorization')
-    assertEquals(authHdr?.includes('AWS4-HMAC-SHA256 '), true)
-    assertEquals(authHdr?.includes('Credential='), true)
-    assertEquals(authHdr?.includes('SignedHeaders='), true)
-    assertEquals(authHdr?.includes('Signature='), true)
+    assert(authHdr?.includes('AWS4-HMAC-SHA256 '))
+    assert(authHdr?.includes('Credential='))
+    assert(authHdr?.includes('SignedHeaders='))
+    assert(authHdr?.includes('Signature='))
     
     const r = await pc.ListSpeechSynthesisTasks().response()
-    // console.log('r: ' ,r)
+    await r.text()
     assertEquals(r.status, 200)
-    await r.body?.cancel
-
+    
     // const rjson = await pc.ListSpeechSynthesisTasks().json()
     // console.log('rjson: \n' ,rjson)
 })
@@ -84,10 +81,10 @@ Deno.test('StartSpeechSynthesisTask Create Request', async ()=>{
     assertEquals(request.headers.has('Authorization'), true)
     
     const authHdr = request.headers.get('Authorization')
-    assertEquals(authHdr?.includes('AWS4-HMAC-SHA256 '), true)
-    assertEquals(authHdr?.includes('Credential='), true)
-    assertEquals(authHdr?.includes('SignedHeaders='), true)
-    assertEquals(authHdr?.includes('Signature='), true)
+    assert(authHdr?.includes('AWS4-HMAC-SHA256 '))
+    assert(authHdr?.includes('Credential='))
+    assert(authHdr?.includes('SignedHeaders='))
+    assert(authHdr?.includes('Signature='))
 })
 
 // skip since the multi-step test accomplsihes the same goal 
@@ -100,7 +97,7 @@ Deno.test(skip('StartSpeechSynthesisTask Issue Request', async ()=>{
     }
     
     const r = await pc.StartSpeechSynthesisTask(req).json()
-    assertEquals(r.SynthesisTask && true, true)
+    assert(r.SynthesisTask)
 }))
 
 Deno.test('Observe a task in-flight (within the queue)', async (t) =>{
@@ -124,7 +121,7 @@ Deno.test('Observe a task in-flight (within the queue)', async (t) =>{
         status = r.SynthesisTask.TaskStatus
         TaskID = r.SynthesisTask.TaskId
         console.log({status, TaskID})
-        assertEquals(['inProgress', 'scheduled'].includes(status) ,true)
+        assert(['inProgress', 'scheduled'].includes(status))
     })
 
     await t.step('Observe Single Task', async()=>{
@@ -150,20 +147,20 @@ Deno.test('Observe a task in-flight (within the queue)', async (t) =>{
 
     await t.step('Observe All Tasks in Queue', async ()=>{
         const r =  await pc.ListSpeechSynthesisTasks({Status: status as Status }).json()
-        const list = r.SynthesisTasks.filter(t => t.TaskId === TaskID)
-        assertEquals(list.length > 0 ,true)
+        const list = r.SynthesisTasks.filter((t) => t.TaskId === TaskID)
+        assert(list.length > 0)
     })
 })
+
 
 // UNTESTED
 //
 // Which happens to be the Query String Based Stuff
 //
-Deno.test(skip('SynthesizeSpeech', async ()=>{}))
+// Deno.test(skip('SynthesizeSpeech', async ()=>{}))
 
 // next priority actions
-Deno.test(skip('DeleteLexicon', async ()=>{}))
-Deno.test(skip('GetLexicon', async ()=>{}))
-Deno.test(skip('ListLexicons', async ()=>{}))
-Deno.test(skip('PutLexicon', async ()=>{}))
-
+// Deno.test(skip('DeleteLexicon', async ()=>{}))
+// Deno.test(skip('GetLexicon', async ()=>{}))
+// Deno.test(skip('ListLexicons', async ()=>{}))
+// Deno.test(skip('PutLexicon', async ()=>{}))

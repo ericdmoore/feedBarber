@@ -3,7 +3,7 @@ import { rss as danLuuRss } from '../mocks/rss/danluu.ts';
 import { parseAndValidate } from '../../src/lib/start.ts';
 import { computableToJson } from '../../src/lib/parsers/ast.ts';
 import { Rss, RespStruct } from '../../src/lib/parsers/rss.ts';
-import { assertEquals } from 'https://deno.land/std@0.123.0/testing/asserts.ts';
+import { assertEquals } from 'https://deno.land/std@0.152.0/testing/asserts.ts';
 
 Deno.test(skip(
 	'Rss -> AST -> Rss',
@@ -13,7 +13,7 @@ Deno.test(skip(
 		const ast = await Rss(c1.data, fakeUrl).toAST();
 		const astJson = await computableToJson(ast);
 		const c2 = await Rss<RespStruct>({}, fakeUrl).fromAST(astJson);
-		assertEquals(c1, c2);
+		assertEquals(c1.data, c2);
 	},
 ));
 

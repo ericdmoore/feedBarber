@@ -1,6 +1,6 @@
 // deno-lint-ignore no-unused-vars
 // import skip from '../helpers.ts';
-import { assertEquals } from 'https://deno.land/std@0.123.0/testing/asserts.ts';
+import { assertEquals } from 'https://deno.land/std@0.152.0/testing/asserts.ts';
 import { getPath, setPath } from '../../src/lib/utils/propertyPath.ts';
 
 Deno.test('getPath - Basic Object', async () => {
@@ -43,7 +43,7 @@ Deno.test('getPath - Array Index', async () => {
 Deno.test('setPath - Object', async () => {
 	const actual = setPath('a.1.e.with', null, { a: [{ b: 2 }, { c: 3, d: 4, e: { with: '5' } }] });
 	const expected = { a: [{ b: 2 }, { c: 3, d: 4, e: { with: null } }] };
-	assertEquals(actual, expected);
+	assertEquals(actual, expected as any);
 });
 
 Deno.test('setPath - in an Array', async () => {

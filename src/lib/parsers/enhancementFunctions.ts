@@ -76,7 +76,6 @@ export interface Right<R> {
 
 export type Maybe<J> = Just<J> | Nothing
 export type Either<R, L = Error> = NonNullable< Right<R> | Left<L>>
-
 export const Nothing = (): Nothing => ({ type: TypeNames.Nothing })
 export const Just = <J> (val: J): Just<J> => ({ type: TypeNames.Just, val })
 
