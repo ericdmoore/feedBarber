@@ -48,11 +48,43 @@ export interface FunctionParsingOptions {
 	};
 }
 
-type valReturnNullOr<T> = { val: T; err: null } | { err: Error; val: null };
+export enum TypeNames {
+	Just = 'maybe-type__just',
+	Nothing = 'maybe-type__nothing',
+	Left = 'either-type__left',
+	Right = 'either-type__right',
+}
+  
+export interface Just<T> {
+	type: typeof TypeNames.Just
+	val: T
+}
+export interface Nothing {
+	type: typeof TypeNames.Nothing
+}
 
-type BareParams = number | boolean | null;
-type EncodedParams = string | FunctionBuilderParamInputs;
-type ParseParamReturn = valReturnNullOr<FunctionBuilderParamInputs>;
+export interface Left<L> {
+	type: TypeNames.Left,
+	left: L
+	right: never
+}
+export interface Right<R> {
+	type: TypeNames.Right,
+	right: R
+	left: never
+}
+
+export type Maybe<J> = Just<J> | Nothing
+export type Either<R, L = Error> = NonNullable< Right<R> | Left<L>>
+
+export const Nothing = (): Nothing => ({ type: TypeNames.Nothing })
+export const Just = <J> (val: J): Just<J> => ({ type: TypeNames.Just, val })
+
+export const Left = <L>(left: L): Left<L> => ({ type: TypeNames.Left, left }) as Left<L>
+export const Right = <R> (right: R): Right<R> => ({ type: TypeNames.Right, right }) as Right<R>
+
+export type BareParams = number | boolean | null;
+export type EncodedParams = string | FunctionBuilderParamInputs;
 
 export interface FunctionBuilderParamInputs {
 	[paramName: string]: BareParams | EncodedParams;
@@ -78,26 +110,9 @@ export const parseOptions = Object.freeze({
 	},
 }) as FunctionParsingOptions;
 
-type DiscoveryInterface = Discovery_Error | Discovery_Data;
-interface Discovery_Error {
-	err: Error;
-	funcs: null;
-	str: null;
-}
-interface Discovery_Data {
-	err: null;
+interface DiscoveryStruct {
 	funcs: string[];
 	str: string;
-}
-
-type LegendInterface = Legend_Error | Legend_Data;
-interface Legend_Error {
-	err: Error;
-	funcs: null;
-}
-interface Legend_Data {
-	err: null;
-	funcs: string[];
 }
 
 const isBareParam = (obj: BareParams | EncodedParams): obj is BareParams => {
@@ -198,11 +213,11 @@ export const sortValidFuncs = (funcs: string[]): string[] => {
 	});
 };
 
-const tryJSONparse = (s: string): valReturnNullOr<unknown> => {
+const tryJSONparse = (s: string): Either<unknown> => {
 	try {
-		return { err: null, val: JSON.parse(s) as unknown };
+		return Right(JSON.parse(s))
 	} catch (_er) {
-		return { err: new Error(_er), val: null };
+		return Left(new Error(_er));
 	}
 };
 
@@ -215,15 +230,17 @@ export const legendIsValid = (legend: string[]): boolean => {
 // All shorthand
 // otherwise bumped to mixed/longform
 export const stringifyLegend = (legend: string[]) =>
-	legend.every((tok) => tok.toLowerCase() === tok) ? legend.join('') : legend.join(',');
+	legend.every((tok) => tok.toLowerCase() === tok) 
+		? legend.join('') 
+		: legend.join(',');
 
-export const parseLegend = (opts: FunctionParsingOptions, legend: string): valReturnNullOr<string[]> => {
+export const parseLegend = (opts: FunctionParsingOptions, legend: string): Either<string[]> => {
 	const val = legend.includes(opts.legendDelim) ? legend.split(opts.legendDelim) : legend.split('');
 	return !val.every((f) => FuncsAVAIL.includes(f))
-		? {val: null, err: new Error(`Found invalid encoding functions: ${val.filter((f) => !!FuncsAVAIL.includes(f)).join(',')}`) } 
+		? Left(new Error(`Found invalid encoding functions: ${val.filter((f) => !!FuncsAVAIL.includes(f)).join(',')}`))
 		: legendIsValid(val)
-		? { err: null, val: sortValidFuncs(val) }
-		: { val: null, err: new Error(`The content encoding legend must have a structure + encoding function, middle funcs are optional`)}
+			? Right(sortValidFuncs(val))
+			: Left(new Error(`The content encoding legend must have a structure + encoding function, middle funcs are optional`))
 };
 
 /**
@@ -232,50 +249,52 @@ export const parseLegend = (opts: FunctionParsingOptions, legend: string): valRe
  * - {legend}::{string} 	// standard form
  * - ::{string} 			// implied default form
  */
-export const discoverLegend = (opts: FunctionParsingOptions = parseOptions)=>(maybeLegend: string): DiscoveryInterface => {
+export const discoverLegend = (opts: FunctionParsingOptions = parseOptions)=>(maybeLegend: string): Either<DiscoveryStruct> => {
 	if(maybeLegend.includes(opts.legendSeperator)){
 		const parsedLeg = parseLegend(opts, maybeLegend.split(opts.legendSeperator)[0])
 		if(maybeLegend.split(opts.legendSeperator)[0].length > 0){
-			return parsedLeg.err
-			? { funcs: null, str: null, err: parsedLeg.err }
-			: { err: null, funcs: parsedLeg.val, str: maybeLegend.split(opts.legendSeperator)[1]}
+			return parsedLeg.left
+			? Left(parsedLeg.left)
+			: Right({funcs: parsedLeg.right, str: maybeLegend.split(opts.legendSeperator)[1]})
 		}else{
-			const {err, val} = parseLegend(opts, opts.legendOpts.init)
-			return err
-			? { err, funcs: null, str: null }
-			: { err: null, funcs: val, str: maybeLegend.split(opts.legendSeperator)[1] }
+			const pl = parseLegend(opts, opts.legendOpts.init)
+			return pl.left
+				? Left(pl.left)
+				: Right({funcs: pl.right, str: maybeLegend.split(opts.legendSeperator)[1] })
 		}
 	}else{
 		return maybeLegend.length > opts.legendOpts.hurdle
-		? { err: null, funcs: opts.legendOpts.over.split(''), str: maybeLegend } as Discovery_Data
-		: { err: null, funcs: opts.legendOpts.under.split(''), str: maybeLegend } as Discovery_Data;
+			? Right({ funcs: opts.legendOpts.over.split(''), str: maybeLegend })
+			: Right({ funcs: opts.legendOpts.under.split(''), str: maybeLegend })
 	}
 }
 
+export const parseParam = (opts: FunctionParsingOptions = parseOptions) => ( paramValueString: string): Either<unknown> => {
+	const leg = discoverLegend(opts)(paramValueString);
+	// console.log('legend::>> ',leg)
 	
-
-export const parseParam = (opts: FunctionParsingOptions = parseOptions) => ( paramValueString: string): valReturnNullOr<unknown> => {
-	const { err, funcs, str } = discoverLegend(opts)(paramValueString);
-
-	if (err) {
-		return { err, val: null };
+	if (leg.left) {
+		return Left(leg.left);
 	} else {
-		if (['null', 'true', 'false'].includes(str)) {
-			return { val: JSON.parse(str), err: null };
+		if (['null', 'true', 'false'].includes(leg.right.str)) {
+			return Right(JSON.parse(leg.right.str))
 		}
 
-		if (!/[^0-9-_.+]+/gi.test(str)) { // has no letters
+		if (!/[^0-9-_.+]+/gi.test(leg.right.str)) { // has no letters
 			// NOTE: basė4 has no . char
-			const maybeVal = tryJSONparse(str);
-			return maybeVal.err ? { err: tryJSONparse(str).err, val: null } : { val: maybeVal.val, err: null };
+			const maybeVal = tryJSONparse(leg.right.str);
+			return maybeVal.left 
+				? Left(maybeVal.left) 
+				: Right(maybeVal.right)
 		} else {
 			// console.log('string:: ', {str})
 			// string, object
+			const funcs = leg.right.funcs
 			const [parseFn, unencFn, ...middFns] = funcs.length === 2
 				? [contentStructureFns.fromURL[funcs[0]], encodingFns.fromURL[funcs[1]]]
 				: [
 					contentStructureFns.fromURL[funcs[0]],
-					encodingFns.fromURL[funcs.slice(-1)[0]],
+					encodingFns.fromURL[leg.right.funcs.slice(-1)[0]],
 					...funcs.slice(1, -1).map((letter) => transformFns.fromURL[letter]),
 				];
 
@@ -285,21 +304,23 @@ export const parseParam = (opts: FunctionParsingOptions = parseOptions) => ( par
 				return (data: Uint8Array) => next(p(data));
 			}, (input: Uint8Array) => input);
 
-			return { err: null, val: parseFn(composedMiddles(unencFn(str))) };
+			return Right(parseFn(composedMiddles(unencFn(leg.right.str))))
 		}
 	}
 };
 
 export const encodeParam = (legend: string, opts: FunctionParsingOptions = parseOptions ) =>
-	(obj: BareParams | EncodedParams): valReturnNullOr<string> => {
-		const { err, val } = parseLegend(opts, legend)
-		if (err) {
-			return { err, val: null };
+	(obj: BareParams | EncodedParams): Either<string> => {
+		// const { err, val } = parseLegend(opts, legend)
+		const pl = parseLegend(opts, legend)
+
+		if (pl.left) {
+			return Left(pl.left);
 		} else {
-			const funcs = val
+			const funcs = pl.right
 			if (isBareParam(obj)) {
-				// console.log('bare',{obj})
-				return { val: `${obj}`, err: null };
+				// console.log('bare',`${obj}`, {obj})
+				return Right(`${obj}`)
 			} else {
 				// console.log('encoded',{obj})
 				const [strFn, encFn, ...middFns] = funcs.length === 2
@@ -314,7 +335,7 @@ export const encodeParam = (legend: string, opts: FunctionParsingOptions = parse
 					return (data: Uint8Array) => next(p(data));
 				}, (input: Uint8Array) => input);
 
-				return { err: null, val: `${stringifyLegend(funcs)}${opts.legendSeperator}${encFn(composedMiddles(strFn(obj)))}` };
+				return Right(`${stringifyLegend(funcs)}${opts.legendSeperator}${encFn(composedMiddles(strFn(obj)))}` )
 			}
 		}
 	};
@@ -322,50 +343,59 @@ export const encodeParam = (legend: string, opts: FunctionParsingOptions = parse
 // NOTE: depending on the dynamic composition of the legend values,
 // this funciton may also have to return errors as values
 export const buildParams = (opts: FunctionParsingOptions = parseOptions) =>
-	(param: FunctionBuilderParamInputs): valReturnNullOr<string> => {
+	(param: FunctionBuilderParamInputs): Either<string> => {
 		// FUTURE DEV: since the only source of errors is via "invalid legend keys"
 		// and since they are hard coded for now, there is zero chance of propogating errors
 		// this would change if the legend is free-handed by the user - clearly that could have errors
-		return { 
-			err: null , 
-			val: Object.entries(param)
-				.map(([paramName, paramVal]) => {
-					if (isBareParam(paramVal)) {
-						return `${paramName}${opts.argValueDelim}${encodeParam('sa')(paramVal).val}`; // sa doesn't matter here
-					} else {
-						return typeof paramVal === 'string'
-							? `${paramName}${opts.argValueDelim}${encodeParam('sa')(paramVal).val}` // sa vs ja
-							: `${paramName}${opts.argValueDelim}${encodeParam('ja')(paramVal).val}`;
-					}
-				}).join(opts.argListDelim)
-		}
+		return Right( 
+			Object.entries(param)
+			.map(([paramName, paramVal]) => {
+				if (isBareParam(paramVal)) {
+					const encDataStr = encodeParam('sa')(paramVal)
+					return encDataStr.left 
+						? Left(encDataStr.left) // can't happen since 'sa' is hard coded
+						: Right(`${paramName}${opts.argValueDelim}${encDataStr.right}`)
+				} else {
+					return typeof paramVal === 'string'
+						? Right(`${paramName}${opts.argValueDelim}${encodeParam('sa')(paramVal).right}`) // sa vs ja
+						: Right(`${paramName}${opts.argValueDelim}${encodeParam('ja')(paramVal).right}`);
+				}
+			})
+			.filter(ei => ei.right)
+			.map(ei => ei.right)
+			.join(opts.argListDelim)
+		)
 	};
-
-export const parseParams = (opts: FunctionParsingOptions = parseOptions) => (multiParamStr: string): ParseParamReturn => {
+/**
+ * ### Parse Params
+ * 
+ * The inverse of `buildParams`
+ * 
+ * 
+ * @param opts 
+ * @returns 
+ */
+export const parseParams = (opts: FunctionParsingOptions = parseOptions) => (multiParamStr: string): Either<FunctionBuilderParamInputs> => {
 		const mapped = multiParamStr
 			.split(opts.argListDelim)
 			.map((paramChunks) => {
 				const [name, val] = paramChunks.split(opts.argValueDelim);
-				const r = parseParam()(val);
-				return (r.err
-					? { p: null, err: r.err }
-					: { err: null, p: { [name]: r.val } } as { err: null; p: { [s: string]: unknown } } | { err: Error; p: null });
-			});
+				const pp = parseParam()(val);
+				return pp.left
+					? Left(pp.left)
+					: Right({ [name]: pp.right })
+			}) as Either<FunctionBuilderParamInputs, Error>[];
 
-		const errs = mapped.filter((item) => item.err);
+		const errs = mapped.filter((item) => item.left);
 		if (errs.length > 0) {
-			return {
-				val: null,
-				err: new Error(errs.join('\n\n')),
-			};
+			return Left(new Error(errs.map(er => er.left).join('\n\n')))
 		} else {
-			return {
-				err: null,
-				val: mapped.reduce((acc, c) => ({
+			return Right( 
+				mapped.reduce((acc, c) => ({
 					...acc,
-					...c.p,
-				}), {} as { [s: string]: unknown }) as FunctionBuilderParamInputs,
-			};
+					...c.right,
+				}), {} as FunctionBuilderParamInputs)
+			)
 		}
 	};
 
@@ -400,34 +430,34 @@ export const parseParams = (opts: FunctionParsingOptions = parseOptions) => (mul
 
 */
 export const buildFunctionString = (opts: FunctionParsingOptions = parseOptions) =>
-	(...funcList: FunctionPathBuilderInputDict[]): valReturnNullOr<string> => {
+	(...funcList: FunctionPathBuilderInputDict[]): Either<string> => {
 		const mapped = funcList
 			.filter((fObj) => Object.keys(fObj).length === 1)
 			.map((fObj) => {
 				const [fName, paramObj] = Object.entries(fObj)[0]; //shgould only be 1 due to filter
 				const paramBodyStr = buildParams(opts)(paramObj);
-				return paramBodyStr.err
-					? { val: null, err: paramBodyStr.err }
-					: { err: null, val: `${fName}${opts.paramStart}${paramBodyStr.val}${opts.paramEnd}` };
-			});
+				return paramBodyStr.left
+					? Left(paramBodyStr.left)
+					: Right(`${fName}${opts.paramStart}${paramBodyStr.right}${opts.paramEnd}`)
+			}) as Either<string>[];
 
-		const errList = mapped.filter((item) => item.err);
-		return errList.length
-			? { val: null, err: new Error(errList.join('\n\n')) }
-			: { err: null, val: mapped.map((item) => item.val).join(opts.functionDelim) };
+		const errList = mapped.filter((item) => item.left);
+		return errList.length > 0
+			? Left( new Error(errList.map(er=>er.left).join('\n\n')))
+			: Right( mapped.map((item) => item.right).join(opts.functionDelim))
 	};
 
-export const parseFunctions = (_opts: FunctionParsingOptions = parseOptions) =>
-	(_compositionStr: string): valReturnNullOr<FunctionPathBuilderInputDict> => {
-		// const unencoded = decodeURIComponent(compositinPath);
-		// const removedEndSlash = unencoded.endsWith('/') ? unencoded.slice(0, -1) : unencoded;
+export const parseFunctions = (opts: FunctionParsingOptions = parseOptions) =>
+	(compositionStr: string): Either<FunctionPathBuilderInputDict> => {
+		
+		const funcitonTokens = compositionStr
+			.split(opts.functionDelim)
+			.map((funcStr) => {
+				const [f, pStr] = funcStr.split(opts.paramStart);
+				return { fname: f, paramStr: !pStr ? null : pStr.slice(0, -1) }; // pull off last )
+			});
 
-		// const funcitonTokens = removedEndSlash
-		// 	.split(opts.functionDelim)
-		// 	.map((fc) => {
-		// 		const [f, pStr] = fc.split(opts.paramStart);
-		// 		return { fname: f, paramStr: !pStr ? null : pStr.slice(0, -1) }; // pull off last )
-		// 	});
+		console.log(funcitonTokens)
 
 		// const namedFuncWithNamedParams = funcitonTokens.map((i) =>
 		// 	typeof i.paramStr === 'string'
@@ -470,7 +500,7 @@ export const parseFunctions = (_opts: FunctionParsingOptions = parseOptions) =>
 		// ) as { f: string; params?: { [param: string]: string } }[];
 
 		// return objectToUndef;
-		return { err: null, val: {} };
+		return Left(new Error('unfinished function'));
 	};
 
 export default parseFunctions;
