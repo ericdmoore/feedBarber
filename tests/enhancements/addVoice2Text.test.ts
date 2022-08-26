@@ -128,7 +128,6 @@ Deno.test('readToString', async () => {
 
 Deno.test({
 	name: 'Valid Attachment For Each Entry ',
-	permissions: {net: true},
 	// only: true,
 	fn: async () => {
 		const addTextFn = textToVoice(await cfg());

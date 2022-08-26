@@ -16,7 +16,10 @@ list:
 	@echo "\n"
 
 test: 
-	deno test --allow-read=.,./src/lib/utils/ --allow-net --allow-env --coverage=$(covDataDir) -j=3 ./tests/**/*
+	deno test --allow-read=./,${PWD},./src/lib/utils/,./tests/enhancements/ --allow-net --allow-env --coverage=$(covDataDir) -j=3 ./tests/**/*
+
+testAllPermissions:
+	deno test -A  --allow-net --allow-read=./,${PWD},./src/lib/utils/,./tests/enhancements/ --allow-env --coverage=$(covDataDir) -j=3 ./tests/**/*
 
 tests: test
 	
