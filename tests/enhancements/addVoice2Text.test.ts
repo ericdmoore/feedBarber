@@ -31,7 +31,7 @@ import {
 import { urlToAST } from '../../src/lib/start.ts';
 import { s3Mock } from '../mocks/s3/s3Mock.ts';
 import { jsonFeed, jsonFeedUrl } from '../mocks/jsonFeed/daringFireball.elon.ts';
-import cfg from '../.env.ts';
+import mkEnvVar from '../../src/lib/utils/vars.ts'
 
 type AST = ASTjson | ASTcomputable;
 type ASTItem = typeof ASTFeedItemJson.TYPE;
@@ -43,14 +43,20 @@ console.warn('WARNING: This Test Runs Against Production Resources');
 const encoder = new TextEncoder();
 const s3stateGlobal = new Map<string, Uint8Array>();
 
-const config = {
-	aws: { key: cfg.AWS_KEY, secret: cfg.AWS_SECRET, region: cfg.REGION },
+const envs = mkEnvVar('MISSING-KEY-VALUE')
+const cfg = async ()=>({
+	aws: { 
+		key: await envs('AWS_KEY'), 
+		secret: await envs('AWS_SECRET'), 
+		region: await envs('REGION') 
+	},
 	config: {
-		s3: { bucket: cfg.pollybucket, 
-			prefix: cfg.pollyPrefix 
+		s3: { 
+			bucket: await envs('POLLYBUCKET'), 
+			prefix: await envs('POLLYPREFIX') 
 		},
 	}
-}
+})
 
 const runAssertions = (...ASTassertionFns: ASTAllAssertion[]) =>
 	(...itemAssertionFns: ASTItemAssertion[]) =>
@@ -125,7 +131,7 @@ Deno.test({
 	permissions: {net: true},
 	// only: true,
 	fn: async () => {
-		const addTextFn = textToVoice(config);
+		const addTextFn = textToVoice(await cfg());
 		const ast = await computableToJson(urlToAST({ url: jsonFeedUrl, txt: jsonFeed }))
 		const astWithAttachment = await computableToJson(addTextFn(ast))		
 		runAssertions() /* All AST assertions */(testItemsHaveValidAttachments)(astWithAttachment);
@@ -136,7 +142,7 @@ Deno.test({
 	name: 'Homomorphic Enhancement', 
 	fn: async () => {
 		const ast = urlToAST({ url: jsonFeedUrl, txt: jsonFeed });
-		const addTextFn = textToVoice(config);
+		const addTextFn = textToVoice(await cfg());
 		const astWithAttachment = await computableToJson(addTextFn(ast));
 		// console.log(JSON.stringify(astWithAttachment, null, 2))
 		const [err, data] = ASTKindJson.validate(astWithAttachment);
