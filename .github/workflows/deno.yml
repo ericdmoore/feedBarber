@@ -40,3 +40,9 @@ jobs:
 
       - name: Run tests
         run: make test
+        env:
+          REGION: ${{ secrets.REGION }}
+          AWS_KEY: ${{ secrets.AWS_KEY }}
+          AWS_SECRET: ${{ secrets.AWS_SECRET }}
+          POLLYBUCKET: ${{ secrets.POLLYBUCKET }}
+          POLLYPREFIX: ${{ secrets.POLLYPREFIX }}
