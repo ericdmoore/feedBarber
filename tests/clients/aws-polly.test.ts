@@ -1,10 +1,28 @@
 import { skip } from '../helpers.ts'
 import { pollyClient, type Status } from '../../src/lib/client/aws-polly.ts'
 import { assertEquals, assert } from 'https://deno.land/std@0.152.0/testing/asserts.ts';
-import envs from '../.env.ts'
+
+import envFn from '../../src/lib/utils/vars.ts'
+const envs =  envFn('MISSING-KEY-VALUE')
+
+const findVars = async ()=>{
+    const [AWS_KEY, AWS_SECRET, AWS_REGION] = await Promise.all([
+        envs('AWS_KEY'),
+        envs('AWS_SECRET'),
+        envs('REGION')
+    ])
+        
+    const POLLY = {
+        BUCKET : await envs('POLLYBUCKET'),
+        PREFIX : await envs('POLLYPREFIX')
+    }
+    return Object.freeze({ AWS_KEY, AWS_REGION, AWS_SECRET, POLLY})
+}
+
 
 // priority actions
 Deno.test('DescribeVoices', async ()=>{
+    const envs = await findVars()
     const pc = pollyClient(envs.AWS_KEY, envs.AWS_SECRET)
     const request = await pc.DescribeVoices().request()
     assertEquals(request.body, null)
@@ -25,15 +43,17 @@ Deno.test('DescribeVoices', async ()=>{
 })
 
 Deno.test('Inpsect Request - GetSpeechSynthesisTask', async() => {
+    const envs = await findVars()
     const pc = pollyClient(envs.AWS_KEY, envs.AWS_SECRET)
     const req = await pc.GetSpeechSynthesisTask('task-Id-42').request()
     assert(req.url)
 })
 
 Deno.test('StartSpeechSynthesisTask Create Request', async ()=>{
+    const envs = await findVars()
     const pc = pollyClient(envs.AWS_KEY, envs.AWS_SECRET)
     const req = {
-        OutputS3BucketName: envs.pollybucket,
+        OutputS3BucketName: envs.POLLY.BUCKET,
         OutputS3KeyPrefix: 'helloWorld',
         Text: 'Hello World! I some text that you can both read and hear.',
     }
@@ -50,6 +70,7 @@ Deno.test('StartSpeechSynthesisTask Create Request', async ()=>{
 })
 
 Deno.test('ListSpeechSynthesisTasks', async ()=>{
+    const envs = await findVars()
     const pc = pollyClient(envs.AWS_KEY, envs.AWS_SECRET)
     
     const request = await pc.ListSpeechSynthesisTasks().request()
@@ -70,9 +91,10 @@ Deno.test('ListSpeechSynthesisTasks', async ()=>{
 })
 
 Deno.test('StartSpeechSynthesisTask Create Request', async ()=>{
+    const envs = await findVars()
     const pc = pollyClient(envs.AWS_KEY, envs.AWS_SECRET)
     const req = {
-        OutputS3BucketName: envs.pollybucket,
+        OutputS3BucketName: envs.POLLY.BUCKET,
         OutputS3KeyPrefix: 'helloWorld',
         Text: 'Hello World! I some text that you can both read and hear.',
     }
@@ -89,9 +111,10 @@ Deno.test('StartSpeechSynthesisTask Create Request', async ()=>{
 
 // skip since the multi-step test accomplsihes the same goal 
 Deno.test(skip('StartSpeechSynthesisTask Issue Request', async ()=>{
+    const envs = await findVars()
     const pc = pollyClient(envs.AWS_KEY, envs.AWS_SECRET)
     const req = {
-        OutputS3BucketName: envs.pollybucket,
+        OutputS3BucketName: envs.POLLY.BUCKET,
         OutputS3KeyPrefix: 'deleteMe-fromTest',
         Text: 'Hello World! I some text that you can both read and hear.',
     }
@@ -101,6 +124,7 @@ Deno.test(skip('StartSpeechSynthesisTask Issue Request', async ()=>{
 }))
 
 Deno.test('Observe a task in-flight (within the queue)', async (t) =>{
+    const envs = await findVars()
     const pc = pollyClient(envs.AWS_KEY, envs.AWS_SECRET)
     const b = Object.entries(Deno.build)
         .filter(([_,v])=>v)    
@@ -111,7 +135,7 @@ Deno.test('Observe a task in-flight (within the queue)', async (t) =>{
     let status: Status
 
     const req = {
-        OutputS3BucketName: envs.pollybucket,
+        OutputS3BucketName: envs.POLLY.BUCKET,
         OutputS3KeyPrefix: `deleteMe-${Date.now()}-${b}`,
         Text: `This text was generated on ${(new Date).toISOString()} from a system that has ${Object.entries(Deno.build).map(([k,v])=>`${k} equal to ${v}`).join(' and ')}`,
     }

@@ -26,10 +26,7 @@ BSON,B64::{{btoa value here}} - ba::
 import { gzipDecode, gzipEncode } from 'https://deno.land/x/wasm_gzip@v1.0.0/mod.ts';
 import { compress as brCompress, decompress as brDecompress } from 'https://deno.land/x/brotli@v0.1.4/mod.ts';
 import { Buffer as nodeBuffer } from 'https://deno.land/std@0.152.0/node/buffer.ts';
-import {
-	compress as zstdCompress,
-	decompress as zstdDecompress,
-} from 'https://deno.land/x/zstd_wasm@0.0.16/deno/zstd.ts';
+import { compress as zstdCompress, decompress as zstdDecompress } from 'https://deno.land/x/zstd_wasm@0.0.16/deno/zstd.ts';
 import * as bson from 'https://deno.land/x/deno_bson@v0.0.2/mod.ts';
 
 export interface FunctionParsingOptions {
@@ -54,33 +51,33 @@ export enum TypeNames {
 	Left = 'either-type__left',
 	Right = 'either-type__right',
 }
-  
+
 export interface Just<T> {
-	type: typeof TypeNames.Just
-	val: T
+	type: typeof TypeNames.Just;
+	val: T;
 }
 export interface Nothing {
-	type: typeof TypeNames.Nothing
+	type: typeof TypeNames.Nothing;
 }
 
 export interface Left<L> {
-	type: TypeNames.Left,
-	left: L
-	right: never
+	type: TypeNames.Left;
+	left: L;
+	right: never;
 }
 export interface Right<R> {
-	type: TypeNames.Right,
-	right: R
-	left: never
+	type: TypeNames.Right;
+	right: R;
+	left: never;
 }
 
-export type Maybe<J> = Just<J> | Nothing
-export type Either<R, L = Error> = NonNullable< Right<R> | Left<L>>
-export const Nothing = (): Nothing => ({ type: TypeNames.Nothing })
-export const Just = <J> (val: J): Just<J> => ({ type: TypeNames.Just, val })
+export type Maybe<J> = Just<J> | Nothing;
+export type Either<R, L = Error> = NonNullable<Right<R> | Left<L>>;
+export const Nothing = (): Nothing => ({ type: TypeNames.Nothing });
+export const Just = <J>(val: J): Just<J> => ({ type: TypeNames.Just, val });
 
-export const Left = <L>(left: L): Left<L> => ({ type: TypeNames.Left, left }) as Left<L>
-export const Right = <R> (right: R): Right<R> => ({ type: TypeNames.Right, right }) as Right<R>
+export const Left = <L>(left: L): Left<L> => ({ type: TypeNames.Left, left }) as Left<L>;
+export const Right = <R>(right: R): Right<R> => ({ type: TypeNames.Right, right }) as Right<R>;
 
 export type BareParams = number | boolean | null;
 export type EncodedParams = string | FunctionBuilderParamInputs;
@@ -214,7 +211,7 @@ export const sortValidFuncs = (funcs: string[]): string[] => {
 
 const tryJSONparse = (s: string): Either<unknown> => {
 	try {
-		return Right(JSON.parse(s))
+		return Right(JSON.parse(s));
 	} catch (_er) {
 		return Left(new Error(_er));
 	}
@@ -229,17 +226,15 @@ export const legendIsValid = (legend: string[]): boolean => {
 // All shorthand
 // otherwise bumped to mixed/longform
 export const stringifyLegend = (legend: string[]) =>
-	legend.every((tok) => tok.toLowerCase() === tok) 
-		? legend.join('') 
-		: legend.join(',');
+	legend.every((tok) => tok.toLowerCase() === tok) ? legend.join('') : legend.join(',');
 
 export const parseLegend = (opts: FunctionParsingOptions, legend: string): Either<string[]> => {
 	const val = legend.includes(opts.legendDelim) ? legend.split(opts.legendDelim) : legend.split('');
 	return !val.every((f) => FuncsAVAIL.includes(f))
 		? Left(new Error(`Found invalid encoding functions: ${val.filter((f) => !!FuncsAVAIL.includes(f)).join(',')}`))
 		: legendIsValid(val)
-			? Right(sortValidFuncs(val))
-			: Left(new Error(`The content encoding legend must have a structure + encoding function, middle funcs are optional`))
+		? Right(sortValidFuncs(val))
+		: Left(new Error(`The content encoding legend must have a structure + encoding function, middle funcs are optional`));
 };
 
 /**
@@ -248,78 +243,76 @@ export const parseLegend = (opts: FunctionParsingOptions, legend: string): Eithe
  * - {legend}::{string} 	// standard form
  * - ::{string} 			// implied default form
  */
-export const discoverLegend = (opts: FunctionParsingOptions = parseOptions)=>(maybeLegend: string): Either<DiscoveryStruct> => {
-	if(maybeLegend.includes(opts.legendSeperator)){
-		const parsedLeg = parseLegend(opts, maybeLegend.split(opts.legendSeperator)[0])
-		if(maybeLegend.split(opts.legendSeperator)[0].length > 0){
-			return parsedLeg.left
-			? Left(parsedLeg.left)
-			: Right({funcs: parsedLeg.right, str: maybeLegend.split(opts.legendSeperator)[1]})
-		}else{
-			const pl = parseLegend(opts, opts.legendOpts.init)
-			return pl.left
-				? Left(pl.left)
-				: Right({funcs: pl.right, str: maybeLegend.split(opts.legendSeperator)[1] })
-		}
-	}else{
-		return maybeLegend.length > opts.legendOpts.hurdle
-			? Right({ funcs: opts.legendOpts.over.split(''), str: maybeLegend })
-			: Right({ funcs: opts.legendOpts.under.split(''), str: maybeLegend })
-	}
-}
-
-export const parseParam = (opts: FunctionParsingOptions = parseOptions) => ( paramValueString: string): Either<unknown> => {
-	const leg = discoverLegend(opts)(paramValueString);
-	// console.log('legend::>> ',leg)
-	
-	if (leg.left) {
-		return Left(leg.left);
-	} else {
-		if (['null', 'true', 'false'].includes(leg.right.str)) {
-			return Right(JSON.parse(leg.right.str))
-		}
-
-		if (!/[^0-9-_.+]+/gi.test(leg.right.str)) { // has no letters
-			// NOTE: basė4 has no . char
-			const maybeVal = tryJSONparse(leg.right.str);
-			return maybeVal.left 
-				? Left(maybeVal.left) 
-				: Right(maybeVal.right)
+export const discoverLegend = (opts: FunctionParsingOptions = parseOptions) =>
+	(maybeLegend: string): Either<DiscoveryStruct> => {
+		if (maybeLegend.includes(opts.legendSeperator)) {
+			const parsedLeg = parseLegend(opts, maybeLegend.split(opts.legendSeperator)[0]);
+			if (maybeLegend.split(opts.legendSeperator)[0].length > 0) {
+				return parsedLeg.left
+					? Left(parsedLeg.left)
+					: Right({ funcs: parsedLeg.right, str: maybeLegend.split(opts.legendSeperator)[1] });
+			} else {
+				const pl = parseLegend(opts, opts.legendOpts.init);
+				return pl.left ? Left(pl.left) : Right({ funcs: pl.right, str: maybeLegend.split(opts.legendSeperator)[1] });
+			}
 		} else {
-			// console.log('string:: ', {str})
-			// string, object
-			const funcs = leg.right.funcs
-			const [parseFn, unencFn, ...middFns] = funcs.length === 2
-				? [contentStructureFns.fromURL[funcs[0]], encodingFns.fromURL[funcs[1]]]
-				: [
-					contentStructureFns.fromURL[funcs[0]],
-					encodingFns.fromURL[leg.right.funcs.slice(-1)[0]],
-					...funcs.slice(1, -1).map((letter) => transformFns.fromURL[letter]),
-				];
-
-			// console.log({ parseFn, unencFn, middFns })
-
-			const composedMiddles = middFns.reduce((p, next) => {
-				return (data: Uint8Array) => next(p(data));
-			}, (input: Uint8Array) => input);
-
-			return Right(parseFn(composedMiddles(unencFn(leg.right.str))))
+			return maybeLegend.length > opts.legendOpts.hurdle
+				? Right({ funcs: opts.legendOpts.over.split(''), str: maybeLegend })
+				: Right({ funcs: opts.legendOpts.under.split(''), str: maybeLegend });
 		}
-	}
-};
+	};
 
-export const encodeParam = (legend: string, opts: FunctionParsingOptions = parseOptions ) =>
+export const parseParam = (opts: FunctionParsingOptions = parseOptions) =>
+	(paramValueString: string): Either<unknown> => {
+		const leg = discoverLegend(opts)(paramValueString);
+		// console.log('legend::>> ',leg)
+
+		if (leg.left) {
+			return Left(leg.left);
+		} else {
+			if (['null', 'true', 'false'].includes(leg.right.str)) {
+				return Right(JSON.parse(leg.right.str));
+			}
+
+			if (!/[^0-9-_.+]+/gi.test(leg.right.str)) { // has no letters
+				// NOTE: basė4 has no . char
+				const maybeVal = tryJSONparse(leg.right.str);
+				return maybeVal.left ? Left(maybeVal.left) : Right(maybeVal.right);
+			} else {
+				// console.log('string:: ', {str})
+				// string, object
+				const funcs = leg.right.funcs;
+				const [parseFn, unencFn, ...middFns] = funcs.length === 2
+					? [contentStructureFns.fromURL[funcs[0]], encodingFns.fromURL[funcs[1]]]
+					: [
+						contentStructureFns.fromURL[funcs[0]],
+						encodingFns.fromURL[leg.right.funcs.slice(-1)[0]],
+						...funcs.slice(1, -1).map((letter) => transformFns.fromURL[letter]),
+					];
+
+				// console.log({ parseFn, unencFn, middFns })
+
+				const composedMiddles = middFns.reduce((p, next) => {
+					return (data: Uint8Array) => next(p(data));
+				}, (input: Uint8Array) => input);
+
+				return Right(parseFn(composedMiddles(unencFn(leg.right.str))));
+			}
+		}
+	};
+
+export const encodeParam = (legend: string, opts: FunctionParsingOptions = parseOptions) =>
 	(obj: BareParams | EncodedParams): Either<string> => {
 		// const { err, val } = parseLegend(opts, legend)
-		const pl = parseLegend(opts, legend)
+		const pl = parseLegend(opts, legend);
 
 		if (pl.left) {
 			return Left(pl.left);
 		} else {
-			const funcs = pl.right
+			const funcs = pl.right;
 			if (isBareParam(obj)) {
 				// console.log('bare',`${obj}`, {obj})
-				return Right(`${obj}`)
+				return Right(`${obj}`);
 			} else {
 				// console.log('encoded',{obj})
 				const [strFn, encFn, ...middFns] = funcs.length === 2
@@ -334,7 +327,7 @@ export const encodeParam = (legend: string, opts: FunctionParsingOptions = parse
 					return (data: Uint8Array) => next(p(data));
 				}, (input: Uint8Array) => input);
 
-				return Right(`${stringifyLegend(funcs)}${opts.legendSeperator}${encFn(composedMiddles(strFn(obj)))}` )
+				return Right(`${stringifyLegend(funcs)}${opts.legendSeperator}${encFn(composedMiddles(strFn(obj)))}`);
 			}
 		}
 	};
@@ -346,55 +339,53 @@ export const buildParams = (opts: FunctionParsingOptions = parseOptions) =>
 		// FUTURE DEV: since the only source of errors is via "invalid legend keys"
 		// and since they are hard coded for now, there is zero chance of propogating errors
 		// this would change if the legend is free-handed by the user - clearly that could have errors
-		return Right( 
+		return Right(
 			Object.entries(param)
-			.map(([paramName, paramVal]) => {
-				if (isBareParam(paramVal)) {
-					const encDataStr = encodeParam('sa')(paramVal)
-					return encDataStr.left 
-						? Left(encDataStr.left) // can't happen since 'sa' is hard coded
-						: Right(`${paramName}${opts.argValueDelim}${encDataStr.right}`)
-				} else {
-					return typeof paramVal === 'string'
-						? Right(`${paramName}${opts.argValueDelim}${encodeParam('sa')(paramVal).right}`) // sa vs ja
-						: Right(`${paramName}${opts.argValueDelim}${encodeParam('ja')(paramVal).right}`);
-				}
-			})
-			.filter(ei => ei.right)
-			.map(ei => ei.right)
-			.join(opts.argListDelim)
-		)
+				.map(([paramName, paramVal]) => {
+					if (isBareParam(paramVal)) {
+						const encDataStr = encodeParam('sa')(paramVal);
+						return encDataStr.left
+							? Left(encDataStr.left) // can't happen since 'sa' is hard coded
+							: Right(`${paramName}${opts.argValueDelim}${encDataStr.right}`);
+					} else {
+						return typeof paramVal === 'string'
+							? Right(`${paramName}${opts.argValueDelim}${encodeParam('sa')(paramVal).right}`) // sa vs ja
+							: Right(`${paramName}${opts.argValueDelim}${encodeParam('ja')(paramVal).right}`);
+					}
+				})
+				.filter((ei) => ei.right)
+				.map((ei) => ei.right)
+				.join(opts.argListDelim),
+		);
 	};
 /**
  * ### Parse Params
- * 
+ *
  * The inverse of `buildParams`
- * 
- * 
- * @param opts 
- * @returns 
+ *
+ * @param opts
+ * @returns
  */
-export const parseParams = (opts: FunctionParsingOptions = parseOptions) => (multiParamStr: string): Either<FunctionBuilderParamInputs> => {
+export const parseParams = (opts: FunctionParsingOptions = parseOptions) =>
+	(multiParamStr: string): Either<FunctionBuilderParamInputs> => {
 		const mapped = multiParamStr
 			.split(opts.argListDelim)
 			.map((paramChunks) => {
 				const [name, val] = paramChunks.split(opts.argValueDelim);
 				const pp = parseParam()(val);
-				return pp.left
-					? Left(pp.left)
-					: Right({ [name]: pp.right })
+				return pp.left ? Left(pp.left) : Right({ [name]: pp.right });
 			}) as Either<FunctionBuilderParamInputs, Error>[];
 
 		const errs = mapped.filter((item) => item.left);
 		if (errs.length > 0) {
-			return Left(new Error(errs.map(er => er.left).join('\n\n')))
+			return Left(new Error(errs.map((er) => er.left).join('\n\n')));
 		} else {
-			return Right( 
+			return Right(
 				mapped.reduce((acc, c) => ({
 					...acc,
 					...c.right,
-				}), {} as FunctionBuilderParamInputs)
-			)
+				}), {} as FunctionBuilderParamInputs),
+			);
 		}
 	};
 
@@ -437,18 +428,17 @@ export const buildFunctionString = (opts: FunctionParsingOptions = parseOptions)
 				const paramBodyStr = buildParams(opts)(paramObj);
 				return paramBodyStr.left
 					? Left(paramBodyStr.left)
-					: Right(`${fName}${opts.paramStart}${paramBodyStr.right}${opts.paramEnd}`)
+					: Right(`${fName}${opts.paramStart}${paramBodyStr.right}${opts.paramEnd}`);
 			}) as Either<string>[];
 
 		const errList = mapped.filter((item) => item.left);
 		return errList.length > 0
-			? Left( new Error(errList.map(er=>er.left).join('\n\n')))
-			: Right( mapped.map((item) => item.right).join(opts.functionDelim))
+			? Left(new Error(errList.map((er) => er.left).join('\n\n')))
+			: Right(mapped.map((item) => item.right).join(opts.functionDelim));
 	};
 
 export const parseFunctions = (opts: FunctionParsingOptions = parseOptions) =>
 	(compositionStr: string): Either<FunctionPathBuilderInputDict> => {
-		
 		const funcitonTokens = compositionStr
 			.split(opts.functionDelim)
 			.map((funcStr) => {
@@ -456,7 +446,7 @@ export const parseFunctions = (opts: FunctionParsingOptions = parseOptions) =>
 				return { fname: f, paramStr: !pStr ? null : pStr.slice(0, -1) }; // pull off last )
 			});
 
-		console.log(funcitonTokens)
+		console.log(funcitonTokens);
 
 		// const namedFuncWithNamedParams = funcitonTokens.map((i) =>
 		// 	typeof i.paramStr === 'string'
