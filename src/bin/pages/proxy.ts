@@ -8,14 +8,12 @@ import { fetchAndValidateIntoAST } from '../../lib/start.ts';
 
 import respondAs from '../utils/respondAs.ts';
 import { readToString, stringToStream } from '../../lib/utils/pumpReader.ts';
-import parseFuncs from '../../lib/parsers/enhancementFunctions.ts';
+import { type FuncInterface, functions } from '../../lib/parsers/enhancementFunctions.ts';
 import funcMap from '../../lib/enhancements/index.ts';
 import er from '../../lib/parsers/helpers/error.ts';
 
 export type Dict<T> = { [key: string]: T };
 export type ASTChainFunc = (i: PromiseOr<ASTComputable>) => Promise<ASTComputable>;
-
-type FuncInterface = { fname: string; params?: Dict<string>; messages?: string[] };
 
 const applyPipeline = async (ast: ASTComputable, ...chainFuncs: ASTChainFunc[]) => {
 	return chainFuncs.reduce(
@@ -60,11 +58,13 @@ const setupAstPipeline = async (ast: ASTComputable, funcParms: FuncInterface[]):
 
 export const proxy: Handler = async (_, params): Promise<Response> => {
 	// find/parse funcs
-	const funcs = parseFuncs(params?.composition ?? 'hash') as FuncInterface[];
+	const funcs = functions.parse()(params?.composition ?? 'hash');
+
+	const funcInt = funcs.right as FuncInterface[];
 
 	const ast = await setupAstPipeline(
 		await fetchAndValidateIntoAST({ url: params?.url ?? '' }),
-		funcs,
+		funcInt,
 	);
 
 	const respAs = await respondAs(params?.outputFmt ?? 'json', { ast, url: params?.url ?? '' });

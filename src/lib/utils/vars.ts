@@ -9,7 +9,7 @@ export const envVar = (defaultVal: string) =>
 		Object.entries(configState)
 			.forEach(([key, value]) => {
 				Deno.env.set(key, value);
-		});
+			});
 
 		return Deno.env.get(key) ?? defaultVal;
 	};
