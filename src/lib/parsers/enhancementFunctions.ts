@@ -38,7 +38,7 @@ import { Buffer as nodeBuffer } from 'https://deno.land/std@0.152.0/node/buffer.
 import { gzipDecode, gzipEncode } from 'https://deno.land/x/wasm_gzip@v1.0.0/mod.ts';
 import { compress as brCompress, decompress as brDecompress } from 'https://deno.land/x/brotli@v0.1.4/mod.ts';
 import { compress as zstdCompress, decompress as zstdDecompress } from 'https://deno.land/x/zstd_wasm@0.0.16/deno/zstd.ts';
-import * as _jose from 'https://deno.land/x/jose@v4.9.1/index.ts';
+import * as jose from 'https://deno.land/x/jose@v4.9.1/index.ts';
 import * as bson from 'https://deno.land/x/deno_bson@v0.0.2/mod.ts';
 
 export interface FunctionParsingOptions {
@@ -144,74 +144,88 @@ const isBareParam = (obj: BareParams | EncodedParams): obj is BareParams => {
 const dec = new TextDecoder();
 const enc = new TextEncoder();
 
-export const functionsStruct = Object.freeze({
-	// data -> UInt8Array
-	toURL: {
-		STR: (text: string) => enc.encode(text),
-		s: (text: string) => enc.encode(text),
-		JSON: (obj: unknown) => new Uint8Array(nodeBuffer.from(JSON.stringify(obj), 'utf8').buffer),
-		j: (obj: unknown) => new Uint8Array(nodeBuffer.from(JSON.stringify(obj), 'utf8').buffer),
-		BSON: (obj: unknown) => new Uint8Array(bson.serialize(obj as bson.Document)),
-		m: (obj: unknown) => new Uint8Array(bson.serialize(obj as bson.Document)),
-	} as { [funcName: string]: (d: unknown) => Uint8Array },
-	// data <- UInt8Array
-	fromURL: {
-		STR: (data: Uint8Array) => dec.decode(data),
-		s: (data: Uint8Array) => dec.decode(data),
-		JSON: (data: Uint8Array) => JSON.parse(dec.decode(data)),
-		j: (data: Uint8Array) => JSON.parse(dec.decode(data)),
-		BSON: (obj: Uint8Array) => bson.deserialize(obj),
-		m: (obj: Uint8Array) => bson.deserialize(obj),
-	} as { [funcName: string]: (d: Uint8Array) => unknown },
-});
+export const functionsStruct = (()=>{
+	const strEnc = async (text: string) => enc.encode(text)
+	const jsonEnc = async (obj: unknown) => new Uint8Array(nodeBuffer.from(JSON.stringify(obj), 'utf8').buffer)
+	const bsonEnc = async (obj: unknown) => new Uint8Array(bson.serialize(obj as bson.Document))
+	
+	const strDec = async (data: Uint8Array) => dec.decode(data)
+	const jsonDec = async (data: Uint8Array) => JSON.parse(dec.decode(data))
+	const bsonDec = async (obj: Uint8Array) => bson.deserialize(obj)
+	
+	return Object.freeze({
+		// data -> UInt8Array
+		toURL: {
+			STR: strEnc, 
+			s:  strEnc, 
+			JSON: jsonEnc,
+			j: jsonEnc,
+			BSON: bsonEnc, 
+			m: bsonEnc, 
+		} as { [funcName: string]: (d: unknown) => Promise<Uint8Array> },
+		// data <- UInt8Array
+		fromURL: {
+			STR: strDec,
+			s: strDec,
+			JSON: jsonDec,
+			j: jsonDec,
+			BSON: bsonDec,
+			m: bsonDec,	
+		} as { [funcName: string]: (d: Uint8Array) => Promise<unknown> },
+	});
+})()
 
-// UInt8Array <-> UInt8Array
-export const functionsTransforms = Object.freeze({
-	toURL: {
-		GZ: gzipEncode,
-		g: gzipEncode,
-		BR: brCompress,
-		b: brCompress,
-		ZSTD: zstdCompress,
-		z: zstdCompress,
-	} as { [transformName: string]: (i: Uint8Array) => Uint8Array },
-	fromURL: {
-		GZ: gzipDecode,
-		g: gzipDecode,
-		BR: brDecompress,
-		b: brDecompress,
-		ZSTD: (i: Uint8Array) => new Uint8Array(zstdDecompress(i)),
-		z: (i: Uint8Array) => new Uint8Array(zstdDecompress(i)),
-	} as { [transformName: string]: (i: Uint8Array) => Uint8Array },
-});
+export const functionsTransforms = (()=>{	
+	const gzEnc = async (bytes: Uint8Array) => gzipEncode(bytes)
+	const brEnc = async (bytes: Uint8Array) => brCompress(bytes)
+	const zEnc = async (bytes: Uint8Array) => zstdCompress(bytes)
+		
+	const gzDec = async (bytes: Uint8Array) => gzipDecode(bytes)
+	const brDec = async (bytes: Uint8Array) => brDecompress(bytes)
+	const zDec = async (i: Uint8Array) => new Uint8Array(zstdDecompress(i))
 
-export const functionsEncodings = Object.freeze({
-	// UInt8Array -> string
-	toURL: {
-		B64: (data: Uint8Array) => nodeBuffer.from(data).toString('base64').replaceAll('/', '_'),
-		a: (data: Uint8Array) => nodeBuffer.from(data).toString('base64').replaceAll('/', '_'),
-		// B91 -> https://deno.land/x/base91@v1.1 -> 19% overhead in lieu of 33% from b64
-		//
-		// do Encryption functions as encoding functions since
-		// you wont want to compress something already encrypted
-		//
-		// provides a parameter to another AST middleware - where the param might be their password to an online publication
-		// perhaps done where each middle ware gets a public/private key pair - and can serialize via the pub key - JWK?
-		//
-		// RSA keys as jwk
-		// AES-GCM
-		// RSA keys via jwe
-		// jwk - https://developer.mozilla.org/en-US/docs/Web/API/SubtleCrypto/importKey#pkcs_8
-		// saltPack | PEX  - https://saltpack.org/encryption-format-v2 | https://book.keybase.io/docs/crypto/key-exchange | https://book.keybase.io/docs/server
-	} as { [funcName: string]: (d: Uint8Array) => string },
-	// UInt8Array <- string
-	fromURL: {
-		B64: (URLstring: string) => new Uint8Array(nodeBuffer.from(URLstring.replaceAll('_', '/'), 'base64').buffer),
-		a: (URLstring: string) => new Uint8Array(nodeBuffer.from(URLstring.replaceAll('_', '/'), 'base64').buffer),
-		// B91 -> https://deno.land/x/base91@v1.1
-		// n
-	} as { [funcName: string]: (d: string) => Uint8Array },
-});
+	return Object.freeze({
+		toURL: {
+			GZ: gzEnc,
+			g: gzEnc,
+			BR: brEnc,
+			b: brEnc,
+			ZSTD: zEnc,
+			z: zEnc,
+		} as { [transformName: string]: (i: Uint8Array) => Promise<Uint8Array> },	
+		fromURL : {
+			GZ: gzDec,
+			g: gzDec,
+			BR: brDec,
+			b: brDec,
+			ZSTD: zDec,
+			z: zDec
+		}as { [transformName: string]: (i: Uint8Array) => Promise<Uint8Array> }
+	})
+})()
+
+
+export const functionsEncodings = ((publicKey:Uint8Array, privateKey: Uint8Array)=>{
+	const B64toURL = async (data: Uint8Array) => nodeBuffer.from(data).toString('base64').replaceAll('/', '_')
+	const B64fromURL = async (URLstring: string) => new Uint8Array(nodeBuffer.from(URLstring.replaceAll('_', '/'), 'base64').buffer)
+	const JWStoURL = async (data: Uint8Array) => new jose.CompactEncrypt(data).setProtectedHeader({ alg: 'RSA-OAEP-256', enc: 'A256GCM' }).encrypt(publicKey)
+	const JWSFromURL = async (URLstring: string) => (await jose.compactDecrypt(URLstring, privateKey)).plaintext
+
+	return Object.freeze({
+		toURL: {
+			B64: B64toURL,
+			a: B64toURL,
+			JWS: JWStoURL,
+			e: JWStoURL
+		} as { [funcName: string]: (d: Uint8Array) => Promise<string> }, 
+		fromURL:{
+			B64: B64fromURL,
+			a: B64fromURL,
+			JWS: JWSFromURL,
+			e: JWSFromURL
+		}as { [funcName: string]: (d: string) => Promise<Uint8Array> }
+	})
+})(new Uint8Array([]), new Uint8Array([]))
 
 // ASSUMES symetry on to and From URL sides
 export const functionAbrevAvailable = [
@@ -305,7 +319,7 @@ export const legends = (() => {
 
 export const paramElement = {
 	parse: (opts: FunctionParsingOptions = defaultedOptions) =>
-		(paramValueString: string): Either<unknown> => {
+		async (paramValueString: string): Promise<Either<unknown>> => {
 			// console.log({paramValueString})
 			const leg = legends.discover(opts)(paramValueString);
 			// console.log('legend::>> ',leg)
@@ -336,15 +350,15 @@ export const paramElement = {
 					// console.log({ parseFn, unencFn, middFns })
 
 					const composedMiddles = middFns.reduce((p, next) => {
-						return (data: Uint8Array) => next(p(data));
-					}, (input: Uint8Array) => input);
+						return async (data: Uint8Array) => next( await p(data));
+					}, async (input: Uint8Array) => input);
 
-					return Right(parseFn(composedMiddles(unencFn(leg.right.str))));
+					return Right(await parseFn(await composedMiddles(await unencFn(leg.right.str))));
 				}
 			}
 		},
 	stringify: (legend: string, opts: FunctionParsingOptions = defaultedOptions) =>
-		(obj: BareParams | EncodedParams): Either<string> => {
+		async (obj: BareParams | EncodedParams): Promise<Either<string>> => {
 			// const { err, val } = parseLegend(opts, legend)
 			const pl = legends.parse(opts)(legend);
 			if (pl.left) {
@@ -365,10 +379,10 @@ export const paramElement = {
 						];
 
 					const composedMiddles = middFns.reduce((p, next) => {
-						return (data: Uint8Array) => next(p(data));
-					}, (input: Uint8Array) => input);
+						return async (data: Uint8Array) => next(await p(data));
+					}, async (input: Uint8Array) => input);
 
-					return Right(`${legends.stringify(funcs)}${opts.legendSeperator}${encFn(composedMiddles(strFn(obj)))}`);
+					return Right(`${legends.stringify(funcs)}${opts.legendSeperator}${await encFn(await composedMiddles(await strFn(obj)))}`);
 				}
 			}
 		},
@@ -376,19 +390,19 @@ export const paramElement = {
 
 export const params = {
 	parse: (opts: FunctionParsingOptions = defaultedOptions) =>
-		(multiParamStr: string): Either<FunctionBuilderParamInputs> => {
-			const mapped = multiParamStr
+		async (multiParamStr: string): Promise<Either<FunctionBuilderParamInputs>> => {
+			const mapped = await Promise.all(multiParamStr
 				.split(opts.argListDelim)
-				.map((paramChunks) => {
+				.map(async (paramChunks) => {
 					// console.log({paramChunks})
 					const [name, val] = paramChunks.split(opts.argValueDelim);
 					if (!val) {
 						return Left(new Error('Parameter string does not contain a key value pair'));
 					} else {
-						const pp = paramElement.parse()(val);
+						const pp = await paramElement.parse()(val);
 						return pp.left ? Left(pp.left) : Right({ [name]: pp.right });
 					}
-				}) as Either<FunctionBuilderParamInputs, Error>[];
+				})) as Either<FunctionBuilderParamInputs>[];
 
 			const errs = mapped.filter((item) => item.left);
 			return errs.length > 0
@@ -396,32 +410,39 @@ export const params = {
 				: Right(mapped.reduce((acc, c) => ({ ...acc, ...c.right }), {} as FunctionBuilderParamInputs));
 		},
 	stringify: (opts: FunctionParsingOptions = defaultedOptions) =>
-		(param: FunctionBuilderParamInputs): Either<string> => {
+		async (param: FunctionBuilderParamInputs): Promise<Either<string>> => {
 			// FUTURE DEV: since the only source of errors is via "invalid legend keys"
 			// and since they are hard coded for now, there is zero chance of propogating errors
 			// this would change if the legend is free-handed by the user - clearly that could have errors
-			return Right(
+			
+			const resolvedEithers = await Promise.all(
 				Object.entries(param)
-					.map(([paramName, paramVal]) => {
-						if (isBareParam(paramVal)) {
-							const encDataStr = paramElement.stringify('sa')(paramVal);
-							return encDataStr.left
-								? Left(encDataStr.left) // can't happen since 'sa' is hard coded
-								: Right(`${paramName}${opts.argValueDelim}${encDataStr.right}`);
-						} else {
-							return typeof paramVal === 'string'
-								? paramVal.length > opts.legendOpts.hurdle
-									? Right(`${paramName}${opts.argValueDelim}${paramElement.stringify('sba')(paramVal).right}`) // sba vs sa
-									: Right(`${paramName}${opts.argValueDelim}${paramElement.stringify('sa')(paramVal).right}`) // sba vs ja
-								: JSON.stringify(paramVal).length > opts.legendOpts.hurdle // heuristic
-								? Right(`${paramName}${opts.argValueDelim}${paramElement.stringify('jba')(paramVal).right}`) // jbs in lieu of sa
-								: Right(`${paramName}${opts.argValueDelim}${paramElement.stringify('ja')(paramVal).right}`); // ja in lieu of sa
-						}
-					})
-					.filter((ei) => ei.right)
-					.map((ei) => ei.right)
-					.join(opts.argListDelim),
-			);
+				.map(async ([paramName, paramVal]) => {
+					if (isBareParam(paramVal)) {
+						const encDataStr = await paramElement.stringify('sa')(paramVal);
+						return encDataStr.left
+							? Left(encDataStr.left) // can't happen since 'sa' is hard coded
+							: Right(`${paramName}${opts.argValueDelim}${encDataStr.right}`);
+					} else {
+						return typeof paramVal === 'string'
+							? paramVal.length > opts.legendOpts.hurdle
+								? Right(`${paramName}${opts.argValueDelim}${(await paramElement.stringify('sba')(paramVal)).right}`) // sba vs sa
+								: Right(`${paramName}${opts.argValueDelim}${(await paramElement.stringify('sa')(paramVal)).right}`) // sba vs ja
+							: JSON.stringify(paramVal).length > opts.legendOpts.hurdle // heuristic
+							? Right(`${paramName}${opts.argValueDelim}${(await paramElement.stringify('jba')(paramVal)).right}`) // jbs in lieu of sa
+							: Right(`${paramName}${opts.argValueDelim}${(await paramElement.stringify('ja')(paramVal)).right}`); // ja in lieu of sa
+					}
+				})
+			) as Either<string>[]
+			
+			const errs = resolvedEithers.filter(ei => ei.left)
+			return errs.length > 0 
+				? Left(new Error(errs.map(ei=> ei.left).join('\n\n') ))
+				: Right( resolvedEithers
+						.filter((ei) => ei.right)
+						.map((ei) => ei.right)
+						.join(opts.argListDelim),
+				);
 		},
 };
 
@@ -430,17 +451,18 @@ export const functions = {
 	transforms: functionsTransforms,
 	structs: functionsStruct,
 	parse: (opts: FunctionParsingOptions = defaultedOptions) =>
-		(compositionStr: string): Either<FuncInterface[]> => {
-			const parsedFunctions = compositionStr
+		async (compositionStr: string): Promise<Either<FuncInterface[]>> => {
+			const parsedFunctions = await Promise.all(compositionStr
 				.split(opts.functionDelim)
 				.map((funcStr) => {
 					const [f, pStr] = funcStr.split(opts.paramStart);
 					return { fname: f, multiParamStr: !pStr ? '' : pStr.slice(0, -1) }; // pull off last )
 				})
-				.map(({ fname, multiParamStr }) => {
-					const parsedParams = params.parse(opts)(multiParamStr);
+				.map(async ({ fname, multiParamStr }) => {
+					const parsedParams = await params.parse(opts)(multiParamStr);
 					return { fname, params: parsedParams.right, errors: parsedParams.left };
-				});
+				})
+			);
 
 			const pfErrs = parsedFunctions.filter((pf) => pf.errors);
 			return pfErrs.length > 0
@@ -451,16 +473,16 @@ export const functions = {
 				} as FuncInterface)));
 		},
 	stringify: (opts: FunctionParsingOptions = defaultedOptions) =>
-		(...funcList: FunctionPathBuilderInputDict[]): Either<string> => {
-			const mapped = funcList
+		async (...funcList: FunctionPathBuilderInputDict[]): Promise<Either<string>> => {
+			const mapped = await Promise.all(funcList
 				.filter((fObj) => Object.keys(fObj).length === 1)
-				.map((fObj) => {
+				.map(async (fObj) => {
 					const [fName, paramObj] = Object.entries(fObj)[0]; //shgould only be 1 due to filter
-					const paramBodyStr = params.stringify(opts)(paramObj);
+					const paramBodyStr = await params.stringify(opts)(paramObj);
 					return paramBodyStr.left
 						? Left(paramBodyStr.left)
 						: Right(`${fName}${opts.paramStart}${paramBodyStr.right}${opts.paramEnd}`);
-				}) as Either<string>[];
+				})) as Either<string>[];
 
 			const errList = mapped.filter((item) => item.left);
 			return errList.length > 0
@@ -470,57 +492,3 @@ export const functions = {
 };
 
 export default { params, functions, legends };
-
-/*
-{
-	f:'name':
-	params: {
-		//
-		key1: 'sa::string',
-		keyA: {
-			keyI: 'string',
-			keyII: true
-			keyIII: {deepNesting: "sa::Other"}
-			}
-		}
-}
-
-// OR WHAT IF WE DID?? -- But the issue is ordering in a dict is loosley governed
-{
-	FName1: {} // object is params
-	FName2: {} // object is params
-}
-
-// OR WHAT IF WE DID?? -- But the issue is ordering in a dict is loosley governed
-// So maybe it coudld be supported but you would neecd to echo back the names in order for verification
-
-// object is params; 1 key per object, next function  object goes in next on the array
-[
-	{ FName1: {p1: true, p2: false} }
-	{ FName2: {} }
-]
-
-*/
-
-// trying to keep this list as URL safe as possible
-// const opts = parseOptions;
-
-// const happyTest = `preview()${opts.functionDelim}` +
-// 	`addBody(css${opts.argValueDelim}'a'${opts.argListDelim}root${opts.argValueDelim}'#main')${opts.functionDelim}` +
-// 	`rmAds(list${opts.argValueDelim}'')${opts.functionDelim}` +
-// 	`funcOne(p1${opts.argValueDelim}""${opts.argListDelim}p2${opts.argValueDelim}"'a'")${opts.functionDelim}` +
-// 	`addsubs`;
-
-// const percent20Test = `preview(show${opts.argValueDelim}false)${opts.functionDelim}` +
-// 	`%20addBody(css%20${opts.argValueDelim}'a'${opts.argListDelim}%20root='#main')${opts.functionDelim}` +
-// 	`rmAds(list${opts.argValueDelim}'')${opts.functionDelim}` +
-// 	`%20addsubs%20`;
-
-// const happyTestPath = buildFunctionString(opts)(
-// 	{ f: 'addBody', params: { 'css': 'a' } },
-// 	{ f: 'rmAds', params: { 'list': 'http://easylist.co' } },
-// 	{ f: 'funcOne', params: { 'p1': '', 'p2': '' } },
-// 	{ f: 'addsubs', params: { some: { nested: { object: 'string' } } } },
-// );
-
-// console.log('composition: ', happyTest, '\n', parseFunctions(happyTest, opts));
