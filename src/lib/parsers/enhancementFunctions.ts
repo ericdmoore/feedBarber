@@ -25,8 +25,8 @@ BSON,B64::{{btoa value here}} - ba::
 	thus the system will need to support encryption
 	So far a rough plan goes like this:
 		- each pluginInstallation is given a private/public key pair from the core
-		  - key fingerprint is available to the plugin
-		- the public key is then made available for encrypting strinbg blobs
+		  - keys and key fingerprints are available to the plugin
+		- the public key is then made available for encrypting string blobs
 		- the encrypter should also include some noise in the payload
 		- for example: an extra key value in a JSON.stringify payload or some otherwise meaningless whitespace for some other types of values
 		- the plugin will then un-encrypt the value so that only that plugin can read the value
@@ -40,6 +40,42 @@ import { compress as brCompress, decompress as brDecompress } from 'https://deno
 import { compress as zstdCompress, decompress as zstdDecompress } from 'https://deno.land/x/zstd_wasm@0.0.16/deno/zstd.ts';
 import * as jose from 'https://deno.land/x/jose@v4.9.1/index.ts';
 import * as bson from 'https://deno.land/x/deno_bson@v0.0.2/mod.ts';
+
+export enum CryptoKeyUsages {
+    'encrypt' = 'encrypt',
+    'decrypt' = 'decrypt',
+    'sign' = 'sign',
+    'verify' = 'verify',
+    'deriveKey' = 'deriveKey',
+    'deriveBits' = 'deriveBits',
+    'wrapKey' = 'wrapKey',
+    'unwrapKey' = 'unwrapKey',
+}
+
+export enum JWS_ALG {
+	'HS256' = 'HS256',
+	'HS384' = 'HS384',
+	'HS512' = 'HS512',
+	'RS256' = 'RS256',
+	'RS384' = 'RS384',
+	'RS512' = 'RS512',
+	'ES256' = 'ES256',
+	'ES384' = 'ES384',
+	'ES512' = 'ES512',
+	'PS256' = 'PS256',
+	'PS384' = 'PS384',
+	'PS512' = 'PS512',
+}
+
+export enum JWE_ALG {
+	'RSA1_5' = 'RSA1_5',
+	'RSA-OAEP' = 'RSA-OAEP',
+	'RSA-OAEP-256' = 'RSA-OAEP-256',
+	'ECDH-ES ' = 'ECDH-ES ',
+	'A128KW' = 'A128KW',
+	'A192KW' = 'A192KW',
+	'A256KW' = 'A256KW',
+}
 
 export interface FunctionParsingOptions {
 	functionDelim: string;
@@ -57,6 +93,10 @@ export interface FunctionParsingOptions {
 	};
 	auto: {
 		stringifyArrays: boolean;
+	};
+	encryptionKeys?: {
+		privateKey: string | jose.JWK;
+		publicKey: string | jose.JWK;
 	};
 }
 
@@ -141,27 +181,29 @@ const isBareParam = (obj: BareParams | EncodedParams): obj is BareParams => {
 		obj === null;
 };
 
+
 const dec = new TextDecoder();
 const enc = new TextEncoder();
 
-export const functionsStruct = (()=>{
-	const strEnc = async (text: string) => enc.encode(text)
-	const jsonEnc = async (obj: unknown) => new Uint8Array(nodeBuffer.from(JSON.stringify(obj), 'utf8').buffer)
-	const bsonEnc = async (obj: unknown) => new Uint8Array(bson.serialize(obj as bson.Document))
-	
-	const strDec = async (data: Uint8Array) => dec.decode(data)
-	const jsonDec = async (data: Uint8Array) => JSON.parse(dec.decode(data))
-	const bsonDec = async (obj: Uint8Array) => bson.deserialize(obj)
-	
+
+export const functionsStruct = (() => {
+	const strEnc = async (text: string) => enc.encode(text);
+	const jsonEnc = async (obj: unknown) => new Uint8Array(nodeBuffer.from(JSON.stringify(obj), 'utf8').buffer);
+	const bsonEnc = async (obj: unknown) => new Uint8Array(bson.serialize(obj as bson.Document));
+
+	const strDec = async (data: Uint8Array) => dec.decode(data);
+	const jsonDec = async (data: Uint8Array) => JSON.parse(dec.decode(data));
+	const bsonDec = async (obj: Uint8Array) => bson.deserialize(obj);
+
 	return Object.freeze({
 		// data -> UInt8Array
 		toURL: {
-			STR: strEnc, 
-			s:  strEnc, 
+			STR: strEnc,
+			s: strEnc,
 			JSON: jsonEnc,
 			j: jsonEnc,
-			BSON: bsonEnc, 
-			m: bsonEnc, 
+			BSON: bsonEnc,
+			m: bsonEnc,
 		} as { [funcName: string]: (d: unknown) => Promise<Uint8Array> },
 		// data <- UInt8Array
 		fromURL: {
@@ -170,19 +212,20 @@ export const functionsStruct = (()=>{
 			JSON: jsonDec,
 			j: jsonDec,
 			BSON: bsonDec,
-			m: bsonDec,	
+			m: bsonDec,
 		} as { [funcName: string]: (d: Uint8Array) => Promise<unknown> },
 	});
-})()
+})();
 
-export const functionsTransforms = (()=>{	
-	const gzEnc = async (bytes: Uint8Array) => gzipEncode(bytes)
-	const brEnc = async (bytes: Uint8Array) => brCompress(bytes)
-	const zEnc = async (bytes: Uint8Array) => zstdCompress(bytes)
-		
-	const gzDec = async (bytes: Uint8Array) => gzipDecode(bytes)
-	const brDec = async (bytes: Uint8Array) => brDecompress(bytes)
-	const zDec = async (i: Uint8Array) => new Uint8Array(zstdDecompress(i))
+
+export const functionsTransforms = (() => {
+	const gzEnc = async (bytes: Uint8Array) => gzipEncode(bytes);
+	const brEnc = async (bytes: Uint8Array) => brCompress(bytes);
+	const zEnc = async (bytes: Uint8Array) => zstdCompress(bytes);
+
+	const gzDec = async (bytes: Uint8Array) => gzipDecode(bytes);
+	const brDec = async (bytes: Uint8Array) => brDecompress(bytes);
+	const zDec = async (i: Uint8Array) => new Uint8Array(zstdDecompress(i));
 
 	return Object.freeze({
 		toURL: {
@@ -192,40 +235,55 @@ export const functionsTransforms = (()=>{
 			b: brEnc,
 			ZSTD: zEnc,
 			z: zEnc,
-		} as { [transformName: string]: (i: Uint8Array) => Promise<Uint8Array> },	
-		fromURL : {
+		} as { [transformName: string]: (i: Uint8Array) => Promise<Uint8Array> },
+		fromURL: {
 			GZ: gzDec,
 			g: gzDec,
 			BR: brDec,
 			b: brDec,
 			ZSTD: zDec,
-			z: zDec
-		}as { [transformName: string]: (i: Uint8Array) => Promise<Uint8Array> }
-	})
-})()
+			z: zDec,
+		} as { [transformName: string]: (i: Uint8Array) => Promise<Uint8Array> },
+	});
+})();
 
+export const jwkRSAtoCryptoKey = async (key: JsonWebKey, usages: KeyUsage[] = [CryptoKeyUsages.encrypt])=>{
+	return crypto.subtle.importKey('jwk', key, {name:JWE_ALG['RSA-OAEP'], hash:'SHA-512'}, true, usages)
+}
 
-export const functionsEncodings = ((publicKey:Uint8Array, privateKey: Uint8Array)=>{
-	const B64toURL = async (data: Uint8Array) => nodeBuffer.from(data).toString('base64').replaceAll('/', '_')
-	const B64fromURL = async (URLstring: string) => new Uint8Array(nodeBuffer.from(URLstring.replaceAll('_', '/'), 'base64').buffer)
-	const JWStoURL = async (data: Uint8Array) => new jose.CompactEncrypt(data).setProtectedHeader({ alg: 'RSA-OAEP-256', enc: 'A256GCM' }).encrypt(publicKey)
-	const JWSFromURL = async (URLstring: string) => (await jose.compactDecrypt(URLstring, privateKey)).plaintext
+export const functionsEncodings = ((publicKey: JsonWebKey, privateKey: JsonWebKey) => {
+	const B64toURL = async (data: Uint8Array) => nodeBuffer.from(data).toString('base64').replaceAll('/', '_');
+	const B64fromURL = async (URLstring: string) =>
+		new Uint8Array(nodeBuffer.from(URLstring.replaceAll('_', '/'), 'base64').buffer);
+	
+	// @todo JWE stuff here
+	const JWEtoURL = async (data: Uint8Array) => {
+		return new jose.CompactEncrypt(data)
+			// .setProtectedHeader({ alg: JWE_ALG['RSA-OAEP'], enc: 'A256GCM' })
+			.encrypt(await jwkRSAtoCryptoKey(publicKey));
+	} 
+		
+	const JWEFromURL = async (URLstring: string) => {
+		return (await jose.compactDecrypt(URLstring, await jwkRSAtoCryptoKey(privateKey, [CryptoKeyUsages.decrypt]))).plaintext;
+	}
 
 	return Object.freeze({
 		toURL: {
 			B64: B64toURL,
 			a: B64toURL,
-			JWS: JWStoURL,
-			e: JWStoURL
-		} as { [funcName: string]: (d: Uint8Array) => Promise<string> }, 
-		fromURL:{
+			JWE: JWEtoURL,
+			e: JWEtoURL,
+		} as { [funcName: string]: (d: Uint8Array) => Promise<string> },
+		fromURL: {
 			B64: B64fromURL,
 			a: B64fromURL,
-			JWS: JWSFromURL,
-			e: JWSFromURL
-		}as { [funcName: string]: (d: string) => Promise<Uint8Array> }
-	})
-})(new Uint8Array([]), new Uint8Array([]))
+			JWE: JWEFromURL,
+			e: JWEFromURL,
+		} as { [funcName: string]: (d: string) => Promise<Uint8Array> },
+	});
+})( {} ,{} );
+
+
 
 // ASSUMES symetry on to and From URL sides
 export const functionAbrevAvailable = [
@@ -236,17 +294,22 @@ export const functionAbrevAvailable = [
 	]),
 ];
 
+
 const sortingWeightsForFunctionTypes = Object.freeze(Object.fromEntries([
 	...Object.keys(functionsStruct.toURL).map((f) => [f, -1]),
 	...Object.keys(functionsTransforms.toURL).map((f) => [f, 0]),
 	...Object.keys(functionsEncodings.toURL).map((f) => [f, 1]),
 ])) as { [funcNames: string]: number };
 
+
+
 export const sortValidFuncs = (funcs: string[], sortFn?: (funcA: unknown, funcB: unknown) => number): string[] => {
 	return sortFn
 		? funcs.sort(sortFn)
 		: funcs.sort((a, z) => sortingWeightsForFunctionTypes[a] - sortingWeightsForFunctionTypes[z]);
 };
+
+
 
 const tryJSONparse = (s: string): Either<unknown> => {
 	try {
@@ -255,6 +318,8 @@ const tryJSONparse = (s: string): Either<unknown> => {
 		return Left(new Error(_er));
 	}
 };
+
+
 
 export const legends = (() => {
 	/**
@@ -322,10 +387,12 @@ export const paramElement = {
 		async (paramValueString: string): Promise<Either<unknown>> => {
 			// console.log({paramValueString})
 			const leg = legends.discover(opts)(paramValueString);
-			// console.log('legend::>> ',leg)
 
 			if (leg.left || paramValueString.length === 0) {
 				return Left(leg.left ?? new Error('Error - there is no value to return'));
+			}
+			if (leg.right.funcs.filter((value) => ['JWE', 'e'].includes(value)).length > 0 && !opts.encryptionKeys) {
+				return Left(new Error('to use the JWE/e encoding functions, both the public and private keys are needed'));
 			} else {
 				if (['null', 'true', 'false'].includes(leg.right.str)) {
 					return Right(JSON.parse(leg.right.str));
@@ -350,7 +417,7 @@ export const paramElement = {
 					// console.log({ parseFn, unencFn, middFns })
 
 					const composedMiddles = middFns.reduce((p, next) => {
-						return async (data: Uint8Array) => next( await p(data));
+						return async (data: Uint8Array) => next(await p(data));
 					}, async (input: Uint8Array) => input);
 
 					return Right(await parseFn(await composedMiddles(await unencFn(leg.right.str))));
@@ -382,7 +449,9 @@ export const paramElement = {
 						return async (data: Uint8Array) => next(await p(data));
 					}, async (input: Uint8Array) => input);
 
-					return Right(`${legends.stringify(funcs)}${opts.legendSeperator}${await encFn(await composedMiddles(await strFn(obj)))}`);
+					return Right(
+						`${legends.stringify(funcs)}${opts.legendSeperator}${await encFn(await composedMiddles(await strFn(obj)))}`,
+					);
 				}
 			}
 		},
@@ -391,18 +460,20 @@ export const paramElement = {
 export const params = {
 	parse: (opts: FunctionParsingOptions = defaultedOptions) =>
 		async (multiParamStr: string): Promise<Either<FunctionBuilderParamInputs>> => {
-			const mapped = await Promise.all(multiParamStr
-				.split(opts.argListDelim)
-				.map(async (paramChunks) => {
-					// console.log({paramChunks})
-					const [name, val] = paramChunks.split(opts.argValueDelim);
-					if (!val) {
-						return Left(new Error('Parameter string does not contain a key value pair'));
-					} else {
-						const pp = await paramElement.parse()(val);
-						return pp.left ? Left(pp.left) : Right({ [name]: pp.right });
-					}
-				})) as Either<FunctionBuilderParamInputs>[];
+			const mapped = await Promise.all(
+				multiParamStr
+					.split(opts.argListDelim)
+					.map(async (paramChunks) => {
+						// console.log({paramChunks})
+						const [name, val] = paramChunks.split(opts.argValueDelim);
+						if (!val) {
+							return Left(new Error('Parameter string does not contain a key value pair'));
+						} else {
+							const pp = await paramElement.parse()(val);
+							return pp.left ? Left(pp.left) : Right({ [name]: pp.right });
+						}
+					}),
+			) as Either<FunctionBuilderParamInputs>[];
 
 			const errs = mapped.filter((item) => item.left);
 			return errs.length > 0
@@ -414,35 +485,34 @@ export const params = {
 			// FUTURE DEV: since the only source of errors is via "invalid legend keys"
 			// and since they are hard coded for now, there is zero chance of propogating errors
 			// this would change if the legend is free-handed by the user - clearly that could have errors
-			
+
 			const resolvedEithers = await Promise.all(
 				Object.entries(param)
-				.map(async ([paramName, paramVal]) => {
-					if (isBareParam(paramVal)) {
-						const encDataStr = await paramElement.stringify('sa')(paramVal);
-						return encDataStr.left
-							? Left(encDataStr.left) // can't happen since 'sa' is hard coded
-							: Right(`${paramName}${opts.argValueDelim}${encDataStr.right}`);
-					} else {
-						return typeof paramVal === 'string'
-							? paramVal.length > opts.legendOpts.hurdle
-								? Right(`${paramName}${opts.argValueDelim}${(await paramElement.stringify('sba')(paramVal)).right}`) // sba vs sa
-								: Right(`${paramName}${opts.argValueDelim}${(await paramElement.stringify('sa')(paramVal)).right}`) // sba vs ja
-							: JSON.stringify(paramVal).length > opts.legendOpts.hurdle // heuristic
-							? Right(`${paramName}${opts.argValueDelim}${(await paramElement.stringify('jba')(paramVal)).right}`) // jbs in lieu of sa
-							: Right(`${paramName}${opts.argValueDelim}${(await paramElement.stringify('ja')(paramVal)).right}`); // ja in lieu of sa
-					}
-				})
-			) as Either<string>[]
-			
-			const errs = resolvedEithers.filter(ei => ei.left)
-			return errs.length > 0 
-				? Left(new Error(errs.map(ei=> ei.left).join('\n\n') ))
-				: Right( resolvedEithers
-						.filter((ei) => ei.right)
-						.map((ei) => ei.right)
-						.join(opts.argListDelim),
-				);
+					.map(async ([paramName, paramVal]) => {
+						if (isBareParam(paramVal)) {
+							const encDataStr = await paramElement.stringify('sa')(paramVal);
+							return encDataStr.left
+								? Left(encDataStr.left) // can't happen since 'sa' is hard coded
+								: Right(`${paramName}${opts.argValueDelim}${encDataStr.right}`);
+						} else {
+							return typeof paramVal === 'string'
+								? paramVal.length > opts.legendOpts.hurdle
+									? Right(`${paramName}${opts.argValueDelim}${(await paramElement.stringify('sba')(paramVal)).right}`) // sba vs sa
+									: Right(`${paramName}${opts.argValueDelim}${(await paramElement.stringify('sa')(paramVal)).right}`) // sba vs ja
+								: JSON.stringify(paramVal).length > opts.legendOpts.hurdle // heuristic
+								? Right(`${paramName}${opts.argValueDelim}${(await paramElement.stringify('jba')(paramVal)).right}`) // jbs in lieu of sa
+								: Right(`${paramName}${opts.argValueDelim}${(await paramElement.stringify('ja')(paramVal)).right}`); // ja in lieu of sa
+						}
+					}),
+			) as Either<string>[];
+
+			const errs = resolvedEithers.filter((ei) => ei.left);
+			return errs.length > 0 ? Left(new Error(errs.map((ei) => ei.left).join('\n\n'))) : Right(
+				resolvedEithers
+					.filter((ei) => ei.right)
+					.map((ei) => ei.right)
+					.join(opts.argListDelim),
+			);
 		},
 };
 
@@ -452,16 +522,17 @@ export const functions = {
 	structs: functionsStruct,
 	parse: (opts: FunctionParsingOptions = defaultedOptions) =>
 		async (compositionStr: string): Promise<Either<FuncInterface[]>> => {
-			const parsedFunctions = await Promise.all(compositionStr
-				.split(opts.functionDelim)
-				.map((funcStr) => {
-					const [f, pStr] = funcStr.split(opts.paramStart);
-					return { fname: f, multiParamStr: !pStr ? '' : pStr.slice(0, -1) }; // pull off last )
-				})
-				.map(async ({ fname, multiParamStr }) => {
-					const parsedParams = await params.parse(opts)(multiParamStr);
-					return { fname, params: parsedParams.right, errors: parsedParams.left };
-				})
+			const parsedFunctions = await Promise.all(
+				compositionStr
+					.split(opts.functionDelim)
+					.map((funcStr) => {
+						const [f, pStr] = funcStr.split(opts.paramStart);
+						return { fname: f, multiParamStr: !pStr ? '' : pStr.slice(0, -1) }; // pull off last )
+					})
+					.map(async ({ fname, multiParamStr }) => {
+						const parsedParams = await params.parse(opts)(multiParamStr);
+						return { fname, params: parsedParams.right, errors: parsedParams.left };
+					}),
 			);
 
 			const pfErrs = parsedFunctions.filter((pf) => pf.errors);
@@ -474,15 +545,17 @@ export const functions = {
 		},
 	stringify: (opts: FunctionParsingOptions = defaultedOptions) =>
 		async (...funcList: FunctionPathBuilderInputDict[]): Promise<Either<string>> => {
-			const mapped = await Promise.all(funcList
-				.filter((fObj) => Object.keys(fObj).length === 1)
-				.map(async (fObj) => {
-					const [fName, paramObj] = Object.entries(fObj)[0]; //shgould only be 1 due to filter
-					const paramBodyStr = await params.stringify(opts)(paramObj);
-					return paramBodyStr.left
-						? Left(paramBodyStr.left)
-						: Right(`${fName}${opts.paramStart}${paramBodyStr.right}${opts.paramEnd}`);
-				})) as Either<string>[];
+			const mapped = await Promise.all(
+				funcList
+					.filter((fObj) => Object.keys(fObj).length === 1)
+					.map(async (fObj) => {
+						const [fName, paramObj] = Object.entries(fObj)[0]; //shgould only be 1 due to filter
+						const paramBodyStr = await params.stringify(opts)(paramObj);
+						return paramBodyStr.left
+							? Left(paramBodyStr.left)
+							: Right(`${fName}${opts.paramStart}${paramBodyStr.right}${opts.paramEnd}`);
+					}),
+			) as Either<string>[];
 
 			const errList = mapped.filter((item) => item.left);
 			return errList.length > 0

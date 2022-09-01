@@ -30,6 +30,7 @@ coverage
 .cov/
 
 _scratch/
+_scratch*
 *_scratch.ts
 
 # nyc test coverage
