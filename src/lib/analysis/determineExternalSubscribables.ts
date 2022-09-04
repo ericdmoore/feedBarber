@@ -1,5 +1,4 @@
-import { join } from 'https://deno.land/std@0.125.0/path/mod.ts';
-import { DOMParser } from 'https://deno.land/x/deno_dom/deno-dom-wasm.ts';
+import { DOMParser, path } from '../../mod.ts';
 import disocverFeedLocal from './discoverFeedLocale.ts';
 
 const grabFromNode = (initURL: URL, propName: string) =>
@@ -7,7 +6,7 @@ const grabFromNode = (initURL: URL, propName: string) =>
 		const _n = n as { attributes: { [key: string]: string } };
 		return (_n.attributes?.[propName] ?? '').startsWith('http')
 			? _n.attributes?.[propName]
-			: join(initURL.href, _n.attributes?.[propName]);
+			: path.join(initURL.href, _n.attributes?.[propName]);
 	};
 
 type IDiscoverInputType = { url: string | URL; body?: PromiseLike<string> };

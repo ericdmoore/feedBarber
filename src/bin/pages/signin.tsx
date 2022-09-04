@@ -1,6 +1,7 @@
 /** @jsx h */
 
-import { h, Handler, jsx } from 'https://deno.land/x/sift@0.4.3/mod.ts';
+import { Fragment, h, jsx, sift } from '../../mod.ts';
+type Handler = sift.Handler
 
 export const signin: Handler = async (req, pathParam) => {
 	return jsx(h('h1', {}, ['Signin']));

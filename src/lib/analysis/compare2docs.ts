@@ -1,4 +1,4 @@
-import mh from 'https://cdn.skypack.dev/minhash@v0.0.9?dts';
+import {minhash as mh} from '../../mod.ts'
 
 export const compareDocSimilarity = async (
 	docA: string,

@@ -1,8 +1,12 @@
-import { assert, assertEquals,  } from 'https://deno.land/std@0.152.0/testing/asserts.ts';
+import hipsteripsum  from './helpers/hipsteripsum.ts'
+import {encblubrSA, encblubrSBA} from './helpers/encTextBlurb.ts'
+import {examplePublic, examplePrivate} from './helpers/jwKeys.example.ts'
 
+import {assert, assertEquals} from '../../src/mod.ts'
 import { 
     type FunctionPathBuilderInputDict,
     type FuncInterface,
+    type FunctionParsingOptions,
     params,
     paramElement,
     legends,
@@ -10,8 +14,6 @@ import {
     functions
 } from '../../src/lib/parsers/enhancementFunctions.ts'
 
-import hipsteripsum  from './helpers/hipsteripsum.ts'
-import {encblubrSA, encblubrSBA} from './helpers/encTextBlurb.ts'
 
 
 Deno.test('basic parse Legend', () => {
@@ -270,4 +272,35 @@ Deno.test('function.stringify + parse is bijective', async ()=>{
     const pf = await functions.parse()(s.right)
     assert(pf.right)
     assertEquals(pf.right, finterface)
+})
+
+
+Deno.test('Encrpted Serialization is bijective', async()=>{
+    const config = {
+        ...defaultedOptions,
+        legendOpts:{
+            // a
+        },
+        encryptionKeys:{
+            publicKey: examplePublic,
+            privateKey: examplePrivate
+        }
+    } as FunctionParsingOptions
+
+    const data = {
+        param1: true, 
+        param2: {a: 1, b:2, c:3},
+        secretObj: {
+            AWS_KEY: 'SOME_EXAMPLE_KEY',
+            AWS_SEC: 'SOME_EXAMPLE_SEC_THAT_SHOULD_NEVER_BE_IN_CODE'
+        }
+    }
+    
+    const s = await params.stringify(config)(data)
+    assert(s.right && !s.left)
+    assert(typeof s.right ==='string')
+
+    const d = await params.parse(config)(s.right)
+    assert(d.right && !d.left)
+    assert(typeof d.right === 'object')
 })

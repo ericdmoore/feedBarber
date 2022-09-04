@@ -34,12 +34,12 @@ BSON,B64::{{btoa value here}} - ba::
 
 */
 
-import { Buffer as nodeBuffer } from 'https://deno.land/std@0.152.0/node/buffer.ts';
-import { gzipDecode, gzipEncode } from 'https://deno.land/x/wasm_gzip@v1.0.0/mod.ts';
-import { compress as brCompress, decompress as brDecompress } from 'https://deno.land/x/brotli@v0.1.4/mod.ts';
-import { compress as zstdCompress, decompress as zstdDecompress } from 'https://deno.land/x/zstd_wasm@0.0.16/deno/zstd.ts';
-import * as jose from 'https://deno.land/x/jose@v4.9.1/index.ts';
-import * as bson from 'https://deno.land/x/deno_bson@v0.0.2/mod.ts';
+import {nodeBuffer, 
+	gzipDecode, 
+	gzipEncode, 
+	brCompress, 
+	brDecompress, zstdCompress, zstdDecompress, jose, bson} from '../../mod.ts'
+
 
 export enum CryptoKeyUsages {
     'encrypt' = 'encrypt',

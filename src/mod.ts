@@ -1,5 +1,6 @@
-// UTILS
-export * as path from 'https://deno.land/std@0.125.0/path/mod.ts';
+/* 
+deno cache --lock=lock.json --lock-write src/mod.ts 
+*/
 
 // deno.land/x/
 export * as superstruct from 'https://deno.land/x/deno_superstruct@0.0.0/mod.ts';
@@ -9,6 +10,8 @@ export * as DenoDom from 'https://deno.land/x/deno_dom@v0.1.21-alpha/deno-dom-wa
 export * as mustache from 'https://deno.land/x/mustache@v0.3.0/mod.ts';
 export * as jsonSchema from 'https://deno.land/x/json_schema_typed@v8.0.0/draft_latest.ts';
 
+// enhancement applications
+export { DOMParser } from "https://deno.land/x/deno_dom@v0.1.33-alpha/deno-dom-wasm.ts";
 export * as multiformat from 'https://esm.sh/multiformats@9.6.4';
 export { default as minhash } from 'https://esm.sh/minhash@0.0.9';
 export { unified } from 'https://denopkg.com/ericdmoore/unified@main/mod.ts';
@@ -30,12 +33,44 @@ export { rehypeRemark } from 'https://denopkg.com/ericdmoore/rehype-remark@main/
 export { remarkRehype } from 'https://denopkg.com/ericdmoore/remark-rehype@main/mod.ts';
 // export * as remarkRetext from 'https://esm.sh/remark-retext?dts';
 
+// enhancment funciton parsing
+export { Buffer as nodeBuffer } from 'https://deno.land/std@0.152.0/node/buffer.ts';
+export { gzipDecode, gzipEncode } from 'https://deno.land/x/wasm_gzip@v1.0.0/mod.ts';
+export { compress as brCompress, decompress as brDecompress } from 'https://deno.land/x/brotli@v0.1.4/mod.ts';
+export { compress as zstdCompress, decompress as zstdDecompress } from 'https://deno.land/x/zstd_wasm@0.0.16/deno/zstd.ts';
+export * as jose from 'https://deno.land/x/jose@v4.9.1/index.ts';
+export * as bson from 'https://deno.land/x/deno_bson@v0.0.2/mod.ts';
+
+// HTML Rendering
+export * as sift from 'https://deno.land/x/sift@0.4.3/mod.ts';
+export { h, jsx, serve, json, Fragment } from 'https://deno.land/x/sift@0.4.3/mod.ts';
+export * as sheets from 'https://esm.sh/twind@0.16.16/sheets';
+export * as twind from 'https://esm.sh/twind@0.16.16';
+
+// CLI
+export { parse } from 'https://deno.land/std@0.123.0/flags/mod.ts';
+export { green, red, yellow } from 'https://deno.land/x/nanocolors@0.1.12/mod.ts';
+
+
+// Utils
+export { Buffer } from 'https://deno.land/std@0.144.0/io/buffer.ts';
+export { StringReader, StringWriter } from 'https://deno.land/std@0.144.0/io/mod.ts';
+export { copy, readableStreamFromReader, readerFromStreamReader } from 'https://deno.land/std@0.144.0/streams/conversion.ts';
+export * as multi from 'https://cdn.skypack.dev/multiformats?dts';
+export * as dotenv from 'https://deno.land/std@0.153.0/dotenv/mod.ts';
+export * as path from 'https://deno.land/std@0.153.0/path/mod.ts';
+
+
 // RETEXT-middlewares
 // export * as retextEmoji from 'https://esm.sh/retext-emoji?dts';
 // export * as retextKeywords from 'https://esm.sh/retext-keywords?dts';
 // export * as retextSpell from 'https://esm.sh/retext-spell?dts';
 // export * as spellingDict from 'https://esm.sh/dictionary-en?dts';
 // export * as retextReadability from 'https://esm.sh/retext-readability?dts';
+
+// Testing
+export * as asserts from 'https://deno.land/std@0.152.0/testing/asserts.ts';
+export { assert, assertEquals } from 'https://deno.land/std@0.152.0/testing/asserts.ts';
 
 // DOTENV
 // "https://deno.land/std/dotenv/mod.ts";

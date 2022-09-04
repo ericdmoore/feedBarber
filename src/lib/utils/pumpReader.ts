@@ -1,6 +1,4 @@
-import { Buffer } from 'https://deno.land/std@0.144.0/io/buffer.ts';
-import { StringReader } from 'https://deno.land/std@0.144.0/io/mod.ts';
-import { copy, readableStreamFromReader, readerFromStreamReader } from 'https://deno.land/std@0.144.0/streams/conversion.ts';
+import {Buffer, StringReader, copy, readableStreamFromReader, readerFromStreamReader} from '../../mod.ts'
 
 const dec = new TextDecoder();
 

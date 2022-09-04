@@ -34,34 +34,34 @@ const discoverValueType = (s: string): { type: 'json' | 'mustache' | 'error'; st
 export const setPath = (
 	input: s.Infer<typeof SetPathParams> = { path: 'title', value: 'json::"Title: Hello World!"' },
 ) =>
-	async (_ast: PromiseOr<ASTComputable>): Promise<ASTComputable> => {
-		if (!SetPathParams.is(input)) {
-			return Promise.reject(er(input, '', new Error().stack));
-		}
-		try {
-			const { type, str } = discoverValueType(input.value);
+async (_ast: PromiseOr<ASTComputable>): Promise<ASTComputable> => {
+	if (!SetPathParams.is(input)) {
+		return Promise.reject(er(input, '', new Error().stack));
+	}
+	try {
+		const { type, str } = discoverValueType(input.value);
 
-			const ast = await computableToJson(await _ast);
-			let replacerVal: JsonValue;
-			let mustacheRender: string;
+		const ast = await computableToJson(await _ast);
+		let replacerVal: JsonValue;
+		let mustacheRender: string;
 
-			switch (type) {
-				case 'json':
-					replacerVal = JSON.parse(str) as JsonValue;
-					break;
-				case 'mustache':
-					mustacheRender = mustache.render(str, ast as Record<string, unknown>) as string;
-					replacerVal = JSON.parse(mustacheRender) as string;
-					break;
-				default:
-					replacerVal = JSON.parse(str) as JsonValue;
-			}
-			setter(input.path, replacerVal, ast as JsonValue);
-			return jsonToComputable(ast);
-		} catch (e) {
-			return Promise.reject(er({ input }, `JSON.parse error on input \n ${e}`, new Error().stack));
+		switch (type) {
+			case 'json':
+				replacerVal = JSON.parse(str) as JsonValue;
+				break;
+			case 'mustache':
+				mustacheRender = mustache.render(str, ast as Record<string, unknown>) as string;
+				replacerVal = JSON.parse(mustacheRender) as string;
+				break;
+			default:
+				replacerVal = JSON.parse(str) as JsonValue;
 		}
-	};
+		setter(input.path, replacerVal, ast as JsonValue);
+		return jsonToComputable(ast);
+	} catch (e) {
+		return Promise.reject(er({ input }, `JSON.parse error on input \n ${e}`, new Error().stack));
+	}
+};
 
 export default {
 	run: setPath,

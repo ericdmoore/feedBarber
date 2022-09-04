@@ -1,13 +1,17 @@
 /** @jsx h */
 /** @jsxFrag Fragment */
 
-import { Fragment, h, Handler, jsx, VNode } from 'https://deno.land/x/sift@0.4.3/mod.ts';
+import {sift, h, jsx, Fragment, twind } from '../../mod.ts'
 import { ILayoutHeader, pageLayout } from './layout.tsx';
 import funcMap from '../../lib/enhancements/index.ts';
-import { encodingFns, parseFunctions } from '../../lib/parsers/enhancementFunctions.ts';
-
+import { functions } from '../../lib/parsers/enhancementFunctions.ts';
 import { getStyleTagProperties, setup, theme, tw } from './styles/base.tsx';
-import { type VirtualSheet, virtualSheet } from 'https://esm.sh/twind@0.16.16/sheets';
+
+type VNode = sift.VNode
+type Handler = sift.Handler
+type VirtualSheet = twind.VirtualSheet
+
+const {virtualSheet} = twind
 
 const twInlineStyle = (sheet: VirtualSheet) => {
 	const { id, textContent } = getStyleTagProperties(sheet);

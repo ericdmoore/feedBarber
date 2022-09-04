@@ -16,18 +16,18 @@ import { type ASTcomputable, type ASTFeedItemJsonTYPE, type ASTjson, computableT
 import { type EnhancementModule } from './index.ts';
 import { jsonSchema as jSchema } from '../../mod.ts';
 import { addVoice2text as voiceSchema, aws, azure, gcloud } from '../schemas/index.ts';
-import { S3Bucket } from 'https://denopkg.com/ericdmoore/s3_deno@main/mod.ts';
-import { createClient, DynamoDBClient } from 'https://denopkg.com/ericdmoore/dynamodb-deno@v1.1.0/mod.ts';
-import { hmac } from 'https://deno.land/x/hmac@v2.0.1/mod.ts';
-import { extname } from 'https://deno.land/std@0.151.0/path/mod.ts';
 import { superstruct as s } from '../../mod.ts';
 import { streamToString } from '../utils/pumpReader.ts';
+
+// mod.ts audit: OK
+import { createClient, DynamoDBClient } from 'https://denopkg.com/ericdmoore/dynamodb-deno@v1.1.0/mod.ts';
+import { S3Bucket } from 'https://denopkg.com/ericdmoore/s3_deno@main/mod.ts';
+import { hmac } from 'https://deno.land/x/hmac@v2.0.1/mod.ts';
+import { extname } from 'https://deno.land/std@0.151.0/path/mod.ts';
 import { getSignedUrl } from 'https://deno.land/x/aws_s3_presign@1.3.0/mod.ts';
 
 import {
 	type OutputFormat,
-	OutputFormatMimeEnum,
-	pollyClient,
 	type PollyClientInterface,
 	type StartSpeechTaskRequired,
 	type Status,
@@ -36,6 +36,8 @@ import {
 	type SynthesisTaskIdentifiers,
 	type SynthesisTaskResponse,
 	type VoiceId,
+	OutputFormatMimeEnum,
+	pollyClient,
 } from '../client/aws-polly.ts';
 
 import { identicon } from '../client/svg-avatars.ts';

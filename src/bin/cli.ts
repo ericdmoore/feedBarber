@@ -4,10 +4,8 @@
  * -u is a URL
  */
 
-import { parse } from 'https://deno.land/std@0.123.0/flags/mod.ts';
-import { green, red, yellow } from 'https://deno.land/x/nanocolors@0.1.12/mod.ts';
-
-import { parseFunctions } from '../lib/parsers/enhancementFunctions.ts';
+import { parse, green, red, yellow } from '../mod.ts';
+import { functions } from '../lib/parsers/enhancementFunctions.ts';
 import flags from './cli_flags.ts';
 
 (async () => {
@@ -43,7 +41,7 @@ import flags from './cli_flags.ts';
 		if (c.length > 0) {
 			if (flags.composition.validation(c)) {
 				outputStr += `- ${green('comp.c:')} ${c}\n`;
-				outputStr += `- ${green('comp.parsed:')}: ${JSON.stringify(parseFunctions(c), null, 2)}\n`;
+				outputStr += `- ${green('comp.parsed:')}: ${JSON.stringify(functions.parse()(c), null, 2)}\n`;
 			} else {
 				outputStr += `${red('PROBLEM--composition:')} ${c}\n`;
 

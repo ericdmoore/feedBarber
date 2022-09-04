@@ -1,5 +1,6 @@
-import { json } from 'https://deno.land/x/sift@0.4.3/mod.ts';
 import type { ASTComputable } from '../../types.ts';
+
+import { json } from '../../mod.ts';
 import { computableToJson } from '../../lib/parsers/ast.ts';
 import { atom, jsonfeed, rss } from '../../lib/parsers/index.ts';
 

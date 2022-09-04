@@ -1,8 +1,5 @@
-import type { Handler } from 'https://deno.land/x/sift@0.4.3/mod.ts';
 import type { ASTComputable, PromiseOr } from '../../types.ts';
-
-import { json } from 'https://deno.land/x/sift@0.4.3/mod.ts';
-
+import { sift, json } from '../../mod.ts'
 // import { jsonToComputable } from '../../lib/parsers/ast.ts'
 import { fetchAndValidateIntoAST } from '../../lib/start.ts';
 
@@ -11,6 +8,8 @@ import { readToString, stringToStream } from '../../lib/utils/pumpReader.ts';
 import { type FuncInterface, functions } from '../../lib/parsers/enhancementFunctions.ts';
 import funcMap from '../../lib/enhancements/index.ts';
 import er from '../../lib/parsers/helpers/error.ts';
+
+type Handler = sift.Handler
 
 export type Dict<T> = { [key: string]: T };
 export type ASTChainFunc = (i: PromiseOr<ASTComputable>) => Promise<ASTComputable>;
@@ -42,8 +41,8 @@ const setupAstPipeline = async (ast: ASTComputable, funcParms: FuncInterface[]):
 		if (funcMap?.[fi.fname]) {
 			return funcMap[fi.fname].run(fi.params) as ASTChainFunc;
 		} else {
-			funcParms[i].messages = [
-				...(funcParms[i].messages ?? []),
+			funcParms[i].errors = [
+				...(funcParms[i].errors ?? []),
 				'Could not locate this function, so it has been omited from the results',
 			];
 			return null;
@@ -58,7 +57,7 @@ const setupAstPipeline = async (ast: ASTComputable, funcParms: FuncInterface[]):
 
 export const proxy: Handler = async (_, params): Promise<Response> => {
 	// find/parse funcs
-	const funcs = functions.parse()(params?.composition ?? 'hash');
+	const funcs = await functions.parse()(params?.composition ?? 'hash');
 
 	const funcInt = funcs.right as FuncInterface[];
 

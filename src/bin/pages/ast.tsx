@@ -1,7 +1,9 @@
 /** @jsx h */
 // import json from '../comps/responders/json.ts'
 import { fetchAndValidateIntoASTJson } from '../../lib/start.ts';
-import { Handler, json } from 'https://deno.land/x/sift@0.4.3/mod.ts';
+import {json, sift} from '../../mod.ts'
+
+type Handler = sift.Handler
 
 export const urlAST = '/ast/*';
 

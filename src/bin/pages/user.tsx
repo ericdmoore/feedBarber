@@ -1,7 +1,8 @@
 /** @jsx h */
 /** @jsxFrag Fragment */
 
-import { Fragment, h, Handler, jsx } from 'https://deno.land/x/sift@0.4.3/mod.ts';
+import { Fragment, h, jsx, sift } from '../../mod.ts';
+type Handler = sift.Handler
 
 // pick out the user token
 // look up the compositions saved by the user

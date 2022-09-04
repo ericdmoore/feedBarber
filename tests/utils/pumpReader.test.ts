@@ -1,4 +1,4 @@
-import { assertEquals } from 'https://deno.land/std@0.152.0/testing/asserts.ts';
+import { assertEquals } from '../../src/mod.ts';
 import {readStream, readToString, streamToString, stringToStream} from '../../src/lib/utils/pumpReader.ts'
 
 const dec = new TextDecoder()

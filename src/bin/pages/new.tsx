@@ -1,6 +1,7 @@
 /** @jsx h */
 
-import { h, Handler, jsx } from 'https://deno.land/x/sift@0.4.3/mod.ts';
+import { h,  jsx, sift } from '../../mod.ts';
+type Handler = sift.Handler
 
 // Eventaully populate this with Popular compositions
 // or Even Pppular Whlole Composed Feeds
