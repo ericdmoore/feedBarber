@@ -1,9 +1,9 @@
 /** @jsx h */
 /** @jsxFrag Fragment */
 
-import {jsx, h, Fragment, sift, StringWriter} from '../../mod.ts'
+import { Fragment, h, jsx, sift, StringWriter } from '../../mod.ts';
 import pumpReader from '../../lib/utils/pumpReader.ts';
-type VNode = sift.VNode
+type VNode = sift.VNode;
 
 export interface ILayoutHeader {
 	title?: string;

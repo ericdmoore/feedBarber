@@ -1,4 +1,4 @@
-import {minhash as mh} from '../../mod.ts'
+import { minhash as mh } from '../../mod.ts';
 
 export const compareDocSimilarity = async (
 	docA: string,

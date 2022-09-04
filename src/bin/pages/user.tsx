@@ -2,7 +2,7 @@
 /** @jsxFrag Fragment */
 
 import { Fragment, h, jsx, sift } from '../../mod.ts';
-type Handler = sift.Handler
+type Handler = sift.Handler;
 
 // pick out the user token
 // look up the compositions saved by the user

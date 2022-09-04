@@ -1,6 +1,6 @@
 /** @jsx h */
-import {jsx, h, sift} from '../../mod.ts'
-type Handler = sift.Handler
+import { h, jsx, sift } from '../../mod.ts';
+type Handler = sift.Handler;
 
 export const preview: Handler = async (req, pathParam) => {
 	return jsx(

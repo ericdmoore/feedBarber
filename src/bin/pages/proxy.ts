@@ -1,5 +1,5 @@
 import type { ASTComputable, PromiseOr } from '../../types.ts';
-import { sift, json } from '../../mod.ts'
+import { json, sift } from '../../mod.ts';
 // import { jsonToComputable } from '../../lib/parsers/ast.ts'
 import { fetchAndValidateIntoAST } from '../../lib/start.ts';
 
@@ -9,7 +9,7 @@ import { type FuncInterface, functions } from '../../lib/parsers/enhancementFunc
 import funcMap from '../../lib/enhancements/index.ts';
 import er from '../../lib/parsers/helpers/error.ts';
 
-type Handler = sift.Handler
+type Handler = sift.Handler;
 
 export type Dict<T> = { [key: string]: T };
 export type ASTChainFunc = (i: PromiseOr<ASTComputable>) => Promise<ASTComputable>;

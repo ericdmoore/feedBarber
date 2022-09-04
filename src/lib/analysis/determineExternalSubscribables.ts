@@ -1,13 +1,12 @@
 import { DOMParser, path } from '../../mod.ts';
 import disocverFeedLocal from './discoverFeedLocale.ts';
 
-const grabFromNode = (initURL: URL, propName: string) =>
-	(n: unknown): string => {
-		const _n = n as { attributes: { [key: string]: string } };
-		return (_n.attributes?.[propName] ?? '').startsWith('http')
-			? _n.attributes?.[propName]
-			: path.join(initURL.href, _n.attributes?.[propName]);
-	};
+const grabFromNode = (initURL: URL, propName: string) => (n: unknown): string => {
+	const _n = n as { attributes: { [key: string]: string } };
+	return (_n.attributes?.[propName] ?? '').startsWith('http')
+		? _n.attributes?.[propName]
+		: path.join(initURL.href, _n.attributes?.[propName]);
+};
 
 type IDiscoverInputType = { url: string | URL; body?: PromiseLike<string> };
 /**

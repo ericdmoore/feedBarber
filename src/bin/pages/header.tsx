@@ -1,6 +1,6 @@
 /** @jsx h */
-import { h, sift} from '../../mod.ts';
-type Handler = sift.Handler
+import { h, sift } from '../../mod.ts';
+type Handler = sift.Handler;
 import { ILayoutHeader, pageLayout } from './layout.tsx';
 import { functions } from '../../lib/parsers/enhancementFunctions.ts';
 
@@ -37,7 +37,9 @@ export const header: Handler = async (req, param = {}) => {
 					<EchoLink href='u-ericdmoore/rss/https://randsinrepose.com/feed' />
 					<EchoLink href='u-ericdmoore/atom/https://randsinrepose.com/feed' />
 					{/* <EchoLink href='u-ericdmoore/city/article(articleCss:I3ByaW1hcnk=)|postLinks(nextPost:Lm5leHQ+YTpudGgtY2hpbGQoMik=,prevPost:LnByZXZpb3VzPmE6bnRoLWNoaWxkKDIp)|hash()/https://randsinrepose.com/feed' /> */}
-					<EchoLink href={`u-ericdmoore/city/` + (await functions.stringify()({ f1: { param1: 'hello World' } })).right + '/'} />
+					<EchoLink
+						href={`u-ericdmoore/city/` + (await functions.stringify()({ f1: { param1: 'hello World' } })).right + '/'}
+					/>
 					<EchoLink href='u-1234sdfg2345?preview&other=Thing&last=true' />
 				</ul>
 			</nav>

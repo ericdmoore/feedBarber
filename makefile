@@ -16,7 +16,7 @@ list:
 	@echo "\n"
 
 test: 
-	deno test --allow-read=./,${PWD},./src/lib/utils/,./tests/enhancements/ --allow-net --allow-env --coverage=$(covDataDir) -j=3 ./tests/**/*
+	DENO_JOBS=3 deno test --allow-read=./,${PWD},./src/lib/utils/,./tests/enhancements/ --allow-net --allow-env --coverage=$(covDataDir) --parallel ./tests/**/*
 
 tests: test
 	

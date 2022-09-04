@@ -1,6 +1,6 @@
 /** @jsx h */
 import { Fragment, h, jsx, sift } from '../../mod.ts';
-type Handler = sift.Handler
+type Handler = sift.Handler;
 
 /**
  * STATE LOOK UP

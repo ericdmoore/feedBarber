@@ -2,9 +2,9 @@
 @Research: Does the style system export a sheet or presets?
 */
 
-import {twind, sheets} from '../../../mod.ts'
-export const { virtualSheet } = sheets
-export const {setup, tw} = twind
+import { sheets, twind } from '../../../mod.ts';
+export const { virtualSheet } = sheets;
+export const { setup, tw } = twind;
 
 export const theme = {
 	fontFamily: {

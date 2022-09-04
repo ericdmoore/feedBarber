@@ -1,4 +1,4 @@
-import {Buffer, StringReader, copy, readableStreamFromReader, readerFromStreamReader} from '../../mod.ts'
+import { Buffer, copy, readableStreamFromReader, readerFromStreamReader, StringReader } from '../../mod.ts';
 
 const dec = new TextDecoder();
 

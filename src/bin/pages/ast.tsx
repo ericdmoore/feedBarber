@@ -1,9 +1,9 @@
 /** @jsx h */
 // import json from '../comps/responders/json.ts'
 import { fetchAndValidateIntoASTJson } from '../../lib/start.ts';
-import {json, sift} from '../../mod.ts'
+import { json, sift } from '../../mod.ts';
 
-type Handler = sift.Handler
+type Handler = sift.Handler;
 
 export const urlAST = '/ast/*';
 

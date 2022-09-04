@@ -1,4 +1,4 @@
-import { path, DOMParser } from '../../mod.ts';
+import { DOMParser, path } from '../../mod.ts';
 // import puppeteer from "https://deno.land/x/puppeteer@9.0.2/mod.ts";
 
 const grabFromNode = (initURL: URL, propName: string) => (n: unknown): string => {
