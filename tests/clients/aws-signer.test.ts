@@ -1,5 +1,7 @@
 import { skip } from '../helpers.ts'
 import { awsV4Sig } from '../../src/lib/client/aws-url-signer.ts'
-import { assertEquals, assertNotEquals } from 'https://deno.land/std@0.152.0/testing/asserts.ts';
+import { assertEquals, assert } from '../../src/mod.ts';
 
-Deno.test(skip('example', async ()=>{}))
+Deno.test(skip('example', async ()=>{
+    assert(true)
+}))

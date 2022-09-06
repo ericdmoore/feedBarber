@@ -1,5 +1,4 @@
-import { assertEquals } from 'https://deno.land/std@0.152.0/testing/asserts.ts';
-
+import { assertEquals } from '../../src/mod.ts';
 import { skip } from '../helpers.ts';
 import { parseAndValidate } from '../../src/lib/start.ts';
 import { computableToJson } from '../../src/lib/parsers/ast.ts';

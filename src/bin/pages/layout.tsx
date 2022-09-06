@@ -1,9 +1,9 @@
 /** @jsx h */
 /** @jsxFrag Fragment */
 
-import { Fragment, h, jsx, VNode } from 'https://deno.land/x/sift@0.4.3/mod.ts';
-import { StringWriter } from 'https://deno.land/std@0.125.0/io/mod.ts';
+import { Fragment, h, jsx, sift, StringWriter } from '../../mod.ts';
 import pumpReader from '../../lib/utils/pumpReader.ts';
+type VNode = sift.VNode;
 
 export interface ILayoutHeader {
 	title?: string;

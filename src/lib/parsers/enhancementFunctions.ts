@@ -34,11 +34,13 @@ BSON,B64::{{btoa value here}} - ba::
 
 */
 
-import { Buffer as nodeBuffer } from 'https://deno.land/std@0.152.0/node/buffer.ts';
-import { gzipDecode, gzipEncode } from 'https://deno.land/x/wasm_gzip@v1.0.0/mod.ts';
-import { compress as brCompress, decompress as brDecompress } from 'https://deno.land/x/brotli@v0.1.4/mod.ts';
-import { compress as zstdCompress, decompress as zstdDecompress } from 'https://deno.land/x/zstd_wasm@0.0.16/deno/zstd.ts';
-import * as bson from 'https://deno.land/x/deno_bson@v0.0.2/mod.ts';
+import {nodeBuffer, 
+	gzipDecode, 
+	gzipEncode, 
+	brCompress, 
+	brDecompress, zstdCompress, zstdDecompress, bson} from '../../mod.ts'
+
+type Dict<T> = {[key:string]:T}
 
 export enum CryptoKeyUsages {
 	'encrypt' = 'encrypt',
@@ -76,31 +78,6 @@ export enum JWE_ALG {
 	'A256KW' = 'A256KW',
 }
 
-export interface FunctionParsingOptions {
-	functionDelim: string;
-	argValueDelim: string;
-	argListDelim: string;
-	paramStart: string;
-	paramEnd: string;
-	legendDelim: string;
-	legendSeperator: string;
-	legendOpts: {
-		hurdle: number;
-		strategy:{
-			unknown: string[]
-			string: string[]
-			object: string[]
-			keys: Dict<string[]>
-		}
-	};
-	auto: {
-		stringifyArrays: boolean;
-	};
-	encryptionKeys?: {
-		privateJWK: JsonWebKey | string;
-		publicJWK: JsonWebKey | string;
-	};
-}
 
 export enum TypeNames {
 	Just = 'maybe-type__just',
@@ -128,11 +105,13 @@ export interface Right<R> {
 	left: never;
 }
 
+export type EncryptableEncoderFn = (key:JsonWebKey)=>(data:Uint8Array)=>Promise<string>
+export type DecryptableEncoderFn = (key:JsonWebKey)=>(str:string)=>Promise<Uint8Array>
+
 export type Maybe<J> = Just<J> | Nothing;
 export type Either<R, L = Error> = NonNullable<Right<R> | Left<L>>;
 export const Nothing = (): Nothing => ({ type: TypeNames.Nothing });
 export const Just = <J>(val: J): Just<J> => ({ type: TypeNames.Just, val });
-
 export const Left = <L>(left: L): Left<L> => ({ type: TypeNames.Left, left }) as Left<L>;
 export const Right = <R>(right: R): Right<R> => ({ type: TypeNames.Right, right }) as Right<R>;
 
@@ -146,6 +125,42 @@ export interface FunctionBuilderParamInputs {
 export interface FunctionPathBuilderInputDict {
 	[fName: string]: FunctionBuilderParamInputs;
 }
+
+export type FuncInterface = { fname: string; params?: Dict<string>; errors?: string[], messages?:string[] };
+
+export interface DiscoveryStruct {
+	funcs: string[];
+	str: string;
+}
+
+export interface FunctionParsingOptions {
+	functionDelim: string;
+	argValueDelim: string;
+	argListDelim: string;
+	paramStart: string;
+	paramEnd: string;
+	legendDelim: string;
+	legendSeperator: string;
+	legendOpts: {
+		hurdle: number;
+		strategy:{
+			unknown: string[]
+			string: string[]
+			object: string[]
+			keys: Dict<string[]>
+		}
+	};
+	auto: {
+		stringifyArrays: boolean;
+	};
+	encryptionKeys?: {
+		privateJWK: JsonWebKey | string;
+		publicJWK: JsonWebKey | string;
+	};
+}
+
+const dec = new TextDecoder();
+const enc = new TextEncoder();
 
 export const defaultedOptions = Object.freeze({
 	functionDelim: '+',
@@ -170,15 +185,6 @@ export const defaultedOptions = Object.freeze({
 	},
 } as FunctionParsingOptions )
 
-export interface DiscoveryStruct {
-	funcs: string[];
-	str: string;
-}
-
-type Dict<T> = { [str: string]: T };
-
-export type FuncInterface = { fname: string; params?: Dict<string>; errors?: string[] };
-
 const isBareParam = (obj: BareParams | EncodedParams): obj is BareParams => {
 	return typeof obj === 'number' ||
 		obj instanceof Number ||
@@ -187,8 +193,6 @@ const isBareParam = (obj: BareParams | EncodedParams): obj is BareParams => {
 		obj === null;
 };
 
-const dec = new TextDecoder();
-const enc = new TextEncoder();
 
 const intersection = <T>(A: T[], B: T[]) => A.filter(e => B.includes(e))
 
@@ -223,8 +227,6 @@ export const functionsStruct = (() => {
 	});
 })();
 
-type EncryptableEncoderFn = (key: JsonWebKey) => (d: Uint8Array) => Promise<string>;
-type DecryptableEncoderFn = (key: JsonWebKey) => (d: string) => Promise<Uint8Array>;
 
 export const functionsTransforms = (() => {
 	const gzEnc = async (bytes: Uint8Array) => gzipEncode(bytes);

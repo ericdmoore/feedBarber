@@ -1,9 +1,5 @@
 import { skip } from '../helpers.ts';
-import { assertEquals, assertNotEquals, assertRejects, assert } from 'https://deno.land/std@0.144.0/testing/asserts.ts';
-import { S3Bucket } from 'https://denopkg.com/ericdmoore/s3_deno@main/mod.ts';
-import { readableStreamFromReader } from 'https://deno.land/std@0.144.0/streams/conversion.ts';
-import { StringReader } from 'https://deno.land/std@0.144.0/io/mod.ts';
-
+import { readableStreamFromReader, asserts, StringReader } from '../../src/mod.ts';
 import { readToString, streamToString } from '../../src/lib/utils/pumpReader.ts';
 import {
 	cacheOurBreadcrumbs,
@@ -32,6 +28,9 @@ import { urlToAST } from '../../src/lib/start.ts';
 import { s3Mock } from '../mocks/s3/s3Mock.ts';
 import { jsonFeed, jsonFeedUrl } from '../mocks/jsonFeed/daringFireball.elon.ts';
 import mkEnvVar from '../../src/lib/utils/vars.ts'
+
+// mod.ts audit: OK
+import { S3Bucket } from 'https://denopkg.com/ericdmoore/s3_deno@main/mod.ts';
 
 type AST = ASTjson | ASTcomputable;
 type ASTItem = typeof ASTFeedItemJson.TYPE;
@@ -75,7 +74,7 @@ const runAssertions = (...ASTassertionFns: ASTAllAssertion[]) =>
 };
 
 const allAttachmentsShouldHave = (p:string)=>`All attachments should have a ${p}`
-const assertPropertyPresensce = (prop:string, msg:(prop:string)=>string) => (obj:{[key:string]:unknown}) => assert(obj[prop], msg(prop))
+const assertPropertyPresensce = (prop:string, msg:(prop:string)=>string) => (obj:{[key:string]:unknown}) => asserts.assert(obj[prop], msg(prop))
 const dynamicPresenceAssertion = (prop:string) => assertPropertyPresensce(prop, allAttachmentsShouldHave)
 
 const propertyAssertions = {
@@ -95,7 +94,7 @@ const buildDynamicAssertions = (assertionMap:{[prop:string]:(prop:string)=>(obj:
 const testItemsHaveValidAttachments = async (item: ASTItem) => {	
 	const attachentList = await rezVal(item.attachments);
 	const dynamicAssertions = buildDynamicAssertions(propertyAssertions)
-	assertEquals(attachentList.length > 0, true, 'All ast items should have attachment');
+	asserts.assertEquals(attachentList.length > 0, true, 'All ast items should have attachment');
 
 	for (const attach of attachentList) {
 		dynamicAssertions(attach)
@@ -116,14 +115,14 @@ Deno.test('streamToString', async () => {
 
 	const s0 = await streamToString(rs0);
 	const o0 = JSON.parse(s0);
-	assertEquals(o0, data);
+	asserts.assertEquals(o0, data);
 });
 
 Deno.test('readToString', async () => {
 	const input = 'Hello';
 	const rsInput = readableStreamFromReader(new StringReader(input));
 	const collected = await readToString(rsInput);
-	assertEquals(input, collected);
+	asserts.assertEquals(input, collected);
 });
 
 Deno.test({
@@ -145,8 +144,8 @@ Deno.test({
 		const astWithAttachment = await computableToJson(addTextFn(ast));
 		// console.log(JSON.stringify(astWithAttachment, null, 2))
 		const [err, data] = ASTKindJson.validate(astWithAttachment);
-		assertEquals(err, undefined);
-		assert(data, 'The AST should now be validated - and thus not undefined');
+		asserts.assertEquals(err, undefined);
+		asserts.assert(data, 'The AST should now be validated - and thus not undefined');
 	}
 });
 
@@ -156,7 +155,7 @@ Deno.test('Enhancement Validates S3 Params', async () => {
 		aws: { key: 'sillyExample', region: 'us-west-2', secret: 'somethingNotTooEmbarrasing' },
 		config: { s3: { bucket: 5, prefix: '' } },
 	} as any);
-	assertRejects(() => addTextFn(ast));
+	asserts.assertRejects(() => addTextFn(ast));
 });
 
 Deno.test('Validates S3 Params', async () => {
@@ -171,7 +170,7 @@ Deno.test('Validates S3 Params', async () => {
 			s3: { bucket: 42, prefix: '' },
 		},
 	} as any);
-	assertRejects(() => addTextFn(ast));
+	asserts.assertRejects(() => addTextFn(ast));
 });
 
 Deno.test('Validates Dynamo Params', async () => {
@@ -187,7 +186,7 @@ Deno.test('Validates Dynamo Params', async () => {
 			dynamo: { table: undefined },
 		},
 	} as any);
-	assertRejects(() => addTextFn(ast));
+	asserts.assertRejects(() => addTextFn(ast));
 });
 
 Deno.test('makeKey changes for config + corpus', async () => {
@@ -195,9 +194,9 @@ Deno.test('makeKey changes for config + corpus', async () => {
 	const ka2 = await makeKey({ a: 2 }, 'itemText');
 	const kb1 = await makeKey({ a: 1 }, 'item Text');
 
-	assertNotEquals(ka1, ka2);
-	assertNotEquals(ka1, kb1);
-	assertNotEquals(kb1, ka2);
+	asserts.assertNotEquals(ka1, ka2);
+	asserts.assertNotEquals(ka1, kb1);
+	asserts.assertNotEquals(kb1, ka2);
 });
 
 Deno.test('S3 Mock Unit Test', async () => {
@@ -216,7 +215,7 @@ Deno.test('S3 Mock Unit Test', async () => {
 	const s3DataObj = JSON.parse(s3DataStr);
 	// console.log('>> parsed data object :: ', s3DataObj)
 
-	assertEquals(s3DataObj, data);
+	asserts.assertEquals(s3DataObj, data);
 });
 
 Deno.test('haveEverStarted is based on breadcrumbs', async () => {
@@ -266,7 +265,7 @@ Deno.test('haveEverStarted is based on breadcrumbs', async () => {
 	);
 	const hasStarted = await haveEverStarted(key, s3m);
 	// console.log({hasStarted})
-	assertEquals(hasStarted && true, true);
+	asserts.assertEquals(hasStarted && true, true);
 });
 
 Deno.test('isMediaFinished is based on bread crumbs', async () => {
@@ -315,16 +314,16 @@ Deno.test('isMediaFinished is based on bread crumbs', async () => {
 	const breadCrumbs = await cacheOurBreadcrumbs(item, key, tcfg.config, taskIDs, s3m);
 	const hasStarted = await haveEverStarted(key, s3m);
 
-	assertEquals('sk' in breadCrumbs, true);
-	assertEquals('pk' in breadCrumbs, true);
-	assertEquals('item' in breadCrumbs, true);
-	assertEquals('task' in breadCrumbs, true);
+	asserts.assertEquals('sk' in breadCrumbs, true);
+	asserts.assertEquals('pk' in breadCrumbs, true);
+	asserts.assertEquals('item' in breadCrumbs, true);
+	asserts.assertEquals('task' in breadCrumbs, true);
 
 	if (hasStarted) {
 		const isFinished = await isMediaFinished(hasStarted);
-		assertEquals(isFinished, false);
+		asserts.assertEquals(isFinished, false);
 	}
-	assertEquals(!!hasStarted, true);
+	asserts.assertEquals(!!hasStarted, true);
 });
 
 Deno.test('isMediaFinished is now complete', async () => {
@@ -374,16 +373,16 @@ Deno.test('isMediaFinished is now complete', async () => {
 	const breadCrumbs = await cacheOurBreadcrumbs(item, key, tcfg.config, taskIDs, s3m);
 	const hasStarted = await haveEverStarted(key, s3m);
 
-	assertEquals('sk' in breadCrumbs, true);
-	assertEquals('pk' in breadCrumbs, true);
-	assertEquals(breadCrumbs.pk, breadCrumbs.sk);
-	assertEquals('item' in breadCrumbs, true);
-	assertEquals('task' in breadCrumbs, true);
-	assertEquals(!!hasStarted, true);
+	asserts.assertEquals('sk' in breadCrumbs, true);
+	asserts.assertEquals('pk' in breadCrumbs, true);
+	asserts.assertEquals(breadCrumbs.pk, breadCrumbs.sk);
+	asserts.assertEquals('item' in breadCrumbs, true);
+	asserts.assertEquals('task' in breadCrumbs, true);
+	asserts.assertEquals(!!hasStarted, true);
 
 	if (hasStarted) {
 		const isFinished = await isMediaFinished(hasStarted);
-		assertEquals(isFinished, true);
+		asserts.assertEquals(isFinished, true);
 	}
 });
 

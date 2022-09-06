@@ -1,7 +1,6 @@
 /** @jsx h */
-
-import type { Handler } from 'https://deno.land/x/sift@0.4.3/mod.ts';
-import { h, jsx } from 'https://deno.land/x/sift@0.4.3/mod.ts';
+import { h, jsx, sift } from '../../mod.ts';
+type Handler = sift.Handler;
 
 export const preview: Handler = async (req, pathParam) => {
 	return jsx(

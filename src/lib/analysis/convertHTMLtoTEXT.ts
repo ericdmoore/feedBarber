@@ -1,5 +1,4 @@
 // import { unified, remarkParse, remarkRetext, retextStringify } from '../../mod.ts';
-// import retextEnglish from 'https://cdn.skypack.dev/retext-english@4?dts';
 
 // export type UnifiedPlugin = unified.Pluggable;
 // export type ParseOpts = remarkParse.Options;

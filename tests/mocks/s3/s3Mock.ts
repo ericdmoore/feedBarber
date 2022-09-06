@@ -1,4 +1,5 @@
-import { Buffer } from "https://deno.land/std@0.144.0/streams/mod.ts";
+import { nodeBuffer as Buffer } from "../../../src/mod.ts";
+// mod.ts audit: OK
 import { hmac } from 'https://deno.land/x/hmac@v2.0.1/mod.ts';
 
 const encoder = new TextEncoder()
@@ -41,7 +42,7 @@ export const s3Mock = (state: Map<string, Uint8Array> = new Map<string, Uint8Arr
     getObject : async (key: string )=>{
         const data = state.get(key)
         return data 
-            ? { body: new Buffer(data).readable }
+            ? {body : new Response(data).body! }
             : Promise.reject({err:'Object Not Found', code: 404})
     },
 })

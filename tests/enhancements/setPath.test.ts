@@ -6,7 +6,8 @@ import { computableToJson, rezVal } from '../../src/lib/parsers/ast.ts';
 
 import { parseAndPickType } from '../../src/lib/start.ts';
 import { jsonFeedNoItems as jsfTXT } from '../mocks/jsonFeed/flyingmeat.ts';
-import { assertEquals, assertNotEquals } from 'https://deno.land/std@0.152.0/testing/asserts.ts';
+import { assertEquals, asserts } from '../../src/mod.ts';
+
 
 // import {getPath} from '../../lib/utils/propertyPath.ts'
 // import {jsonfeed} from '../../lib/parsers/index.ts'
@@ -17,8 +18,8 @@ Deno.test('Setter Default', async () => {
 	const p = await parseAndPickType({ url: 'http://example.biz', txt: jsfTXT });
 	const ast = await p.parser(p.data, p.url).toAST();
 	const ast2 = await computableToJson(setTitle(ast));
-	assertNotEquals(ast.title, 'Title: Hello World!');
-	assertEquals(ast2.title, 'Title: Hello World!');
+	asserts.assertNotEquals(ast.title, 'Title: Hello World!');
+	asserts.assertEquals(ast2.title, 'Title: Hello World!');
 });
 
 Deno.test('Given Values', async () => {
@@ -26,7 +27,7 @@ Deno.test('Given Values', async () => {
 	const p = await parseAndPickType({ url: 'http://example.biz', txt: jsfTXT });
 	const ast = await p.parser(p.data, p.url).toAST();
 	const ast2 = await computableToJson(setImages(ast));
-	assertNotEquals(ast.title, 'Title: Hello World!');
+	asserts.assertNotEquals(ast.title, 'Title: Hello World!');
 	assertEquals(ast2.images.bannerImage, 'https://cdn.image.com');
 });
 
@@ -38,7 +39,7 @@ Deno.test('Mustache Values', async () => {
 	const ast2 = await computableToJson(assignIconToFavicon(setFavicon(ast)));
 
 	const astImages = await rezVal(ast.images);
-	assertNotEquals(astImages.favicon, 'https://cdn.something.com');
+	asserts.assertNotEquals(astImages.favicon, 'https://cdn.something.com');
 	assertEquals(ast2.images.favicon, 'https://cdn.something.com');
 	assertEquals(ast2.images.icon, 'https://cdn.something.com');
 });

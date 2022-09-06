@@ -1,4 +1,4 @@
-import { assertEquals } from 'https://deno.land/std@0.152.0/testing/asserts.ts';
+import { assertEquals } from '../../src/mod.ts';
 
 import { skip } from '../helpers.ts';
 import { getPath, type JsonValue } from '../../src/lib/utils/propertyPath.ts'

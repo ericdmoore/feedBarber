@@ -1,5 +1,8 @@
-import { assert, assertEquals,  } from 'https://deno.land/std@0.152.0/testing/asserts.ts';
+import hipsteripsum  from './helpers/hipsteripsum.ts'
+import {encblubrSA, encblubrSBA} from './helpers/encTextBlurb.ts'
+import {examplePublic, examplePrivate} from './helpers/jwKeys.example.ts'
 
+import {assert, assertEquals} from '../../src/mod.ts'
 import { 
     type FunctionPathBuilderInputDict,
     type FuncInterface,
@@ -11,9 +14,13 @@ import {
     functions
 } from '../../src/lib/parsers/enhancementFunctions.ts'
 
+<<<<<<< HEAD
 import hipsteripsum  from './helpers/hipsteripsum.ts'
 import {encblubrSA, encblubrSBA} from './helpers/encTextBlurb.ts'
 import {examplePrivate, examplePublic} from './helpers/jwKeys.example.ts'
+=======
+
+>>>>>>> 870112fb8486af1476fb3d44c60b8bb48e79dcee
 
 Deno.test('basic parse Legend', () => {
     const sba = legends.parse()('sba')
@@ -274,6 +281,7 @@ Deno.test('function.stringify + parse is bijective', async ()=>{
 })
 
 
+<<<<<<< HEAD
 Deno.test('Encrypted params', async ()=>{
     const config = {
         ...defaultedOptions,
@@ -302,4 +310,34 @@ Deno.test('Encrypted params', async ()=>{
     const fStr = await functions.stringify(config)(data)
     console.log('fStr: ',fStr.right)
     assert(fStr.right)
+=======
+Deno.test('Encrpted Serialization is bijective', async()=>{
+    const config = {
+        ...defaultedOptions,
+        legendOpts:{
+            // a
+        },
+        encryptionKeys:{
+            publicKey: examplePublic,
+            privateKey: examplePrivate
+        }
+    } as FunctionParsingOptions
+
+    const data = {
+        param1: true, 
+        param2: {a: 1, b:2, c:3},
+        secretObj: {
+            AWS_KEY: 'SOME_EXAMPLE_KEY',
+            AWS_SEC: 'SOME_EXAMPLE_SEC_THAT_SHOULD_NEVER_BE_IN_CODE'
+        }
+    }
+    
+    const s = await params.stringify(config)(data)
+    assert(s.right && !s.left)
+    assert(typeof s.right ==='string')
+
+    const d = await params.parse(config)(s.right)
+    assert(d.right && !d.left)
+    assert(typeof d.right === 'object')
+>>>>>>> 870112fb8486af1476fb3d44c60b8bb48e79dcee
 })

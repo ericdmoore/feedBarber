@@ -4,7 +4,7 @@
  *  Ref: https://docs.aws.amazon.com/general/latest/gr/signature-version-4.html
  */
 
-import { Buffer } from 'https://deno.land/std@0.142.0/node/buffer.ts';
+import { nodeBuffer as Buffer } from '../../mod.ts';
 
 // const decoder = new TextDecoder()
 const encoder = new TextEncoder();

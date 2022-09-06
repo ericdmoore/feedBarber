@@ -1,6 +1,6 @@
 /** @jsx h */
 
-import { h, jsx, PathParams, serve } from 'https://deno.land/x/sift@0.4.3/mod.ts';
+import { h, jsx, serve } from '../mod.ts';
 import configure from './pages/configure.tsx';
 import create from './pages/create.tsx';
 import logout from './pages/logout.tsx';
@@ -12,6 +12,8 @@ import token from './pages/token.tsx';
 import user from './pages/user.tsx';
 import header from './pages/header.tsx';
 import echoAST from './pages/ast.tsx';
+
+// const {h, jsx, serve} = sift
 
 const Title = (title = 'Hello World!') =>
 	jsx(
