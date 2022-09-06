@@ -3,6 +3,7 @@ import { assert, assertEquals,  } from 'https://deno.land/std@0.152.0/testing/as
 import { 
     type FunctionPathBuilderInputDict,
     type FuncInterface,
+    type FunctionParsingOptions,
     params,
     paramElement,
     legends,
@@ -12,7 +13,7 @@ import {
 
 import hipsteripsum  from './helpers/hipsteripsum.ts'
 import {encblubrSA, encblubrSBA} from './helpers/encTextBlurb.ts'
-
+import {examplePrivate, examplePublic} from './helpers/jwKeys.example.ts'
 
 Deno.test('basic parse Legend', () => {
     const sba = legends.parse()('sba')
@@ -24,17 +25,17 @@ Deno.test('basic parse Legend', () => {
     assertEquals(ma.right, ['m','a'])
 
     const bad = legends.parse()('bad')
-    assert(!bad.right)
-    assert(bad.left)
+    assert( bad.left && !bad.right)
+    
+    const bae = legends.parse()('bae')
+    assert(bad.left && !bad.right)
 
-    const jbgbga = legends.parse()('jbgbga')
-    assert(jbgbga.right)
-    assert(!jbgbga.left)
-    assertEquals('jbgbga'.split(''), jbgbga.right)
-
+    const jbgbga = legends.parse()('jbgbga')    
+    assert(jbgbga.left && !jbgbga.right)
+    
     const jaa = legends.parse()('jaa')
-    assert(!jaa.right)
-    assert(jaa.left)
+    console.log({jaa})
+    assert(jaa.left && !jaa.right)
 })
 
 Deno.test('parse and Sort Legend', () => {
@@ -270,4 +271,35 @@ Deno.test('function.stringify + parse is bijective', async ()=>{
     const pf = await functions.parse()(s.right)
     assert(pf.right)
     assertEquals(pf.right, finterface)
+})
+
+
+Deno.test('Encrypted params', async ()=>{
+    const config = {
+        ...defaultedOptions,
+        encryptionKeys: {
+            privateJWK: examplePrivate, 
+            publicJWK: examplePublic
+        },
+        legendOpts:{
+            hurdle: 512, 
+            strategy:{
+                ...defaultedOptions.legendOpts.strategy,
+                keys:{
+                    secretObj: ['je','jbe']
+                },
+            }
+        }
+    } as FunctionParsingOptions
+    
+    const data = {
+        f1name: {
+            param1:true,  
+            secretObj:{hello: 'world', mySecret:'AWS_KEY_0987654321234567890'}
+        }
+    }
+    
+    const fStr = await functions.stringify(config)(data)
+    console.log('fStr: ',fStr.right)
+    assert(fStr.right)
 })
