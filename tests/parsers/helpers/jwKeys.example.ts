@@ -26,7 +26,9 @@ export default {pub: examplePublic, priv: examplePrivate}
 
 /**
 
+//
 // Generate using this
+//
 
 const keyPair = await crypto.subtle.generateKey(
   {
@@ -40,11 +42,11 @@ const keyPair = await crypto.subtle.generateKey(
 );
 
 const saveablePubKeyJwk = await crypto.subtle.exportKey('jwk', keyPair.publicKey)
-console.log('public')
-console.log(JSON.stringify(saveablePubKeyJwk,  null, 2));
+console.log('public:\n', JSON.stringify(saveablePubKeyJwk,  null, 2) )
 
-console.log('\n\n\nprivate')
 const saveablePrivKey = await crypto.subtle.exportKey('jwk', keyPair.privateKey)
-console.log(JSON.stringify(saveablePrivKey,  null, 2));
+console.log('\n\n\nprivate:\n', JSON.stringify(saveablePrivKey,  null, 2))
 
+//
+//
 */

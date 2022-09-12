@@ -28,6 +28,8 @@ import { getSignedUrl } from 'https://deno.land/x/aws_s3_presign@1.3.0/mod.ts';
 
 import {
 	type OutputFormat,
+	OutputFormatMimeEnum,
+	pollyClient,
 	type PollyClientInterface,
 	type StartSpeechTaskRequired,
 	type Status,
@@ -36,8 +38,6 @@ import {
 	type SynthesisTaskIdentifiers,
 	type SynthesisTaskResponse,
 	type VoiceId,
-	OutputFormatMimeEnum,
-	pollyClient,
 } from '../client/aws-polly.ts';
 
 import { identicon } from '../client/svg-avatars.ts';

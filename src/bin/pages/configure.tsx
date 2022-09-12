@@ -1,17 +1,17 @@
 /** @jsx h */
 /** @jsxFrag Fragment */
 
-import {sift, h, jsx, Fragment, twind } from '../../mod.ts'
-import { ILayoutHeader, pageLayout } from './layout.tsx';
+import { Fragment, h, sift, sheets, twind, jsx } from '../../mod.ts';
 import funcMap from '../../lib/enhancements/index.ts';
-import { functions } from '../../lib/parsers/enhancementFunctions.ts';
-import { getStyleTagProperties, setup, theme, tw } from './styles/base.tsx';
+import {setup, theme, tw } from './styles/base.tsx';
+import { pageLayout, type ILayoutHeader } from './layout.tsx';
+// import { functions } from '../../lib/parsers/enhancementFunctions.ts';
 
-type VNode = sift.VNode
-type Handler = sift.Handler
-type VirtualSheet = twind.VirtualSheet
+type VNode = sift.VNode;
+type Handler = sift.Handler;
+type VirtualSheet = sheets.VirtualSheet;
 
-const {virtualSheet} = twind
+const { virtualSheet, getStyleTagProperties } = sheets;
 
 const twInlineStyle = (sheet: VirtualSheet) => {
 	const { id, textContent } = getStyleTagProperties(sheet);

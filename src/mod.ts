@@ -10,7 +10,7 @@ export * as mustache from 'https://deno.land/x/mustache@v0.3.0/mod.ts';
 export * as jsonSchema from 'https://deno.land/x/json_schema_typed@v8.0.0/draft_latest.ts';
 
 // enhancement applications
-export * as DenoDom from "https://deno.land/x/deno_dom@v0.1.21-alpha/deno-dom-wasm.ts"
+export * as DenoDom from 'https://deno.land/x/deno_dom@v0.1.21-alpha/deno-dom-wasm.ts';
 export * as multiformat from 'https://esm.sh/multiformats@9.6.4';
 export { default as minhash } from 'https://esm.sh/minhash@0.0.9';
 export { unified } from 'https://denopkg.com/ericdmoore/unified@main/mod.ts';
@@ -37,7 +37,7 @@ export { Buffer as nodeBuffer } from 'https://deno.land/std@0.152.0/node/buffer.
 export { gzipDecode, gzipEncode } from 'https://deno.land/x/wasm_gzip@v1.0.0/mod.ts';
 export { compress as brCompress, decompress as brDecompress } from 'https://deno.land/x/brotli@v0.1.4/mod.ts';
 export { compress as zstdCompress, decompress as zstdDecompress } from 'https://deno.land/x/zstd_wasm@0.0.16/deno/zstd.ts';
-export * as jose from 'https://deno.land/x/jose@v4.9.1/index.ts';
+// export * as jose from 'https://deno.land/x/jose@v4.9.1/index.ts';
 export * as bson from 'https://deno.land/x/deno_bson@v0.0.2/mod.ts';
 
 // HTML Rendering

@@ -30,5 +30,6 @@ export const EnhancementParams = object({
 	useNeural: optional(boolean()),
 });
 
-export const enhancement = async () => async (_ast: PromiseOr<ASTComputable>) => {
-};
+export const enhancement = async () =>
+	async (_ast: PromiseOr<ASTComputable>) => {
+	};

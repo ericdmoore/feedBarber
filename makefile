@@ -5,8 +5,9 @@ URL = "https://s3.eu-central-1.amazonaws.com/dynamodb-local-frankfurt/dynamodb_l
 DIR = "./dynamodb_local_latest"
 covDataDir = .cov
 covRptDir = cov_profile
-lcovFile = _lines.lcov
+lcovFile = deno.lcov
 dynamoDBFile = shared-local-instance.db
+useParallel = --parallel
 
 ls: list
 
@@ -16,7 +17,7 @@ list:
 	@echo "\n"
 
 test: 
-	DENO_JOBS=3 deno test --allow-read=./,${PWD},./src/lib/utils/,./tests/enhancements/ --allow-net --allow-env --coverage=$(covDataDir) --parallel ./tests/**/*
+	DENO_JOBS=3 deno test --allow-read=./,${PWD},./src/lib/utils/,./tests/enhancements/ --allow-net --allow-env --coverage=$(covDataDir) -j=3 ./tests/**/*
 
 tests: test
 	
@@ -29,8 +30,8 @@ coverage_prev_clear:
 	rm -rf ${covRptDir}
 
 coverage: coverage_prev_clear local_db_start wait5 test cov
-	genhtml -o cov_profile/html .coverage/_deno.lcov;
-	open cov_profile/html/index.html
+	genhtml -o ${covRptDir}/html $(covDataDir)/$(lcovFile);
+	open ${covRptDir}/html/index.html
 
 local_dl:
 	./local_db_avail.sh $(DIR) $(URL)
@@ -60,6 +61,3 @@ fmt:
 
 scratch:
 	deno run --allow-net _sratch/discover.ts
-
-
-

@@ -1,12 +1,13 @@
-import { DOMParser, path } from '../../mod.ts';
+import { DenoDom, path } from '../../mod.ts';
 // import puppeteer from "https://deno.land/x/puppeteer@9.0.2/mod.ts";
 
-const grabFromNode = (initURL: URL, propName: string) => (n: unknown): string => {
-	const _n = n as { attributes: { [key: string]: string } };
-	return (_n.attributes?.[propName] ?? '').startsWith('http')
-		? _n.attributes?.[propName]
-		: path.join(initURL.href, _n.attributes?.[propName]);
-};
+const grabFromNode = (initURL: URL, propName: string) =>
+	(n: unknown): string => {
+		const _n = n as { attributes: { [key: string]: string } };
+		return (_n.attributes?.[propName] ?? '').startsWith('http')
+			? _n.attributes?.[propName]
+			: path.join(initURL.href, _n.attributes?.[propName]);
+	};
 
 type IDiscoverInputType = { url: string | URL; body?: PromiseLike<string> };
 
@@ -21,10 +22,10 @@ export const discoverSelfFeed = async (input: IDiscoverInputType) => {
 	if (input.body) {
 		inputPageText = await input.body;
 	} else {
-		inputPageText = await (await fetch(url)).text();
+		inputPageText = await (await fetch(url.href)).text();
 	}
 
-	const doc = new DOMParser().parseFromString(inputPageText, 'text/html')!;
+	const doc = new DenoDom.DOMParser().parseFromString(inputPageText, 'text/html')!;
 
 	const rssAlts = doc.querySelectorAll('link[type="application/rss+xml" i]');
 	const atomAlts = doc.querySelectorAll('link[type="application/atom+xml" i]');

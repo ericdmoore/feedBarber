@@ -1,12 +1,15 @@
-import { DOMParser, path } from '../../mod.ts';
+import { DenoDom, path } from '../../mod.ts';
 import disocverFeedLocal from './discoverFeedLocale.ts';
 
-const grabFromNode = (initURL: URL, propName: string) => (n: unknown): string => {
-	const _n = n as { attributes: { [key: string]: string } };
-	return (_n.attributes?.[propName] ?? '').startsWith('http')
-		? _n.attributes?.[propName]
-		: path.join(initURL.href, _n.attributes?.[propName]);
-};
+
+
+const grabFromNode = (initURL: URL, propName: string) =>
+	(n: unknown): string => {
+		const _n = n as { attributes: { [key: string]: string } };
+		return (_n.attributes?.[propName] ?? '').startsWith('http')
+			? _n.attributes?.[propName]
+			: path.join(initURL.href, _n.attributes?.[propName]);
+	};
 
 type IDiscoverInputType = { url: string | URL; body?: PromiseLike<string> };
 /**
@@ -15,15 +18,17 @@ type IDiscoverInputType = { url: string | URL; body?: PromiseLike<string> };
  */
 export const discoverOtherLinkedDomainURLs = async (input: IDiscoverInputType) => {
 	let inputPageText: string;
-	const url = typeof input.url === 'string' ? new URL(input.url) : input.url;
+	const url = typeof input.url === 'string' 
+		? new URL(input.url) 
+		: input.url;
 
 	if (input.body) {
 		inputPageText = await input.body;
 	} else {
-		inputPageText = await (await fetch(url)).text();
+		inputPageText = await (await fetch(url.href)).text();
 	}
 
-	const doc = new DOMParser().parseFromString(inputPageText, 'text/html')!;
+	const doc = new DenoDom.DOMParser().parseFromString(inputPageText, 'text/html')!;
 	const externalLinks = doc.querySelectorAll('a');
 	const externalLinksStr = [...externalLinks].map(grabFromNode(url, 'href'));
 

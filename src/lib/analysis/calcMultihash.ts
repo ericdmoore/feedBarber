@@ -3,8 +3,8 @@ import { multi } from '../../mod.ts';
 const textEncoder = new TextEncoder();
 const textDecoder = new TextDecoder();
 
-const sha = (name: AlgorithmIdentifier) => async (data: Uint8Array) =>
-	new Uint8Array(await crypto.subtle.digest(name, data));
+const sha = (name: AlgorithmIdentifier) =>
+	async (data: Uint8Array) => new Uint8Array(await crypto.subtle.digest(name, data));
 
 const sha256 = multi.hasher.from({
 	name: 'sha2-256',

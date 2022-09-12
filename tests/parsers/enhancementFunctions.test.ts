@@ -1,26 +1,19 @@
 import hipsteripsum  from './helpers/hipsteripsum.ts'
-import {encblubrSA, encblubrSBA} from './helpers/encTextBlurb.ts'
+import {SAblurb, SBAblurb} from './helpers/encTextBlurb.ts'
 import {examplePublic, examplePrivate} from './helpers/jwKeys.example.ts'
+import {assert, asserts, assertEquals} from '../../src/mod.ts'
 
-import {assert, assertEquals} from '../../src/mod.ts'
 import { 
     type FunctionPathBuilderInputDict,
     type FuncInterface,
     type FunctionParsingOptions,
+    TypeNames,
     params,
     paramElement,
     legends,
     defaultedOptions,
     functions
 } from '../../src/lib/parsers/enhancementFunctions.ts'
-
-<<<<<<< HEAD
-import hipsteripsum  from './helpers/hipsteripsum.ts'
-import {encblubrSA, encblubrSBA} from './helpers/encTextBlurb.ts'
-import {examplePrivate, examplePublic} from './helpers/jwKeys.example.ts'
-=======
-
->>>>>>> 870112fb8486af1476fb3d44c60b8bb48e79dcee
 
 Deno.test('basic parse Legend', () => {
     const sba = legends.parse()('sba')
@@ -41,8 +34,12 @@ Deno.test('basic parse Legend', () => {
     assert(jbgbga.left && !jbgbga.right)
     
     const jaa = legends.parse()('jaa')
-    console.log({jaa})
+    // console.log({jaa})
     assert(jaa.left && !jaa.right)
+
+    const jae = legends.parse()('jae')
+    // console.log({jae})
+    assert(jae.left && !jae.right)
 })
 
 Deno.test('parse and Sort Legend', () => {
@@ -67,14 +64,17 @@ Deno.test('validity requires 1only1 structure and 1only1 encoding legend keys', 
 
 Deno.test('SA encodeParams', async  () => {
     const legend = 'sa'    
-    assertEquals( (await paramElement.stringify('sa')(null)).right, 'null')
-    assertEquals( (await paramElement.stringify('sa')(true)).right, 'true')
-    assertEquals( (await paramElement.stringify('sa')(false)).right, 'false')
-    assertEquals( (await paramElement.stringify('sa')(42)).right, '42')
-    assertEquals( (await paramElement.stringify('sa')(3005)).right, '3005')
-    assertEquals( (await paramElement.stringify('sa')(18.82)).right, '18.82')
-    assertEquals( (await paramElement.stringify('sa')("Hello World")).right, 'sa::SGVsbG8gV29ybGQ=')
-    assertEquals( (await paramElement.stringify('sa')(hipsteripsum)).right, encblubrSA)
+    assertEquals( (await paramElement.stringify(legend)(null)).right, 'null')
+    assertEquals( (await paramElement.stringify(legend)(true)).right, 'true')
+    assertEquals( (await paramElement.stringify(legend)(false)).right, 'false')
+    assertEquals( (await paramElement.stringify(legend)(42)).right, '42')
+    assertEquals( (await paramElement.stringify(legend)(3005)).right, '3005')
+    assertEquals( (await paramElement.stringify(legend)(18.82)).right, '18.82')
+    assertEquals( (await paramElement.stringify(legend)("Hello World")).right, 'sa::SGVsbG8gV29ybGQ=')
+    assertEquals( (await paramElement.stringify(legend)(hipsteripsum)).right, SAblurb)
+    const helloWorld = await paramElement.stringify(legend)("Hello World")
+    asserts.assertObjectMatch(helloWorld , {type: TypeNames.Right, right: 'sa::SGVsbG8gV29ybGQ='})
+
 })
 
 Deno.test('SA decodeParams',  async () => {
@@ -88,7 +88,7 @@ Deno.test('SA decodeParams',  async () => {
     assertEquals( (await paramElement.parse()('18.82')).right, 18.82)
     assertEquals( (await paramElement.parse()('::18.82')).right, 18.82)
     assertEquals( (await paramElement.parse()('sa::SGVsbG8gV29ybGQ=')).right, 'Hello World')
-    assertEquals( (await paramElement.parse()( encblubrSA)).right, hipsteripsum )
+    assertEquals( (await paramElement.parse()( SAblurb)).right, hipsteripsum )
 })
 
 Deno.test('SBA encode decode', async ()=>{
@@ -97,8 +97,8 @@ Deno.test('SBA encode decode', async ()=>{
         console.error(encSBA.left)
         assert(!encSBA.left)
     }else{
-        assert(encSBA.right.length < encblubrSA.length, 'Compressed SHOULD BE smaller than unencrypted')
-        assertEquals(encSBA.right, encblubrSBA)
+        assert(encSBA.right.length < SAblurb.length, 'Compressed SHOULD BE smaller than unencrypted')
+        assertEquals(encSBA.right, SBAblurb)
         assertEquals((await paramElement.parse()(encSBA.right)).right, hipsteripsum)
     }
 })
@@ -121,7 +121,7 @@ Deno.test('encode + parse Param', async ()=>{
 Deno.test('param parse',  async ()=>{
     const p1 = {param1:true, param2:{a:1, b:null, c:'Hello World'}}
     const r = await params.parse()('param1=true&param2=ja::eyJhIjoxLCJiIjpudWxsLCJjIjoiSGVsbG8gV29ybGQifQ==')
-    assert( !r.left )
+    assert( r.right && !r.left )
     assertEquals( r.right, p1 )
 })
 
@@ -195,8 +195,6 @@ Deno.test('buildFunctionString.2', async  ()=>{
 
 
 Deno.test('example stringify works',  async ()=>{
-
-    // NOTE params.stringify is hard coded so far
    const exampleJson = {
         _id: "630d2767f1f0781298f1e4e4",
         index: 0,
@@ -274,14 +272,14 @@ Deno.test('function.stringify + parse is bijective', async ()=>{
 
     const s = await functions.stringify()(...finput)   
     assert(s.right)
-    console.log(s.right)
+    // console.log(s.right)
     const pf = await functions.parse()(s.right)
     assert(pf.right)
     assertEquals(pf.right, finterface)
 })
 
 
-<<<<<<< HEAD
+
 Deno.test('Encrypted params', async ()=>{
     const config = {
         ...defaultedOptions,
@@ -308,19 +306,28 @@ Deno.test('Encrypted params', async ()=>{
     }
     
     const fStr = await functions.stringify(config)(data)
-    console.log('fStr: ',fStr.right)
+    // console.log('fStr: ',fStr.right)
     assert(fStr.right)
-=======
-Deno.test('Encrpted Serialization is bijective', async()=>{
+})
+
+Deno.test('Encrypted Serialization is bijective', async()=>{
+    const encryptionKeys = {
+        publicJWK: examplePublic,
+        privateJWK: examplePrivate
+    }
+    
     const config = {
         ...defaultedOptions,
+        encryptionKeys,
         legendOpts:{
-            // a
+            ...defaultedOptions.legendOpts,
+            strategy: {
+                ...defaultedOptions.legendOpts.strategy,
+                keys:{
+                    secretObj: ['je','jbe']
+                }
+            }
         },
-        encryptionKeys:{
-            publicKey: examplePublic,
-            privateKey: examplePrivate
-        }
     } as FunctionParsingOptions
 
     const data = {
@@ -333,11 +340,11 @@ Deno.test('Encrpted Serialization is bijective', async()=>{
     }
     
     const s = await params.stringify(config)(data)
+    // console.log(s.right)
     assert(s.right && !s.left)
     assert(typeof s.right ==='string')
 
     const d = await params.parse(config)(s.right)
     assert(d.right && !d.left)
-    assert(typeof d.right === 'object')
->>>>>>> 870112fb8486af1476fb3d44c60b8bb48e79dcee
+    assertEquals(d.right, data)
 })
