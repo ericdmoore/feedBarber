@@ -11,7 +11,7 @@ const loadPage = async (url: string) => (await fetch(url)).text();
 const pickArticle = async (raw: string, css: string): Promise<string | undefined> => {
 	const doc = new DOMParser().parseFromString(raw, 'text/html')!;
 	const articleNode = doc.querySelector(css);
-	return articleNode?.outerHTML;
+	return await articleNode?.outerHTML;
 };
 
 export const addLoadRawAndArticle = (input: { articleCss: string }) =>

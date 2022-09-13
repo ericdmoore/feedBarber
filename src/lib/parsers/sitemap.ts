@@ -1,3 +1,4 @@
+// deno-lint-ignore-file require-await
 import type { ASTcomputable, ASTjson } from './ast.ts';
 import type { TypedValidator } from '../start.ts';
 import { superstruct, toXml } from '../../mod.ts';

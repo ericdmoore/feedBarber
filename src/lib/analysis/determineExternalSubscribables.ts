@@ -48,7 +48,7 @@ export const discoverOtherLinkedDomainURLs = async (input: IDiscoverInputType) =
 };
 
 export const discoverOtherSubscribables = async (_urls: (string | URL)[]): Promise<string[]> => {
-	const urls = _urls.map((u) => u instanceof URL ? u : new URL(u));
+	const urls = await _urls.map((u) => u instanceof URL ? u : new URL(u));
 	return urls.reduce(async (p: Promise<string[]>, u: URL) => {
 		return [...(await p), ...(await disocverFeedLocal({ url: u }))];
 	}, Promise.resolve([]) as Promise<string[]>);

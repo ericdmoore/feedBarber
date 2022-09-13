@@ -329,12 +329,12 @@ export const Atom = ((
 					icon: txtorCData('_missing logo', c.feed?.logo),
 					bannerImage: txtorCData('_missing logo', c.feed?.logo),
 				},
-				links: async () => {
+				links:  () => {
 					const links = Array.isArray(c.feed?.link) ? c.feed?.link : [c.feed?.link];
 					const homeUrl = links.filter((l) => l?._attributes.rel === 'alternate')[0]?._attributes?.href ?? '';
 					const sourceURL = links.filter((l) => l?._attributes.rel === 'self')[0]?._attributes?.href ?? '';
 					const feedUrl = links.filter((l) => l?._attributes.rel === 'self')[0]?._attributes?.href ?? '';
-					return {
+					return Promise.resolve({
 						feedUrl,
 						homeUrl,
 						sourceURL,
@@ -346,7 +346,7 @@ export const Atom = ((
 								type: l?._attributes.type ?? '',
 							};
 						}),
-					};
+					});
 				},
 				paging: {
 					itemCount: c.feed?.entry?.length,
@@ -363,7 +363,7 @@ export const Atom = ((
 					},
 				},
 				item: {
-					next: async () => [],
+					next: async () => await [],
 					list: (c.feed?.entry ?? []).map((i: s.Infer<typeof EntryKind>) => ({
 						id: i.id?._text ?? pickURL('>> no link provided', i.link),
 						url: pickURL('>> no link provided', i.link),

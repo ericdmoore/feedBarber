@@ -8,7 +8,7 @@ type Handler = sift.Handler;
 // look up the compositions saved by the user
 // display the list to the screen as preview links
 
-export const ListFeedsForUser: Handler = async (req, pathParam) => {
+export const ListFeedsForUser: Handler =  (req, pathParam) => {
 	return jsx(
 		<>
 			<h1>User</h1>

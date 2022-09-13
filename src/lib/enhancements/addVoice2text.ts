@@ -531,27 +531,27 @@ export const cloudParams = {
 };
 
 const enhancementModule = () => {
-	const awsInstall = async (opts: typeof cloudParams.aws.struct.TYPE) => {
-		return `all resource IDs that are generated from the cloud - useful for deletion ${opts}`;
+	const awsInstall =  async (opts: typeof cloudParams.aws.struct.TYPE) => {
+		return await `all resource IDs that are generated from the cloud - useful for deletion ${opts}`;
 	};
-	const awsRemove = async (opts: typeof cloudParams.aws.struct.TYPE, resourceManifest: string) => {
-		return `confirm the resource IDs removed, or provide ACTIONable messages on how to resolve conflicts so that it can be removed ${opts} ${resourceManifest}`;
+	const awsRemove =  async(opts: typeof cloudParams.aws.struct.TYPE, resourceManifest: string) => {
+		return await `confirm the resource IDs removed, or provide ACTIONable messages on how to resolve conflicts so that it can be removed ${opts} ${resourceManifest}`;
 	};
 
-	const azureInstall = async (opts: typeof cloudParams.azure.struct.TYPE) => {
-		return `all resource IDs that are generated from the cloud - useful for deletion ${opts}`;
+	const azureInstall =  async(opts: typeof cloudParams.azure.struct.TYPE) => {
+		return await `all resource IDs that are generated from the cloud - useful for deletion ${opts}`;
 	};
 
 	const azureRemove = async (opts: typeof cloudParams.azure.struct.TYPE, resourceManifest: string) => {
-		return `confirm the resource IDs removed, or provide ACTIONable messages on how to resolve conflicts so that it can be removed ${opts} ${resourceManifest}`;
+		return await `confirm the resource IDs removed, or provide ACTIONable messages on how to resolve conflicts so that it can be removed ${opts} ${resourceManifest}`;
 	};
 
 	const gcloudInstall = async (opts: typeof cloudParams.gcloud.struct.TYPE) => {
-		return `all resource IDs that are generated from the cloud - useful for deletion ${opts}`;
+		return await `all resource IDs that are generated from the cloud - useful for deletion ${opts}`;
 	};
 
 	const gcloudRemove = async (opts: typeof cloudParams.gcloud.struct.TYPE, resourceManifest: string) => {
-		return `confirm the resource IDs removed, or provide ACTIONable messages on how to resolve conflicts so that it can be removed ${opts} ${resourceManifest}`;
+		return await `confirm the resource IDs removed, or provide ACTIONable messages on how to resolve conflicts so that it can be removed ${opts} ${resourceManifest}`;
 	};
 
 	return {
@@ -567,7 +567,7 @@ const enhancementModule = () => {
 			},
 			remove: async (opts: typeof cloudParams.remove.struct.TYPE, resourceManifest: string) => {
 				// run all cloud versions together
-				return `message: that shows successful deletion / or conflict  ${opts} ${resourceManifest}`;
+				return await `message: that shows successful deletion / or conflict  ${opts} ${resourceManifest}`;
 			},
 			aws: { install: awsInstall, remove: awsRemove },
 			azure: { install: azureInstall, remove: azureRemove },

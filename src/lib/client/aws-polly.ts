@@ -295,7 +295,7 @@ const sigMaker = (accessKeyId: string, secretAccessKey: string, region: string, 
 		awsAccessKeyId: accessKeyId,
 		awsSecretKey: secretAccessKey,
 	});
-	return async (req: Request) => sign(req);
+	return async (req: Request) => sign(await req);
 };
 
 const middleware = async (r: PromiseOr<Request>) => {
@@ -305,7 +305,7 @@ const middleware = async (r: PromiseOr<Request>) => {
 	// const req = await r
 	// req.headers.set('content-length',`${}`)
 
-	return r;
+	return await r;
 };
 
 const final = <T>(r: PromiseOr<Request>) => {
@@ -314,7 +314,7 @@ const final = <T>(r: PromiseOr<Request>) => {
 		response: async () => fetch(await middleware(r)),
 		json: async () => (await fetch(await middleware(r))).json() as Promise<T>,
 		text: async () => (await fetch(await middleware(r))).text(),
-		__mockedResponse: async (testingResponse: unknown) => testingResponse,
+		__mockedResponse: async (testingResponse: unknown) => await testingResponse,
 	};
 };
 

@@ -5,7 +5,7 @@ import { Fragment, h, sift, sheets, twind, jsx } from '../../mod.ts';
 import funcMap from '../../lib/enhancements/index.ts';
 import {setup, theme, tw } from './styles/base.tsx';
 import { pageLayout, type ILayoutHeader } from './layout.tsx';
-// import { functions } from '../../lib/parsers/enhancementFunctions.ts';
+import { functions } from '../../lib/parsers/enhancementFunctions.ts';
 
 type VNode = sift.VNode;
 type Handler = sift.Handler;
@@ -24,7 +24,7 @@ const twInlineStyle = (sheet: VirtualSheet) => {
 };
 
 export const configure = (s = 'Configure Composition'): Handler =>
-	async (req, pathParam) => {
+	(_req, pathParam) => {
 		const sheet = virtualSheet();
 		setup({ sheet, theme });
 

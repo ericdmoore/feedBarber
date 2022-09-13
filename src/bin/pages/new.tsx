@@ -8,7 +8,7 @@ type Handler = sift.Handler;
 //  how to clean up the NYT / WaPo / Medium / Substack
 //
 
-export const newFeedForm: Handler = async (req, pathParam) => {
+export const newFeedForm: Handler = (req, pathParam) => {
 	return jsx(h('h1', {}, ['New Form']));
 };
 

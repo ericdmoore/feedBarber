@@ -14,7 +14,7 @@ JSON,BR,B64::{{btoa value here}} - jba::
 BSON,B64::{{btoa value here}} - ba::
 
 */
-
+import { type PromiseOr } from '../../types.ts'
 import {
 	brCompress,
 	brDecompress,
@@ -200,13 +200,13 @@ const isBareParam = (obj: BareParams | EncodedParams): obj is BareParams => {
 const intersection = <T>(A: T[], B: T[]) => A.filter((e) => B.includes(e));
 
 export const functionsStruct = (() => {
-	const strEnc = async (text: string) => enc.encode(text);
-	const jsonEnc = async (obj: unknown) => new Uint8Array(nodeBuffer.from(JSON.stringify(obj), 'utf8').buffer);
-	const bsonEnc = async (obj: unknown) => new Uint8Array(bson.serialize(obj as bson.Document));
+	const strEnc = async (text: string) => await enc.encode(text);
+	const jsonEnc = async (obj: unknown) => new Uint8Array( await nodeBuffer.from(JSON.stringify(obj), 'utf8').buffer);
+	const bsonEnc = async (obj: unknown) => new Uint8Array( await  bson.serialize(obj as bson.Document));
 
-	const strDec = async (data: Uint8Array) => dec.decode(data);
-	const jsonDec = async (data: Uint8Array) => JSON.parse(dec.decode(data));
-	const bsonDec = async (obj: Uint8Array) => bson.deserialize(obj);
+	const strDec = async (data: Uint8Array) => await dec.decode(data);
+	const jsonDec = async (data: Uint8Array) => JSON.parse(await dec.decode(data));
+	const bsonDec = async (obj: Uint8Array) => bson.deserialize(await obj);
 
 	return Object.freeze({
 		// data -> UInt8Array
@@ -231,13 +231,13 @@ export const functionsStruct = (() => {
 })();
 
 export const functionsTransforms = (() => {
-	const gzEnc = async (bytes: Uint8Array) => gzipEncode(bytes);
-	const brEnc = async (bytes: Uint8Array) => brCompress(bytes);
-	const zEnc = async (bytes: Uint8Array) => zstdCompress(bytes);
+	const gzEnc = async (bytes: Uint8Array) => await gzipEncode(bytes);
+	const brEnc = async (bytes: Uint8Array) => await brCompress(bytes);
+	const zEnc = async (bytes: Uint8Array) => await zstdCompress(bytes);
 
-	const gzDec = async (bytes: Uint8Array) => gzipDecode(bytes);
-	const brDec = async (bytes: Uint8Array) => brDecompress(bytes);
-	const zDec = async (i: Uint8Array) => new Uint8Array(zstdDecompress(i));
+	const gzDec = async (bytes: Uint8Array) => await gzipDecode(bytes);
+	const brDec = async (bytes: Uint8Array) => await brDecompress(bytes);
+	const zDec = async (i: Uint8Array) => new Uint8Array(await zstdDecompress(i));
 
 	return Object.freeze({
 		toURL: {
@@ -259,15 +259,15 @@ export const functionsTransforms = (() => {
 	});
 })();
 
-export const jwkRSAtoCryptoKey = async (key: JsonWebKey, usages: KeyUsage[] = [CryptoKeyUsages.encrypt]) => {
+export const jwkRSAtoCryptoKey = async (key: PromiseOr<JsonWebKey>, usages: KeyUsage[] = [CryptoKeyUsages.encrypt]) => {
 	// console.log({ key, usages })
-	return crypto.subtle.importKey('jwk', key, { name: JWE_ALG['RSA-OAEP'], hash: 'SHA-512' }, true, usages);
+	return crypto.subtle.importKey('jwk', await key, { name: JWE_ALG['RSA-OAEP'], hash: 'SHA-512' }, true, usages);
 };
 
 export const functionsEncodings = (() => {
-	const B64toURL = async (data: Uint8Array) => nodeBuffer.from(data).toString('base64').replaceAll('/', '_');
+	const B64toURL = async (data: PromiseOr<Uint8Array>) => nodeBuffer.from( await data).toString('base64').replaceAll('/', '_');
 	const B64fromURL = async (URLstring: string) =>
-		new Uint8Array(nodeBuffer.from(URLstring.replaceAll('_', '/'), 'base64').buffer);
+		new Uint8Array(nodeBuffer.from(await URLstring.replaceAll('_', '/'), 'base64').buffer);
 
 	const JWEtoURL = (pubKey: JsonWebKey) =>
 		async (data: Uint8Array) => {
@@ -479,7 +479,7 @@ export const paramElement = (() => {
 
 					const composedMiddles = middFns.reduce((p, next) => {
 						return async (data: Uint8Array) => next(await p(data));
-					}, async (input: Uint8Array) => input);
+					}, async (input: Uint8Array) => await input);
 
 					if (opts.encryptionKeys) {
 						// console.info('will use the enc keys provided', {unencFn, middFns, parseFn})
@@ -530,7 +530,7 @@ export const paramElement = (() => {
 
 					const composedMiddles = middFns.reduce((p, next) => {
 						return async (data: Uint8Array) => next(await p(data));
-					}, async (input: Uint8Array) => input);
+					}, async (input: Uint8Array) => await input);
 
 					if (opts.encryptionKeys) {
 						const ppubWebKey = opts.encryptionKeys.publicJWK;

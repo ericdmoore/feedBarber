@@ -1,6 +1,6 @@
 import { assertEquals } from '../../src/mod.ts';
 
-import { skip } from '../helpers.ts';
+// import { skip } from '../helpers.ts';
 import { getPath, type JsonValue } from '../../src/lib/utils/propertyPath.ts'
 import { parseAndValidate } from '../../src/lib/start.ts';
 import { computableToJson, ASTAuthor, type ASTjson,  } from '../../src/lib/parsers/ast.ts';
@@ -24,7 +24,7 @@ const assertProp = (
 	a: unknown, 
 	e:unknown, 
 	prefix : string | string[]= '',
-	n?: number
+	_n?: number
 	)=>{
 	const pre = Array.isArray(prefix) ? prefix.join('.') : prefix
 
@@ -79,7 +79,7 @@ const compareASTtoJSFheaders = (ast: ASTjson, kind:string, jsData: RespStruct)=>
 }
 
 const compareASTtoJSFitems = (ast: ASTjson, jsData: RespStruct)=>{
-	ast.items.forEach((astItem,i,a)=>{
+	ast.items.forEach((astItem,i,_a)=>{
 		const origItem = jsData.items[i]
 		assertProp({prop:'id'}, astItem, origItem)
 		assertProp({prop:'url'}, astItem, origItem)

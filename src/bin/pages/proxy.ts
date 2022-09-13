@@ -14,9 +14,9 @@ type Handler = sift.Handler;
 export type Dict<T> = { [key: string]: T };
 export type ASTChainFunc = (i: PromiseOr<ASTComputable>) => Promise<ASTComputable>;
 
-const applyPipeline = async (ast: ASTComputable, ...chainFuncs: ASTChainFunc[]) => {
+const applyPipeline = (ast: ASTComputable, ...chainFuncs: ASTChainFunc[]) => {
 	return chainFuncs.reduce(
-		async (ast, f, i) => {
+		 (ast, f, i) => {
 			try {
 				return f(ast);
 			} catch (e) {
@@ -29,7 +29,7 @@ const applyPipeline = async (ast: ASTComputable, ...chainFuncs: ASTChainFunc[]) 
 	) as Promise<ASTComputable>;
 };
 
-const setupAstPipeline = async (ast: ASTComputable, funcParms: FuncInterface[]): Promise<ASTComputable> => {
+const setupAstPipeline = (ast: ASTComputable, funcParms: FuncInterface[]): Promise<ASTComputable> => {
 	// import the name
 	// apply the params
 	// and invoke thunk

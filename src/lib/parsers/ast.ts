@@ -75,8 +75,8 @@ export const astShell = async (
 				}
 				return ast.item.list;
 			},
-			all: async () => {
-				return [] as typeof ASTFeedItemJson.TYPE[];
+			all: () => {
+				return Promise.resolve([] as typeof ASTFeedItemJson.TYPE[]);
 			},
 		},
 		changeState: {
@@ -385,6 +385,7 @@ export const ASTKindComputable = object({
 	__enhancement: optional(union([record(string(), unknown()), Thunk<Record<string, unknown>>()])),
 });
 
+// deno-lint-ignore require-await
 export const rezVal = async <T>(i: T | ThunkType<T>) => typeof i === 'function' ? (i as ThunkType<T>)() : i;
 
 export const isAstJson = (ast: ASTcomputable | ASTjson): ast is ASTjson => {

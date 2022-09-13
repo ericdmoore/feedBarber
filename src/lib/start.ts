@@ -95,7 +95,7 @@ export const parseAndPickType = (i: { url: string; txt: string }): IDictUnionOfP
 	}
 };
 
-export const urlToAST = async (i: { url: string; txt: string }): Promise<ASTComputable> => {
+export const urlToAST = (i: { url: string; txt: string }): Promise<ASTComputable> => {
 	const picked = parseAndPickType(i);
 	return picked.parser(picked.data, picked.url).toAST();
 };
@@ -137,11 +137,11 @@ export const typedValidation = async (
 	}
 };
 
-export const parseAndValidate = async (i: { url: string; txt: string }) => typedValidation(parseAndPickType(i));
+export const parseAndValidate =  (i: { url: string; txt: string }) => typedValidation(parseAndPickType(i));
 
 export const fetchParseValidate = async (i: { url: string }) => typedValidation(parseAndPickType(await startFromURL(i.url)));
 
-export const fetchAndValidateIntoASTJson = async (i: { url: string }): Promise<ASTJson> => {
+export const fetchAndValidateIntoASTJson =  (i: { url: string }): Promise<ASTJson> => {
 	return computableToJson(fetchAndValidateIntoAST(i));
 };
 

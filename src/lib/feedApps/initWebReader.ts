@@ -15,10 +15,11 @@ export const SetupParams = s.object({
  * provision and configure cloud services & resources that will be needed
  * during ongoing use of the enhancement
  */
-export const setup = async (i: s.Infer<typeof SetupParams>): Promise<void> => {
+export const setup = (i: s.Infer<typeof SetupParams>): Promise<null> => {
 	if (SetupParams.is(i)) {
-		return Promise.reject(() => er(i, '', (new Error()).stack));
+		return Promise.reject(() => er(i, 'did not fill in', (new Error()).stack));
 	}
+	return Promise.resolve(null)
 };
 
 export const TeardownParams = object({});
@@ -30,6 +31,6 @@ export const EnhancementParams = object({
 	useNeural: optional(boolean()),
 });
 
-export const enhancement = async () =>
+export const enhancement = () =>
 	async (_ast: PromiseOr<ASTComputable>) => {
 	};

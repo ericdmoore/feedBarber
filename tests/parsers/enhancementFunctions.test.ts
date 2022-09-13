@@ -28,7 +28,7 @@ Deno.test('basic parse Legend', () => {
     assert( bad.left && !bad.right)
     
     const bae = legends.parse()('bae')
-    assert(bad.left && !bad.right)
+    assert(bae.left && !bae.right)
 
     const jbgbga = legends.parse()('jbgbga')    
     assert(jbgbga.left && !jbgbga.right)
@@ -111,6 +111,7 @@ Deno.test('encode + parse Param', async ()=>{
     const encParamStr = await paramElement.stringify('ja')(params)
     if(encParamStr.left){
         assert(!encParamStr.left)
+        assertEquals(encParamStr.right, multiParamStr)
     }else{
         const parsedParam = (await paramElement.parse()(encParamStr.right)).right
         assertEquals(parsedParam, params)

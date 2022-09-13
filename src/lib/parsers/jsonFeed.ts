@@ -250,23 +250,23 @@ export const JsonFeed = ((
 				language: c.language ?? 'en-US',
 				links: async () => {
 					return {
-						feedUrl: c.feed_url,
+						feedUrl: await c.feed_url,
 						homeUrl: c.home_page_url,
 						sourceURL: c.feed_url,
 						list: [],
 					};
 				},
 				images: async () => ({
-					favicon: c.favicon,
+					favicon: await c.favicon,
 					icon: c.icon,
 					bannerImage: c.icon,
 				}),
 				paging: async () => ({
-					itemCount: c.items.length,
+					itemCount: await c.items.length,
 				}),
 				entitlements: [],
 				sourceFeedMeta: async () => {
-					return {};
+					return await {};
 				},
 				authors: [...c.authors ?? []].concat(c.author ? [c.author] : [])
 					.map((a) => ({
@@ -277,9 +277,9 @@ export const JsonFeed = ((
 							`https://randomuser.me/api/portraits/lego/${Math.round(Math.random() * 9)}.jpg`,
 					})),
 				item: {
-					next: async () => [],
+					next: async () => await [],
 					list: async () =>
-						c.items.map((i: typeof JsonFeedItem.TYPE) => {
+						(await c.items).map((i: typeof JsonFeedItem.TYPE) => {
 							const jsonAuthors = [...c.authors ?? []].concat(c.author ? [c.author] : []);
 							const itemAuthors = (i.authors ?? []).concat(
 								// add the singular element via concat by wrapping it
@@ -315,7 +315,7 @@ export const JsonFeed = ((
 									published: i.date_published ? (new Date(i.date_published)).getTime() : Date.now(),
 								},
 								images: async () => ({
-									bannerImage: i.banner_image,
+									bannerImage: await i.banner_image,
 									indexImage: i.image,
 								}),
 								links: {
@@ -328,7 +328,7 @@ export const JsonFeed = ((
 								},
 								expires: undefined,
 								attachments: async () =>
-									(i.attachments ?? []).map((a) => {
+									(await i.attachments ?? []).map((a) => {
 										return {
 											url: a.url,
 											title: a.title,

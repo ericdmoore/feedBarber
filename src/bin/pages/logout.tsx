@@ -3,7 +3,7 @@
 import { h, jsx, sift } from '../../mod.ts';
 type Handler = sift.Handler;
 
-export const logout: Handler = async (req, pathParam) => {
+export const logout: Handler = (req, pathParam) => {
 	return jsx(h('h1', {}, ['Logout']));
 };
 

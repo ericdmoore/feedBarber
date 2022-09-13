@@ -476,16 +476,16 @@ const sigMaker = (accessKeyId: string, secretAccessKey: string, region: string, 
 
 const middleware = (fns: ((r: Request | Promise<Request>) => Promise<Request>)[]) =>
 	(r: Request | Promise<Request>) => {
-		return fns.reduce(async (p, f) => f(p), Promise.resolve(r));
+		return fns.reduce(async (p, f) => await f(p), Promise.resolve(r));
 	};
 
 const sendIt = <T>(r: Request | Promise<Request>) => {
 	return {
 		fetch: async (init?: RequestInit) => fetch(await r, init),
-		request: async () => r,
+		request: async () => await r,
 		json: async () => (await fetch(await r)).json() as Promise<T>,
 		text: async () => (await fetch(await r)).text(),
-		__mockedResponse: async (testingResponse: unknown) => testingResponse,
+		__mockedResponse: async (testingResponse: unknown) => await testingResponse,
 	};
 };
 
@@ -525,7 +525,7 @@ export class cloudwatchClient {
 		const r = new Request(this.baseURL, {
 			method: 'POST',
 			headers: { 'X-Amz-Target': 'Logs_20140328.AssociateKmsKey', 'Content-Type': 'application/x-amz-json-1.1' },
-			body: JSON.stringify(i),
+			body: JSON.stringify(await i),
 		});
 		return sendIt<AssociateKmsKeyOutput>(middleware(this.middlewareFns)(r));
 	}

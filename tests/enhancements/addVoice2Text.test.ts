@@ -6,7 +6,7 @@ import {
 	haveEverStarted,
 	isMediaFinished,
 	makeKey,
-	splitBucketItemURL,
+	// splitBucketItemURL,
 	splitSynthTaskResponse,
 	textToVoice,
 } from '../../src/lib/enhancements/addVoice2text.ts';
@@ -39,8 +39,8 @@ type ASTAllAssertion = (item: AST) => Promise<void>;
 
 console.warn('WARNING: This Test Runs Against Production Resources');
 
-const encoder = new TextEncoder();
-const s3stateGlobal = new Map<string, Uint8Array>();
+const _encoder = new TextEncoder();
+const _s3stateGlobal = new Map<string, Uint8Array>();
 
 const envs = mkEnvVar('MISSING-KEY-VALUE')
 const cfg = async ()=>({
@@ -66,7 +66,7 @@ const runAssertions = (...ASTassertionFns: ASTAllAssertion[]) =>
 			ASTassertionFns.forEach(async fASTAssert => await fASTAssert(ast))
 			
 			itemAssertionFns.forEach((fItemAssert) => {
-				_ast.items.forEach(async (item, i) => {
+				_ast.items.forEach(async (item, _i) => {
 					// console.log({ i, 'Len(attachedList)': item.attachments.length, item })
 					await fItemAssert(item)
 				} )
@@ -149,16 +149,17 @@ Deno.test({
 	}
 });
 
-Deno.test('Enhancement Validates S3 Params', async () => {
+Deno.test('Enhancement Validates S3 Params',  () => {
 	const ast = urlToAST({ url: jsonFeedUrl, txt: jsonFeed });
 	const addTextFn = textToVoice({
 		aws: { key: 'sillyExample', region: 'us-west-2', secret: 'somethingNotTooEmbarrasing' },
 		config: { s3: { bucket: 5, prefix: '' } },
+	// deno-lint-ignore no-explicit-any
 	} as any);
 	asserts.assertRejects(() => addTextFn(ast));
 });
 
-Deno.test('Validates S3 Params', async () => {
+Deno.test('Validates S3 Params',  () => {
 	const ast = urlToAST({ url: jsonFeedUrl, txt: jsonFeed });
 	const addTextFn = textToVoice({
 		aws: {
@@ -169,11 +170,12 @@ Deno.test('Validates S3 Params', async () => {
 		config: {
 			s3: { bucket: 42, prefix: '' },
 		},
+	// deno-lint-ignore no-explicit-any
 	} as any);
 	asserts.assertRejects(() => addTextFn(ast));
 });
 
-Deno.test('Validates Dynamo Params', async () => {
+Deno.test('Validates Dynamo Params',  () => {
 	const ast = urlToAST({ url: jsonFeedUrl, txt: jsonFeed });
 	const addTextFn = textToVoice({
 		aws: {
@@ -185,6 +187,7 @@ Deno.test('Validates Dynamo Params', async () => {
 			s3: { bucket: '42', prefix: 'prefix' },
 			dynamo: { table: undefined },
 		},
+	// deno-lint-ignore no-explicit-any
 	} as any);
 	asserts.assertRejects(() => addTextFn(ast));
 });
@@ -201,10 +204,10 @@ Deno.test('makeKey changes for config + corpus', async () => {
 
 Deno.test('S3 Mock Unit Test', async () => {
 	const s3m = s3Mock();
-	const encoder = new TextEncoder();
-	const decoder = new TextDecoder();
+	// const encoder = new TextEncoder();
+	// const decoder = new TextDecoder();
+	// const dataEcho = await s3m.putObject('someKey', data);
 	const data = { a: 1, b: 2, c: { d: 4, e: 5 } };
-	const dataEcho = await s3m.putObject('someKey', data);
 
 	const rSFromS3Mock = await (await s3m.getObject('someKey')).body;
 	// console.log('>> fromS3Mock :: ',rSFromS3Mock)
@@ -294,18 +297,18 @@ Deno.test('isMediaFinished is based on bread crumbs', async () => {
 			TaskStatus: status,
 			TaskId: 'a1b2c3d4',
 			CreationTime: Date.now(),
-			OutputFormat: 'mp3' as 'mp3',
+			OutputFormat: 'mp3' as const,
 			OutputUri: 'https://audio.example.com/1234',
-			Engine: 'neural' as 'neural',
-			LanguageCode: 'en-US' as 'en-US',
+			Engine: 'neural' as const, 
+			LanguageCode: 'en-US' as const, 
 			LexiconNames: [''],
 			RequestCharacters: 42,
 			SampleRate: '24000',
 			SnsTopicArn: '',
 			SpeechMarkTypes: ['sentence'] as ['sentence'],
 			TaskStatusReason: '',
-			TextType: 'text' as 'text',
-			VoiceId: 'Matthew' as 'Matthew',
+			TextType: 'text' as const, 
+			VoiceId: 'Matthew' as const,
 		},
 	};
 
@@ -353,17 +356,17 @@ Deno.test('isMediaFinished is now complete', async () => {
 			TaskStatusReason: '',
 			TaskId: 'a1b2c3d4',
 			CreationTime: Date.now(),
-			OutputFormat: 'mp3' as 'mp3',
+			OutputFormat: 'mp3' as const, 
 			OutputUri: 'https://audio.example.com/1234',
-			Engine: 'neural' as 'neural',
-			LanguageCode: 'en-US' as 'en-US',
+			Engine: 'neural' as const, 
+			LanguageCode: 'en-US' as const, 
 			LexiconNames: [''],
 			RequestCharacters: 42,
 			SampleRate: '24000',
 			SnsTopicArn: '',
 			SpeechMarkTypes: ['sentence'] as ['sentence'],
-			TextType: 'text' as 'text',
-			VoiceId: 'Matthew' as 'Matthew',
+			TextType: 'text' as const, 
+			VoiceId: 'Matthew' as const, 
 		},
 	};
 

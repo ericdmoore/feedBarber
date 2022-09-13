@@ -1,3 +1,4 @@
+// deno-lint-ignore-file require-await
 // define the expected atom shape
 // perform the fetch
 // validate the response
@@ -272,7 +273,7 @@ export const Rss: TypedValidator = ((
 						...((ast._rss as { rss: { channel: RssChannelData } })?.rss?.channel),
 						item: await Promise.all(ast.items.map(async (i) => {
 							return {
-								link: _text(i.url),
+								link: await _text(i.url),
 								guid: _text(i.id),
 								title: _text(i.title ?? 'null_source_title'),
 								description: _text(i.summary ?? 'null_source_description'),
@@ -300,7 +301,7 @@ export const Rss: TypedValidator = ((
 			};
 		},
 		toAST: async (): Promise<ASTcomputable> => {
-			const c = compactParse as RespStruct;
+			const c = await compactParse as RespStruct;
 
 			// console.log('item0:', c.rss.channel.item[0]);
 
@@ -320,7 +321,7 @@ export const Rss: TypedValidator = ((
 				description: txtorCData('>> no description', c.rss.channel.description),
 				language: 'en-US',
 				authors: async () => {
-					const authors = c.rss.channel.item.reduce((p, i) => {
+					const authors = (await c.rss.channel.item).reduce((p, i) => {
 						return {
 							...p,
 							[txtorCData('null_Author', i['dc:creator'])]: {
@@ -332,14 +333,14 @@ export const Rss: TypedValidator = ((
 				},
 				images: async () => {
 					return {
-						favicon: txtorCData('null_favicon', c.rss.channel.image?.url),
+						favicon: await txtorCData('null_favicon', c.rss.channel.image?.url),
 						icon: txtorCData('null_icon', c.rss.channel.image?.url),
 						bannerImage: txtorCData('null_bannerImage', c.rss.channel.image?.url),
 					};
 				},
 				links: async () => {
 					return {
-						feedUrl: txtorCData('', c.rss.channel.link),
+						feedUrl: await txtorCData('', c.rss.channel.link),
 						homeUrl: txtorCData('', c.rss.channel.link),
 						sourceURL: txtorCData('', c.rss.channel.link),
 						list: [

@@ -1,11 +1,11 @@
-import { nodeBuffer as Buffer } from "../../../src/mod.ts";
+// import { nodeBuffer as Buffer } from "../../../src/mod.ts";
 // mod.ts audit: OK
 import { hmac } from 'https://deno.land/x/hmac@v2.0.1/mod.ts';
 
 const encoder = new TextEncoder()
 
 export const s3Mock = (state: Map<string, Uint8Array> = new Map<string, Uint8Array>())=>({
-    headObject: async (key:string)=>{
+    headObject: (key:string)=>{
         const res = state.get(key) ?? new Uint8Array()
         return {
             contentLength: res.length,
@@ -30,16 +30,16 @@ export const s3Mock = (state: Map<string, Uint8Array> = new Map<string, Uint8Arr
             websiteRedirectLocation: undefined,
         }
     },
-    putObject: async (key: string, data: object | string | Uint8Array):Promise<Uint8Array>=>{ 
+    putObject: (key: string, data: unknown | string | Uint8Array):Promise<Uint8Array>=>{ 
         const val = typeof data ==='string' 
             ? encoder.encode(data) 
             : data instanceof Uint8Array
                 ? data
                 : encoder.encode(JSON.stringify(data)) 
         state.set(key, val)
-        return val
+        return Promise.resolve(val)
     },
-    getObject : async (key: string )=>{
+    getObject : (key: string )=>{
         const data = state.get(key)
         return data 
             ? {body : new Response(data).body! }

@@ -11,7 +11,7 @@ export const compareDocSimilarity = async (
 	tokenizer(docA).forEach((t) => d1.update(t));
 	tokenizer(docB).forEach((t) => d2.update(t));
 
-	return { score: d1.jaccard(d2), d1, d2 };
+	return await { score: d1.jaccard(d2), d1, d2 };
 };
 
 const d1 = 'minhash is a probabilistic data structure for estimating the similarity between datasets';

@@ -30,10 +30,12 @@ export const streamToString = async (rs: ReadableStream<Uint8Array>, result = ''
 	return result;
 };
 
-export const readStream = async (stream: ReadableStream<Uint8Array>, init = ''): Promise<string> => {
+export const readStream = (stream: ReadableStream<Uint8Array>, init = ''): Promise<string> => {
 	const concatToString = (reader: ReadableStreamDefaultReader<Uint8Array>, init: string) => {
-		return async (i: { done: boolean; value?: Uint8Array }): Promise<string> => {
-			return !i.done && i.value ? reader.read().then(concatToString(reader, init + dec.decode(i.value))) : init;
+		return (i: { done: boolean; value?: Uint8Array }): Promise<string> => {
+			return !i.done && i.value 
+				? reader.read().then(concatToString(reader, init + dec.decode(i.value))) 
+				: Promise.resolve(init);
 		};
 	};
 	const reader = stream.getReader();

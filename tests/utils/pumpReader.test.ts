@@ -1,7 +1,7 @@
 import { assertEquals } from '../../src/mod.ts';
 import {readStream, readToString, streamToString, stringToStream} from '../../src/lib/utils/pumpReader.ts'
 
-const dec = new TextDecoder()
+const _dec = new TextDecoder()
 const enc = new TextEncoder()
 
 interface IStreamingOptions {
@@ -9,7 +9,7 @@ interface IStreamingOptions {
     chunkSize:number
 }
 
-const rsString = (s:string, opts:IStreamingOptions  = {start:0, chunkSize:64})=> {
+const _rsString = (s:string, opts:IStreamingOptions  = {start:0, chunkSize:64})=> {
     let local_start = opts.start
     return new ReadableStream<string>({
         pull:(c)=>{  
