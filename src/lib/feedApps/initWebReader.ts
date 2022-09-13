@@ -1,7 +1,7 @@
 import type { PromiseOr } from "../../types.ts";
 import type { ASTComputable } from "../../types.ts";
 import er from "../parsers/helpers/error.ts";
-import { superstruct as s } from "../../mod.ts";
+import { superstruct as s } from "../../deps.ts";
 
 const { optional, boolean, object } = s;
 

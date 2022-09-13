@@ -14,9 +14,8 @@
 import { type PromiseOr } from '../../types.ts';
 import { type ASTcomputable, type ASTFeedItemJsonTYPE, type ASTjson, computableToJson, rezVal } from '../parsers/ast.ts';
 import { type EnhancementModule } from './index.ts';
-import { jsonSchema as jSchema } from '../../mod.ts';
+import { jsonSchema as jSchema , superstruct as s} from '../../deps.ts';
 import { addVoice2text as voiceSchema, aws, azure, gcloud } from '../schemas/index.ts';
-import { superstruct as s } from '../../mod.ts';
 import { streamToString } from '../utils/pumpReader.ts';
 
 // mod.ts audit: OK

@@ -1,5 +1,5 @@
 /*
-deno cache --lock=lock.json --lock-write src/mod.ts
+deno cache --lock=lock.json --lock-write src/deps.ts
 */
 
 // deno.land/x/
@@ -50,14 +50,14 @@ export {
 export * as bson from "https://deno.land/x/deno_bson@v0.0.2/mod.ts";
 
 // HTML Rendering
-export * as sift from "https://deno.land/x/sift@0.4.3/mod.ts";
+export * as sift from "https://deno.land/x/sift@0.6.0/mod.ts";
 export {
   Fragment,
   h,
   json,
   jsx,
   serve,
-} from "https://deno.land/x/sift@0.4.3/mod.ts";
+} from "https://deno.land/x/sift@0.6.0/mod.ts";
 export * as sheets from "https://esm.sh/twind@0.16.16/sheets";
 export * as twind from "https://esm.sh/twind@0.16.16";
 export * as twindServer from "https://esm.sh/twind@0.16.17/server";

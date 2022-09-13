@@ -24,7 +24,7 @@ import {
 	nodeBuffer,
 	zstdCompress,
 	zstdDecompress,
-} from '../../mod.ts';
+} from '../../deps.ts';
 
 type Dict<T> = { [key: string]: T };
 

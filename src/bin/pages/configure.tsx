@@ -1,7 +1,7 @@
 /** @jsx h */
 /** @jsxFrag Fragment */
 
-import { Fragment, h, sift, sheets, twind, jsx } from '../../mod.ts';
+import { Fragment, h, sift, sheets, twind, jsx } from '../../deps.ts';
 import funcMap from '../../lib/enhancements/index.ts';
 import {setup, theme, tw } from './styles/base.tsx';
 import { pageLayout, type ILayoutHeader } from './layout.tsx';

@@ -3,7 +3,7 @@ import {
   asserts,
   readableStreamFromReader,
   StringReader,
-} from "../../src/mod.ts";
+} from "../../src/deps.ts";
 import {
   readToString,
   streamToString,

@@ -1,7 +1,7 @@
 /** @jsx h */
 /** @jsxFrag Fragment */
 
-import { Fragment, h, jsx, sift, StringWriter } from "../../mod.ts";
+import { Fragment, h, jsx, sift, StringWriter } from "../../deps.ts";
 import pumpReader from "../../lib/utils/pumpReader.ts";
 type VNode = sift.VNode;
 

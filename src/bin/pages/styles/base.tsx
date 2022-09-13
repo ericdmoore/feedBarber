@@ -2,7 +2,7 @@
 @Research: Does the style system export a sheet or presets?
 */
 
-import { sheets, twind } from "../../../mod.ts";
+import { sheets, twind } from "../../../deps.ts";
 export const { virtualSheet } = sheets;
 export const { setup, tw } = twind;
 

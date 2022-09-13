@@ -6,7 +6,7 @@ import type { IValidate } from '../../types.ts';
 import type { TypedValidator } from '../start.ts';
 import { hashUsingCID } from '../analysis/calcMultihash.ts';
 import { ASTcomputable, ASTjson, computableToJson } from './ast.ts';
-import { superstruct as s } from '../../mod.ts';
+import { superstruct as s } from '../../deps.ts';
 import er from './helpers/error.ts';
 
 const {

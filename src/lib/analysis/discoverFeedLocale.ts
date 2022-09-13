@@ -1,4 +1,4 @@
-import { DenoDom, path } from "../../mod.ts";
+import { DenoDom, path } from "../../deps.ts";
 // import puppeteer from "https://deno.land/x/puppeteer@9.0.2/mod.ts";
 
 const grabFromNode =

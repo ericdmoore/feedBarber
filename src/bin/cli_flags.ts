@@ -1,6 +1,3 @@
-// import { superstruct as s } from '../mod.ts';
-// const { object, array, string } = s;
-
 export const flags = {
   _alias: {
     outputFmt: "f",

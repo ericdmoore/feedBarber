@@ -1,4 +1,4 @@
-import { dotenv, path } from "../../mod.ts";
+import { dotenv, path } from "../../deps.ts";
 type Dict<T> = { [key: string]: T };
 
 export const envVar =

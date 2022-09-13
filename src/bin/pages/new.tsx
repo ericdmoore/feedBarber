@@ -1,6 +1,6 @@
 /** @jsx h */
 
-import { h, jsx, sift } from "../../mod.ts";
+import { h, jsx, sift } from "../../deps.ts";
 type Handler = sift.Handler;
 
 // Eventaully populate this with Popular compositions

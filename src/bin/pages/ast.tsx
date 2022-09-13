@@ -1,7 +1,7 @@
 /** @jsx h */
 // import json from '../comps/responders/json.ts'
 import { fetchAndValidateIntoASTJson } from "../../lib/start.ts";
-import { json, sift } from "../../mod.ts";
+import { json, sift } from "../../deps.ts";
 
 type Handler = sift.Handler;
 

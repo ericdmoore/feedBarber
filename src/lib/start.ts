@@ -1,4 +1,4 @@
-import { fromXml } from "../mod.ts";
+import { fromXml } from "../deps.ts";
 import { ASTComputable, ASTJson, IValidate } from "../types.ts";
 import { atom, jsonfeed, rss, sitemap } from "./parsers/index.ts";
 import { computableToJson } from "./parsers/ast.ts";

@@ -1,7 +1,7 @@
 import type { IDictValidPayloadTypes, ISupportedTypes } from '../start.ts';
 import type { ASTShell, IValidate, PromiseOr } from '../../types.ts';
 
-import { superstruct as s } from '../../mod.ts';
+import { superstruct as s } from '../../deps.ts';
 
 import * as rss from './rss.ts';
 import * as jsonFeed from './jsonFeed.ts';

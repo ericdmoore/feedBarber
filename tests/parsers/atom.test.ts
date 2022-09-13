@@ -1,4 +1,4 @@
-import { assertEquals } from "../../src/mod.ts";
+import { assertEquals } from "../../src/deps.ts";
 import { skip } from "../helpers.ts";
 import { parseAndValidate } from "../../src/lib/start.ts";
 import { computableToJson } from "../../src/lib/parsers/ast.ts";

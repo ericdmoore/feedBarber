@@ -1,4 +1,4 @@
-// import { unified, rehypeParse, rehypeRemark, remarkStringify } from '../../mod.ts';
+// import { unified, rehypeParse, rehypeRemark, remarkStringify } from '../../deps.ts';
 
 // export type UnifiedPlugin = unified.Pluggable;
 // export type ParseOpts = rehypeParse.Options;

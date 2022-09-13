@@ -1,7 +1,7 @@
 import type { TypedValidator } from '../start.ts';
 import type { IValidate } from '../../types.ts';
 import { ASTcomputable, ASTjson, computableToJson } from '../parsers/ast.ts';
-import { superstruct as s, toXml } from '../../mod.ts';
+import { superstruct as s, toXml } from '../../deps.ts';
 import { JSONStruct, removeUndef } from './helpers/removeUndef.ts';
 
 import {

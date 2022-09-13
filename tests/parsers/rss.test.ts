@@ -3,7 +3,7 @@ import { rss as danLuuRss } from "../mocks/rss/danluu.ts";
 import { parseAndValidate } from "../../src/lib/start.ts";
 import { computableToJson } from "../../src/lib/parsers/ast.ts";
 import { RespStruct, Rss } from "../../src/lib/parsers/rss.ts";
-import { assertEquals } from "../../src/mod.ts";
+import { assertEquals } from "../../src/deps.ts";
 
 Deno.test(skip(
   "Rss -> AST -> Rss",

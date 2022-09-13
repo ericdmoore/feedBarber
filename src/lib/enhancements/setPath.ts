@@ -1,9 +1,8 @@
 import { type EnhancementModule } from "./index.ts";
 import type { ASTComputable, PromiseOr } from "../../types.ts";
-import { superstruct as s } from "../../mod.ts";
+import { mustache, superstruct as s } from "../../deps.ts";
 import { computableToJson, jsonToComputable } from "../parsers/ast.ts";
 import { JsonValue, setPath as setter } from "../utils/propertyPath.ts";
-import { mustache } from "../../mod.ts";
 import { setPathSchema } from "../schemas/setPath.ts";
 import er from "../parsers/helpers/error.ts";
 

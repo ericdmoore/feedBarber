@@ -1,4 +1,4 @@
-import { assertEquals } from "../../src/mod.ts";
+import { assertEquals } from "../../src/deps.ts";
 
 // import { skip } from '../helpers.ts';
 import { getPath, type JsonValue } from "../../src/lib/utils/propertyPath.ts";

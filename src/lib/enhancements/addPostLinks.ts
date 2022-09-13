@@ -1,7 +1,7 @@
 import { ASTComputable, PromiseOr } from "../../types.ts";
 import type { EnhancementModule } from "./index.ts";
 import { rezVal } from "../parsers/ast.ts";
-import { DenoDom, path } from "../../mod.ts";
+import { DenoDom, path } from "../../deps.ts";
 const { DOMParser } = DenoDom;
 type Node = DenoDom.Node;
 

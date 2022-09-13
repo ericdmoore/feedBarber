@@ -8,7 +8,7 @@
 // 	retextEnglish,
 // 	retextKeywords,
 // 	retextStringify,
-// } from '../../mod.ts';
+// } from '../../deps.ts';
 
 // export type UnifiedPlugin = unified.Pluggable;
 // export type ParseOpts = remarkParse.Options;

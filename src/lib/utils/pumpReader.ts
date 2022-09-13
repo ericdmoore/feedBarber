@@ -4,7 +4,7 @@ import {
   readableStreamFromReader,
   readerFromStreamReader,
   StringReader,
-} from "../../mod.ts";
+} from "../../deps.ts";
 
 const dec = new TextDecoder();
 

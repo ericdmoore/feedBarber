@@ -1,6 +1,6 @@
 import { skip } from "../helpers.ts";
 import { pollyClient, type Status } from "../../src/lib/client/aws-polly.ts";
-import { assert, assertEquals } from "../../src/mod.ts";
+import { assert, assertEquals } from "../../src/deps.ts";
 
 import envFn from "../../src/lib/utils/vars.ts";
 const envs = envFn("MISSING-KEY-VALUE");

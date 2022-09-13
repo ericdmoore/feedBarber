@@ -1,4 +1,4 @@
-import { assertEquals } from "../../src/mod.ts";
+import { assertEquals } from "../../src/deps.ts";
 import {
   readStream,
   readToString,

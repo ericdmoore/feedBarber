@@ -3,7 +3,7 @@
 import type { EnhancementModule } from "./index.ts";
 import { ASTComputable, PromiseOr } from "../../types.ts";
 import { rezVal } from "../parsers/ast.ts";
-import { DenoDom } from "../../mod.ts";
+import { DenoDom } from "../../deps.ts";
 const { DOMParser } = DenoDom;
 
 const loadPage = async (url: string) => (await fetch(url)).text();

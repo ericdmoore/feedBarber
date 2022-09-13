@@ -1,5 +1,5 @@
 /** @jsx h */
-import { h, sift } from "../../mod.ts";
+import { h, sift } from "../../deps.ts";
 type Handler = sift.Handler;
 import { ILayoutHeader, pageLayout } from "./layout.tsx";
 import { functions } from "../../lib/parsers/enhancementFunctions.ts";

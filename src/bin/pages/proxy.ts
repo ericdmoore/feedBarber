@@ -1,5 +1,5 @@
 import type { ASTComputable, PromiseOr } from "../../types.ts";
-import { json, sift } from "../../mod.ts";
+import { json, sift } from "../../deps.ts";
 // import { jsonToComputable } from '../../lib/parsers/ast.ts'
 import { fetchAndValidateIntoAST } from "../../lib/start.ts";
 

@@ -4,7 +4,7 @@
  * -u is a URL
  */
 
-import { green, parse, red, yellow } from "../mod.ts";
+import { green, parse, red, yellow } from "../deps.ts";
 import { functions } from "../lib/parsers/enhancementFunctions.ts";
 import flags from "./cli_flags.ts";
 

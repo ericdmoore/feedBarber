@@ -1,6 +1,6 @@
 /** @jsx h */
 
-import { h, jsx, serve } from "../mod.ts";
+import { h, jsx, serve } from "../deps.ts";
 import configure from "./pages/configure.tsx";
 import create from "./pages/create.tsx";
 import logout from "./pages/logout.tsx";

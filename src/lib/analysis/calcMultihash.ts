@@ -1,4 +1,4 @@
-import { multi } from "../../mod.ts";
+import { multi } from "../../deps.ts";
 
 const textEncoder = new TextEncoder();
 const textDecoder = new TextDecoder();

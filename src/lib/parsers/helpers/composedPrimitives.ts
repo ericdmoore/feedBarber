@@ -1,4 +1,4 @@
-import { superstruct } from "../../../mod.ts";
+import { superstruct } from "../../../deps.ts";
 const { partial, type, optional, object, string, union, literal, define, is } =
   superstruct;
 

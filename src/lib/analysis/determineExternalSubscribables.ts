@@ -1,4 +1,4 @@
-import { DenoDom, path } from "../../mod.ts";
+import { DenoDom, path } from "../../deps.ts";
 import disocverFeedLocal from "./discoverFeedLocale.ts";
 
 const grabFromNode =

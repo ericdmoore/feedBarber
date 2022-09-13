@@ -1,6 +1,6 @@
 import type { ASTComputable } from "../../types.ts";
 
-import { json } from "../../mod.ts";
+import { json } from "../../deps.ts";
 import { computableToJson } from "../../lib/parsers/ast.ts";
 import { atom, jsonfeed, rss } from "../../lib/parsers/index.ts";
 

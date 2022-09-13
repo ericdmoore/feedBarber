@@ -4,7 +4,7 @@ import { computableToJson, rezVal } from "../../src/lib/parsers/ast.ts";
 
 import { parseAndPickType } from "../../src/lib/start.ts";
 import { jsonFeedNoItems as jsfTXT } from "../mocks/jsonFeed/flyingmeat.ts";
-import { assertEquals, asserts } from "../../src/mod.ts";
+import { assertEquals, asserts } from "../../src/deps.ts";
 
 // import {getPath} from '../../lib/utils/propertyPath.ts'
 // import {jsonfeed} from '../../lib/parsers/index.ts'

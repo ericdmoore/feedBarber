@@ -3,7 +3,7 @@ import { sitemap as flyingMeatSite } from "../mocks/sitemaps/flyingmeat.ts";
 import { parseAndValidate } from "../../src/lib/start.ts";
 import { computableToJson } from "../../src/lib/parsers/ast.ts";
 import { RespStruct, Sitemap } from "../../src/lib/parsers/sitemap.ts";
-import { assertEquals } from "../../src/mod.ts";
+import { assertEquals } from "../../src/deps.ts";
 
 Deno.test(skip(
   "Sitemap -> AST -> Sitemap",

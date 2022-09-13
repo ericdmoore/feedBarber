@@ -5,18 +5,10 @@ import type {
   ASTFeedItemJson,
   ASTjson,
 } from "./lib/parsers/ast.ts";
-// import type { Node as _Node } from './mods/unist.ts';
-// import { unified } from './mod.ts';
 
 export type PaginationResp<T> = Promise<
   { val: T; canPrev: boolean; canNext: boolean }
 >;
-
-// export interface StartValidator<T = unknown>{
-// 	fromUrl:  (i: { url:string }) => Promise<IValidate<T>>
-// 	fromText: (i: { url:string, txt:string }) => Promise<IValidate<T>>
-// 	fromData: (i: { url:string, data: unknown }) => Promise<IValidate<T>>
-// }
 
 export interface IValidate<T> {
   _: T;

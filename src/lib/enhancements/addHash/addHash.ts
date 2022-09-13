@@ -4,7 +4,7 @@
 
 import type { EnhancementModule } from "../index.ts";
 import type { ASTComputable, PromiseOr } from "../../../types.ts";
-import { jsonSchema as jSchema } from "../../../mod.ts";
+import { jsonSchema as jSchema } from "../../../deps.ts";
 import { rezVal } from "../../parsers/ast.ts";
 import { cidStr } from "../../analysis/calcMultihash.ts";
 

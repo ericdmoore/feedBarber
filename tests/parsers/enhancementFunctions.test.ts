@@ -1,7 +1,7 @@
 import hipsteripsum from "./helpers/hipsteripsum.ts";
 import { SAblurb, SBAblurb } from "./helpers/encTextBlurb.ts";
 import { examplePrivate, examplePublic } from "./helpers/jwKeys.example.ts";
-import { assert, assertEquals, asserts } from "../../src/mod.ts";
+import { assert, assertEquals, asserts } from "../../src/deps.ts";
 
 import {
   defaultedOptions,

@@ -1,4 +1,4 @@
-// import { unified, remarkParse, remarkRetext, retextStringify } from '../../mod.ts';
+// import { unified, remarkParse, remarkRetext, retextStringify } from '../../deps.ts';
 
 // export type UnifiedPlugin = unified.Pluggable;
 // export type ParseOpts = remarkParse.Options;
