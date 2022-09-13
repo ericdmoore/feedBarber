@@ -302,4 +302,4 @@ export const rss = `<?xml version="1.0" encoding="UTF-8"?>
     </p>
  ]]></content:encoded></item></channel></rss>`;
 
- export default {rss}
+export default { rss };

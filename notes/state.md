@@ -1,5 +1,2 @@
-DomainConfig
-|---------------------------|
-| domain | path | lastFetch | 
-|--------|------|-----------|
-| example.com | https://example.com/feed | 
+DomainConfig |---------------------------| | domain | path | lastFetch |
+|--------|------|-----------| | example.com | https://example.com/feed |

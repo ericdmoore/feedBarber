@@ -6,8 +6,9 @@ See `make server`
 
 ### Developing Libraries
 
-The Heuristic of purity defines the difference between `enhancement` and `analysis`.
-Analysis modules are pure, and `enhancements` create limited but useful side effects.
+The Heuristic of purity defines the difference between `enhancement` and
+`analysis`. Analysis modules are pure, and `enhancements` create limited but
+useful side effects.
 
 ### Developing the Command Line interface (CLI)
 

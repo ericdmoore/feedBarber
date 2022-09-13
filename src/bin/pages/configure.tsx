@@ -34,21 +34,22 @@ export const configure = (s = 'Configure Composition'): Handler =>
 				<h1 class='font-serif text(3xl slate-500)'>{s}</h1>
 				<h4>Direct Path Params</h4>
 				<pre>
-					{Object.entries({ ...pathParam })
+					{	/*
+						Object.entries({ ...pathParam })
 						.map(([k, v]) => JSON.stringify({ [k]: v }))
-						.join('\n')}
+						.join('\n')
+						*/
+					}
 				</pre>
 
 				<h4>Funcs</h4>
-				{
 					<pre>
 						{
-							// parseFunctions((pathParam ?? {})?.composition ?? 'none')
-							// 	.map((f) => JSON.stringify(f, null, 2))
-							// 	.join('\n')
+							/* parseFunctions((pathParam ?? {})?.composition ?? 'none')
+								.map((f) => JSON.stringify(f, null, 2))
+								.join('\n') */
 						}
 					</pre>
-				}
 
 				<p>Here we will</p>
 				<ul>
@@ -61,9 +62,11 @@ export const configure = (s = 'Configure Composition'): Handler =>
 
 				<h3 id='funcs'>Functions & Params</h3>
 				<pre>
-					{Object.entries(funcMap).map(([k, v]) => {
-						return `${k} : ${JSON.stringify(JSON.parse(v.params.run), null, 2)}`;
-					}).join('\n\n')}
+					{
+						Object.entries(funcMap).map(([k, v]) => {
+							return `${k} : ${JSON.stringify(JSON.parse(v.params.run), null, 2)}`;
+						}).join('\n\n')
+					}
 				</pre>
 			</body>
 		);

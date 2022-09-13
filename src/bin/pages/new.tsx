@@ -1,6 +1,6 @@
 /** @jsx h */
 
-import { h, jsx, sift } from '../../mod.ts';
+import { h, jsx, sift } from "../../mod.ts";
 type Handler = sift.Handler;
 
 // Eventaully populate this with Popular compositions
@@ -9,7 +9,7 @@ type Handler = sift.Handler;
 //
 
 export const newFeedForm: Handler = (req, pathParam) => {
-	return jsx(h('h1', {}, ['New Form']));
+  return jsx(h("h1", {}, ["New Form"]));
 };
 
 export default newFeedForm;

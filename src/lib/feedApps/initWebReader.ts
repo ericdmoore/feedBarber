@@ -1,12 +1,12 @@
-import type { PromiseOr } from '../../types.ts';
-import type { ASTComputable } from '../../types.ts';
-import er from '../parsers/helpers/error.ts';
-import { superstruct as s } from '../../mod.ts';
+import type { PromiseOr } from "../../types.ts";
+import type { ASTComputable } from "../../types.ts";
+import er from "../parsers/helpers/error.ts";
+import { superstruct as s } from "../../mod.ts";
 
 const { optional, boolean, object } = s;
 
 export const SetupParams = s.object({
-	awsCredLoc: s.string(),
+  awsCredLoc: s.string(),
 });
 
 /**
@@ -16,21 +16,22 @@ export const SetupParams = s.object({
  * during ongoing use of the enhancement
  */
 export const setup = (i: s.Infer<typeof SetupParams>): Promise<null> => {
-	if (SetupParams.is(i)) {
-		return Promise.reject(() => er(i, 'did not fill in', (new Error()).stack));
-	}
-	return Promise.resolve(null)
+  if (SetupParams.is(i)) {
+    return Promise.reject(() => er(i, "did not fill in", (new Error()).stack));
+  }
+  return Promise.resolve(null);
 };
 
 export const TeardownParams = object({});
 
-export const teardown = async (_i: s.Infer<typeof TeardownParams>): Promise<void> => {
+export const teardown = async (
+  _i: s.Infer<typeof TeardownParams>,
+): Promise<void> => {
 };
 
 export const EnhancementParams = object({
-	useNeural: optional(boolean()),
+  useNeural: optional(boolean()),
 });
 
-export const enhancement = () =>
-	async (_ast: PromiseOr<ASTComputable>) => {
-	};
+export const enhancement = () => async (_ast: PromiseOr<ASTComputable>) => {
+};

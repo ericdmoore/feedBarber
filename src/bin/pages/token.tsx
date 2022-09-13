@@ -1,5 +1,5 @@
 /** @jsx h */
-import { Fragment, h, jsx, sift } from '../../mod.ts';
+import { Fragment, h, jsx, sift } from "../../mod.ts";
 type Handler = sift.Handler;
 
 /**
@@ -7,9 +7,9 @@ type Handler = sift.Handler;
  * - for user or state
  * @param tokenType
  */
-export const ListFeedsFortoken = (tokenType: 'User' | 'Temp'): Handler =>
-	(req, pathParam) => {
-		return jsx(<h1>{`Feeds For ${tokenType} Token`}</h1>);
-	};
+export const ListFeedsFortoken =
+  (tokenType: "User" | "Temp"): Handler => (req, pathParam) => {
+    return jsx(<h1>{`Feeds For ${tokenType} Token`}</h1>);
+  };
 
 export default ListFeedsFortoken;

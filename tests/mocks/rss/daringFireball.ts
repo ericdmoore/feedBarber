@@ -1,4 +1,3 @@
-
 export const rss = `
 <?xml version="1.0" encoding="utf-8"?>
 <feed xmlns="http://www.w3.org/2005/Atom">
@@ -2058,6 +2057,6 @@ expertise can explain why this is, let me know.</p>
 ]]></content>
   <title>★ The D.O.J. Goes After Google’s ‘Communicate With Care’ Program</title></entry></feed>
 <!-- THE END -->
-`
+`;
 
 export default { rss };
