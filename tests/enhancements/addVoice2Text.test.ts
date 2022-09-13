@@ -241,7 +241,7 @@ Deno.test("makeKey changes for config + corpus", async () => {
 Deno.test("S3 Mock Unit Test", async () => {
   const s3m = s3Mock();
   const data = { a: 1, b: 2, c: { d: 4, e: 5 } };
-  await s3m.putObject('someKey', data);
+  await s3m.putObject("someKey", data);
   const s3DataStr = await streamToString((await s3m.getObject("someKey")).body);
   const s3DataObj = JSON.parse(s3DataStr);
 
