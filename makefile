@@ -17,11 +17,11 @@ list:
 	@echo "\n"
 
 test_ci:
-	DENO_JOBS=3 deno test --allow-read=./,${PWD},./src/lib/utils/,./tests/enhancements/ --allow-net --allow-env --coverage=$(covDataDir) --paralell ./tests/**/*
+	DENO_JOBS=3 deno test --allow-read=./,${PWD},./src/lib/utils/,./tests/enhancements/ --allow-net --allow-env --coverage=$(covDataDir) --parallel ./tests/**/*
 
 test: test_ci
-	deno lint;
-	deno fmt;
+	deno lint --json | jq '[.diagnostics[].file] | unique';
+	deno fmt ./src ./tests;
 
 tests: test	
 
