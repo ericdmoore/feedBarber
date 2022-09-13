@@ -280,7 +280,6 @@ export const haveEverStarted = async (
 		const s3CacheCrumb = await s3c.getObject(
 			itemKey.replace('://', '.!!') + '.json',
 		)
-			.catch(() => null);
 
 		if (s3CacheCrumb) {
 			const s3Str = await streamToString(s3CacheCrumb?.body);

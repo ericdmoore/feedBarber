@@ -240,18 +240,12 @@ Deno.test("makeKey changes for config + corpus", async () => {
 
 Deno.test("S3 Mock Unit Test", async () => {
   const s3m = s3Mock();
-  // const encoder = new TextEncoder();
-  // const decoder = new TextDecoder();
-  // const dataEcho = await s3m.putObject('someKey', data);
   const data = { a: 1, b: 2, c: { d: 4, e: 5 } };
-
-  const rSFromS3Mock = await (await s3m.getObject("someKey")).body;
-  // console.log('>> fromS3Mock :: ',rSFromS3Mock)
-
-  const s3DataStr = await streamToString(rSFromS3Mock);
-  // console.log('>> await readToString(fromS3Mock) :: ', s3DataStr)
-
+  await s3m.putObject('someKey', data);
+  const s3DataStr = await streamToString((await s3m.getObject("someKey")).body);
   const s3DataObj = JSON.parse(s3DataStr);
+
+  // console.log('>> await readToString(fromS3Mock) :: ', s3DataStr)
   // console.log('>> parsed data object :: ', s3DataObj)
 
   asserts.assertEquals(s3DataObj, data);
