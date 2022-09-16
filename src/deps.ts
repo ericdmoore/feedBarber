@@ -33,7 +33,7 @@ export { remarkRehype } from "https://denopkg.com/ericdmoore/remark-rehype@main/
 // export * as remarkRetext from 'https://esm.sh/remark-retext?dts';
 
 // enhancment funciton parsing
-export { Buffer as nodeBuffer } from "https://deno.land/std@0.152.0/node/buffer.ts";
+export { Buffer as nodeBuffer } from "https://deno.land/std@0.153.0/node/buffer.ts";
 export {
   gzipDecode,
   gzipEncode,
@@ -48,6 +48,8 @@ export {
 } from "https://deno.land/x/zstd_wasm@0.0.16/deno/zstd.ts";
 // export * as jose from 'https://deno.land/x/jose@v4.9.1/index.ts';
 export * as bson from "https://deno.land/x/deno_bson@v0.0.2/mod.ts";
+
+export { default as S } from 'https://esm.sh/fluent-json-schema@3.1.0?deno-std=0.153.0"';
 
 // HTML Rendering
 export * as sift from "https://deno.land/x/sift@0.6.0/mod.ts";
@@ -83,7 +85,7 @@ export {
   copy,
   readableStreamFromReader,
   readerFromStreamReader,
-} from "https://deno.land/std@0.144.0/streams/conversion.ts";
+} from "https://deno.land/std@0.153.0/streams/conversion.ts";
 export * as multi from "https://cdn.skypack.dev/multiformats?dts";
 export * as dotenv from "https://deno.land/std@0.153.0/dotenv/mod.ts";
 export * as path from "https://deno.land/std@0.153.0/path/mod.ts";
@@ -96,11 +98,11 @@ export * as path from "https://deno.land/std@0.153.0/path/mod.ts";
 // export * as retextReadability from 'https://esm.sh/retext-readability?dts';
 
 // Testing
-export * as asserts from "https://deno.land/std@0.152.0/testing/asserts.ts";
+export * as asserts from "https://deno.land/std@0.153.0/testing/asserts.ts";
 export {
   assert,
   assertEquals,
-} from "https://deno.land/std@0.152.0/testing/asserts.ts";
+} from "https://deno.land/std@0.153.0/testing/asserts.ts";
 
 // DOTENV
 // "https://deno.land/std/dotenv/mod.ts";

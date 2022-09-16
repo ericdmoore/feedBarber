@@ -130,3 +130,13 @@ Compact URL:
 ### Console
 
 > Show Funciton Output
+
+## User Developed of Plugins
+
+Plugin as a named folder pattern
+
+- index.ts file that exports an `EnhancementModule` interface
+- Can be uploaded as a
+  - `tar.gz`
+  - others coming soon
+- ## Can be given capabilities via Deno permissions

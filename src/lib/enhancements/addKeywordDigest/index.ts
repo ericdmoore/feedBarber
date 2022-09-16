@@ -1,4 +1,3 @@
-// tie it all together
 // deno-lint-ignore-file require-await
 // tie it all together
 import {
@@ -7,9 +6,9 @@ import {
   type ProviderFunctions,
   type ProviderInstallParamSchemas,
 } from "../index.ts";
-import { paramSchema, setPath } from "./setPath.ts";
+import { addKeywordDigest, paramSchema } from "./addKeywordDigest.ts";
 
-const run = setPath as ASTChainFunc;
+const run = addKeywordDigest as ASTChainFunc;
 
 const aws = (() => {
   const install = async () => "";

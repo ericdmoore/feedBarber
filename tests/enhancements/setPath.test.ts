@@ -1,5 +1,5 @@
 // import skip from '../helpers.ts';
-import { setPath } from "../../src/lib/enhancements/setPath.ts";
+import { setPath } from "../../src/lib/enhancements/setPath/setPath.ts";
 import { computableToJson, rezVal } from "../../src/lib/parsers/ast.ts";
 
 import { parseAndPickType } from "../../src/lib/start.ts";

@@ -2,7 +2,7 @@
 /** @jsxFrag Fragment */
 
 import { Fragment, h, jsx, sheets, sift, twind } from "../../deps.ts";
-import funcMap from "../../lib/enhancements/index.ts";
+import { moduleMap } from "../../lib/enhancements/index.ts";
 import { setup, theme, tw } from "./styles/base.tsx";
 import { type ILayoutHeader, pageLayout } from "./layout.tsx";
 import { functions } from "../../lib/parsers/enhancementFunctions.ts";
@@ -23,23 +23,6 @@ const twInlineStyle = (sheet: VirtualSheet) => {
     </>
   );
 };
-
-/*
-Direct Path Params
-
-	Object.entries({ ...pathParam })
-	.map(([k, v]) => JSON.stringify({ [k]: v }))
-	.join('\n')
-
-
-Funcs
-
-	parseFunctions((pathParam ?? {})?.composition ?? 'none')
-		.map((f) => JSON.stringify(f, null, 2))
-		.join('\n')
-
-
-*/
 
 export const configure =
   (s = "Configure Composition"): Handler => (_req, pathParam) => {
@@ -66,10 +49,11 @@ export const configure =
         </ul>
 
         <h3 id="funcs">Functions & Params</h3>
+        {/* parse | stringify for the object-based pretty print */}
         <pre>
 					{
-						Object.entries(funcMap).map(([k, v]) => {
-							return `${k} : ${JSON.stringify(JSON.parse(v.params.run), null, 2)}`;
+						Object.entries(moduleMap).map(([k, v]) => {
+							return `${k} : ${JSON.stringify(JSON.parse(v.paramsSchema.run), null, 2)}`;
 						}).join('\n\n')
 					}
         </pre>
@@ -84,3 +68,14 @@ export const configure =
   };
 
 export default configure;
+
+// Direct Path Params
+
+// 	Object.entries({ ...pathParam })
+// 	.map(([k, v]) => JSON.stringify({ [k]: v }))
+// 	.join('\n')
+
+// Funcs
+// 	parseFunctions((pathParam ?? {})?.composition ?? 'none')
+// 		.map((f) => JSON.stringify(f, null, 2))
+// 		.join('\n')

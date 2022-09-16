@@ -16,7 +16,7 @@ import {
   // splitBucketItemURL,
   splitSynthTaskResponse,
   textToVoice,
-} from "../../src/lib/enhancements/addVoice2text.ts";
+} from "../../src/lib/enhancements/addVoice2text/addVoice2text.ts";
 
 import {
   type SynthesisTaskConfig,

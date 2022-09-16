@@ -1,62 +1,67 @@
-import { jsonSchema as jSchema } from "../../deps.ts";
+import { S } from "../../deps.ts";
+// import { jsonSchema as jSchema } from "../../deps.ts";
 
-export const pollyRunSchema = {
-  $schema: jSchema.$schema,
-  $id: "https://feeds.city/schemas/addVoiceToText.run.json",
-  type: jSchema.TypeName.Object,
-  properties: {
-    aws: {
-      type: jSchema.TypeName.Object,
-      required: ["key", "secret"],
-      properties: {
-        key: jSchema.TypeName.String,
-        secret: jSchema.TypeName.String,
-        region: jSchema.TypeName.String,
-      },
-    },
-    config: {
-      type: jSchema.TypeName.Object,
-      required: ["s3"],
-      properties: {
-        s3: {
-          type: jSchema.TypeName.Object,
-          required: ["bucket"],
-          properties: {
-            bucket: jSchema.TypeName.String,
-            prefix: jSchema.TypeName.String,
-          },
-        },
-        polly: {
-          type: jSchema.TypeName.Object,
-          properties: {
-            voiceId: jSchema.TypeName.String,
-            outputFormat: { enum: ["json", "mp3", "ogg_vorbis", "pcm"] },
-            sampleRate: jSchema.TypeName.String,
-            useNeuralEngine: jSchema.TypeName.Boolean,
-            isPlainText: jSchema.TypeName.Boolean,
-            onCompletion: {
-              type: jSchema.TypeName.Object,
-              properties: {
-                snsTopic: jSchema.TypeName.String,
-              },
-            },
-          },
-        },
-        cloudfront: {
-          type: jSchema.TypeName.Object,
-          required: ["host"],
-          properties: {
-            host: jSchema.TypeName.String,
-            expiresAfterSeconds: jSchema.TypeName.Number,
-          },
-        },
-        dynamo: {
-          type: jSchema.TypeName.Object,
-          properties: {
-            table: jSchema.TypeName.String,
-          },
-        },
-      },
-    },
-  },
-} as jSchema.JSONSchema;
+const IDroot = {
+  protocol: "//",
+  pathSeg: ["feeds.city", "schemas", "addVoiceToText", "run"],
+  paths: ["feeds.city", "schemas", "addVoiceToText", "run.json"],
+  str: "feeds.city/schemas/addVoiceToText/run.json",
+  ext: ".json",
+};
+
+const configS3Part = S
+  .object()
+  .id(IDroot.protocol + IDroot.str + "#config/s3")
+  .required(["bucket"])
+  .prop("bucket", S.string())
+  .prop("prefix", S.string());
+
+const configDynamoPart = S
+  .object()
+  .id(IDroot.protocol + IDroot.str + "#config/dynamo")
+  .required(["table"])
+  .prop("table", S.string());
+
+const configCloudfrontPart = S
+  .object()
+  .id(IDroot.protocol + IDroot.str + "#config/cloudfront")
+  .required(["host"])
+  .prop("host", S.string())
+  .prop("expiresAfterSeconds", S.number());
+
+const configPollyPart = S
+  .object()
+  .id(IDroot.protocol + IDroot.str + "#config/polly")
+  .prop("voiceId", S.string())
+  .prop("outputFormat", S.enum(["json", "mp3", "ogg_vorbis", "pcm"]))
+  .prop("sampleRate", S.string())
+  .prop("useNeuralEngine", S.boolean())
+  .prop("isPlainText", S.boolean())
+  .prop("onCompletion", S.object().prop("snsTopic", S.string()));
+
+const configPart = S
+  .object()
+  .id(IDroot.protocol + IDroot.str + "#config")
+  .prop("s3", configS3Part)
+  .prop("polly", configPollyPart)
+  .prop("dynamo", configDynamoPart)
+  .prop("cloudfront", configCloudfrontPart);
+
+const awsPart = S
+  .object()
+  .id(IDroot.protocol + IDroot.str + "#aws")
+  .required(["key", "secret"])
+  .prop("key", S.string())
+  .prop("secret", S.string())
+  .prop("region", S.string());
+
+const pollyObjectSchema = S
+  .object()
+  .id(IDroot.protocol + IDroot.str)
+  .title("Add Voice To Text lugin")
+  .description("Validator for User params to the Add Voice To Text PLugin")
+  .required(["aws", "config"])
+  .prop("aws", awsPart)
+  .prop("config", configPart);
+
+export const pollyRunSchema = pollyObjectSchema.valueOf();
