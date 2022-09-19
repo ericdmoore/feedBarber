@@ -6,9 +6,9 @@ import {
   type ProviderFunctions,
   type ProviderInstallParamSchemas,
 } from "../index.ts";
-import { addHash, paramSchema } from "./addHash.ts";
 
-const run = addHash as ASTChainFunc;
+import { filterBy, paramSchema } from "./filterBy.ts";
+const run = filterBy as ASTChainFunc;
 
 const aws = (() => {
   const install = async () => "";

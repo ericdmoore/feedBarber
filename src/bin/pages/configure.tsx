@@ -4,14 +4,21 @@
 import { Fragment, h, jsx, sheets, sift, twind } from "../../deps.ts";
 import { moduleMap } from "../../lib/enhancements/index.ts";
 import { setup, theme, tw } from "./styles/base.tsx";
-import { type ILayoutHeader, pageLayout } from "./layout.tsx";
-import { functions } from "../../lib/parsers/enhancementFunctions.ts";
+import { 
+  pageLayout, 
+  // type ILayoutHeader 
+} from "./layout.tsx";
+
+import { 
+  functions 
+} from "../../lib/parsers/enhancementFunctions.ts";
 
 type VNode = sift.VNode;
 type Handler = sift.Handler;
 type VirtualSheet = sheets.VirtualSheet;
 
 const { virtualSheet, getStyleTagProperties } = sheets;
+
 
 const twInlineStyle = (sheet: VirtualSheet) => {
   const { id, textContent } = getStyleTagProperties(sheet);
@@ -23,6 +30,7 @@ const twInlineStyle = (sheet: VirtualSheet) => {
     </>
   );
 };
+
 
 export const configure =
   (s = "Configure Composition"): Handler => (_req, pathParam) => {
@@ -68,14 +76,3 @@ export const configure =
   };
 
 export default configure;
-
-// Direct Path Params
-
-// 	Object.entries({ ...pathParam })
-// 	.map(([k, v]) => JSON.stringify({ [k]: v }))
-// 	.join('\n')
-
-// Funcs
-// 	parseFunctions((pathParam ?? {})?.composition ?? 'none')
-// 		.map((f) => JSON.stringify(f, null, 2))
-// 		.join('\n')

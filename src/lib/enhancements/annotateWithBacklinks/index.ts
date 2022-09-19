@@ -6,9 +6,9 @@ import {
   type ProviderFunctions,
   type ProviderInstallParamSchemas,
 } from "../index.ts";
-import { addHash, paramSchema } from "./addHash.ts";
 
-const run = addHash as ASTChainFunc;
+import { annotateWithBackLinks, paramSchema } from './annotateWIthBackLinks.ts'
+const run = annotateWithBackLinks as ASTChainFunc;
 
 const aws = (() => {
   const install = async () => "";
