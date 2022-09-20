@@ -7,7 +7,7 @@ import {
   type ProviderInstallParamSchemas,
 } from "../index.ts";
 
-import { annotateWithBackLinks, paramSchema } from './annotateWIthBackLinks.ts'
+import { annotateWithBackLinks, paramSchema } from "./annotateWIthBackLinks.ts";
 const run = annotateWithBackLinks as ASTChainFunc;
 
 const aws = (() => {

@@ -25,7 +25,7 @@ const buildSearchParams = (req: Request) => {
   return searchParams;
 };
 
-export const echoAST: Handler = async (req, param) => {
+export const echoAST: Handler = async (req, _con, param) => {
   if (param?.url) {
     const r = await fetchAndValidateIntoASTJson({ url: param.url }).catch(() =>
       null

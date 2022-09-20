@@ -7,7 +7,7 @@ import {
   type ProviderInstallParamSchemas,
 } from "../index.ts";
 
-import { removeAds, paramSchema } from './removeAds.ts'
+import { paramSchema, removeAds } from "./removeAds.ts";
 
 const run = removeAds as ASTChainFunc;
 

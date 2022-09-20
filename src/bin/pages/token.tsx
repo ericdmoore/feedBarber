@@ -8,7 +8,7 @@ type Handler = sift.Handler;
  * @param tokenType
  */
 export const ListFeedsFortoken =
-  (tokenType: "User" | "Temp"): Handler => (req, pathParam) => {
+  (tokenType: "User" | "Temp"): Handler => (_req, _con, pathParam) => {
     return jsx(<h1>{`Feeds For ${tokenType} Token`}</h1>);
   };
 

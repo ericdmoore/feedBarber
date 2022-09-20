@@ -1,8 +1,7 @@
 import type { ASTComputable, PromiseOr } from "../../types.ts";
 import { json, sift } from "../../deps.ts";
-// import { jsonToComputable } from '../../lib/parsers/ast.ts'
-import { fetchAndValidateIntoAST } from "../../lib/start.ts";
 
+import { fetchAndValidateIntoAST } from "../../lib/start.ts";
 import respondAs from "../utils/respondAs.ts";
 import { readToString, stringToStream } from "../../lib/utils/pumpReader.ts";
 import {
@@ -38,9 +37,6 @@ const setupAstPipeline = (
   ast: ASTComputable,
   funcParms: FuncInterface[],
 ): Promise<ASTComputable> => {
-  // import the name
-  // apply the params
-  // and invoke thunk
   const chainFuncs = funcParms.map((fi, i) => {
     // @todo blow out this directory
     // integrate with npm?
@@ -69,23 +65,20 @@ const setupAstPipeline = (
   });
 };
 
-export const proxy: Handler = async (_, params): Promise<Response> => {
-  // find/parse funcs
-  const funcs = await functions.parse()(params?.composition ?? "hash");
-
-  const funcInt = funcs.right as FuncInterface[];
-
-  const ast = await setupAstPipeline(
-    await fetchAndValidateIntoAST({ url: params?.url ?? "" }),
-    funcInt,
-  );
-
-  const respAs = await respondAs(params?.outputFmt ?? "json", {
-    ast,
+export const proxy: Handler = async (_, __, params): Promise<Response> => {
+  const opts = {
+    composition: params?.composition ?? "hash",
     url: params?.url ?? "",
-  });
+    outputFmt: params?.outputFmt ?? "json",
+  };
 
-  // respond sometimes XML, sometimes JSON
+  const funcs = (await functions.parse()(opts.composition)).right;
+  const ast = await setupAstPipeline(
+    await fetchAndValidateIntoAST({ url: opts.url }),
+    funcs,
+  );
+  const respAs = await respondAs(opts.outputFmt, { ast, url: opts.url });
+
   if (respAs.headers.get("Content-Type")?.match("xml")) {
     return respAs;
   } else {

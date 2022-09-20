@@ -2,7 +2,7 @@
 import { h, jsx, sift } from "../../deps.ts";
 
 type Handler = sift.Handler;
-export const createAcct: Handler = (req, pathParam) => {
+export const createAcct: Handler = () => {
   return jsx(<h1>Create Account</h1>);
 };
 

@@ -13,7 +13,7 @@ const EchoLink = (p: { href: string }) => (
 // find: class="([a-zA-Z0-9 -:]+)"
 // replace: class={tw("$1")}
 
-export const header: Handler = async (req, param = {}) => {
+export const header: Handler = async (_req, _con) => {
   const header: ILayoutHeader = { title: "Feed City" };
   const body = (
     <body>

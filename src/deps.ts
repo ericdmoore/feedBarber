@@ -49,7 +49,7 @@ export {
 // export * as jose from 'https://deno.land/x/jose@v4.9.1/index.ts';
 export * as bson from "https://deno.land/x/deno_bson@v0.0.2/mod.ts";
 
-export { default as S } from 'https://esm.sh/fluent-json-schema@3.1.0?deno-std=0.153.0"';
+export { default as S } from "https://esm.sh/fluent-json-schema@3.1.0?deno-std=0.153.0";
 
 // HTML Rendering
 export * as sift from "https://deno.land/x/sift@0.6.0/mod.ts";

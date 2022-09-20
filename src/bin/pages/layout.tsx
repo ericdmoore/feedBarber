@@ -1,8 +1,8 @@
 /** @jsx h */
 /** @jsxFrag Fragment */
 
-import { Fragment, h, jsx, sift, StringWriter } from "../../deps.ts";
-import pumpReader from "../../lib/utils/pumpReader.ts";
+import { Fragment, h, jsx, sift } from "../../deps.ts";
+// import pumpReader from "../../lib/utils/pumpReader.ts";
 type VNode = sift.VNode;
 
 export interface ILayoutHeader {
