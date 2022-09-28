@@ -48,7 +48,9 @@ serve({
   "/u-{:userToken}": token("User"),
 
   "/:tokType(u|t)-:token/{:outputFmt}": configure("Start From Scratch"), // builder
-  "/:tokType(u|t)-:token/:outputFmt/{:composition}": configure("Composition in Progress"), // missing url, so view config and preview a feed
+  "/:tokType(u|t)-:token/:outputFmt/{:composition}": configure(
+    "Composition in Progress",
+  ), // missing url, so view config and preview a feed
 
   "/:tokType(u|t)-:token/:outputFmt/:url(http.*)": proxy,
   "/:tokType(u|t)-:token/:outputFmt/:composition/:url(http.*)": proxy, // merge ?
