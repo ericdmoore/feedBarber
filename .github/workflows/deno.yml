@@ -33,10 +33,10 @@ jobs:
 
       # Uncomment this step to verify the use of 'deno fmt' on each commit.
       - name: Verify formatting
-        run: deno fmt ./src ./tests --check
+        run: make fmt
 
       - name: Run linter
-        run: deno lint ./src ./tests --json | jq '[.diagnostics[].file] | unique';
+        run: make lint
 
       - name: Run tests
         run: make test_ci

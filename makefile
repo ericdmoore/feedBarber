@@ -19,9 +19,7 @@ list:
 test_ci:
 	DENO_JOBS=3 deno test --allow-read=./,${PWD},./src/lib/utils/,./tests/enhancements/ --allow-net --allow-env --coverage=$(covDataDir) --parallel ./tests/**/*
 
-test: test_ci
-	deno lint ./src ./tests --json | jq '[.diagnostics[].file] | unique';
-	deno fmt ./src ./tests;
+test: test_ci fmt lint
 
 tests: test	
 
@@ -61,7 +59,9 @@ cli:
 	deno run --allow-net src/bin/cli.ts
 
 fmt:
-	deno fmt 
+	deno fmt ./src/lib ./src/bin ./tests --check
+lint:
+	deno lint ./src/lib ./src/bin ./tests --json | jq '[.diagnostics[].file] | unique'
 
 scratch:
 	deno run --allow-net _sratch/discover.ts
