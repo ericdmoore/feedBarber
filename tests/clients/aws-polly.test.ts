@@ -1,5 +1,5 @@
 import { skip } from "../helpers.ts";
-import { pollyClient, type Status } from "../../src/lib/client/aws-polly.ts";
+import { pollyClient, type Status } from "../../src/lib/clients/aws-polly.ts";
 import { assert, assertEquals } from "../../src/deps.ts";
 
 import envFn from "../../src/lib/utils/vars.ts";

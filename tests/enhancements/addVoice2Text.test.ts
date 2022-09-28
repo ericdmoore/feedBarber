@@ -21,7 +21,7 @@ import {
 import {
   type SynthesisTaskConfig,
   type SynthesisTaskIdentifiers,
-} from "../../src/lib/client/aws-polly.ts";
+} from "../../src/lib/clients/aws-polly.ts";
 
 import {
   type ASTcomputable,

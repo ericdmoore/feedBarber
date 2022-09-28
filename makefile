@@ -16,12 +16,15 @@ list:
 	@LC_ALL=C $(MAKE) -pRrq -f $(lastword $(MAKEFILE_LIST)) : 2>/dev/null | awk -v RS= -F: '/^# File/,/^# Finished Make data base/ {if ($$1 !~ "^[#.]") {print $$1}}' | sort | egrep -v -e '^[^[:alnum:]]' -e '^$@$$'
 	@echo "\n"
 
+test: test_ci fmt lint
+tests: test	
+
 test_ci:
 	DENO_JOBS=3 deno test --allow-read=./,${PWD},./src/lib/utils/,./tests/enhancements/ --allow-net --allow-env --coverage=$(covDataDir) --parallel ./tests/**/*
 
-test: test_ci fmt lint
+test-reload: 
+	DENO_JOBS=3 deno test --allow-read --allow-net --allow-env --coverage=$(covDataDir) --parallel --reload ./tests/**/*
 
-tests: test	
 
 cov:
 	deno coverage $(covDataDir) --lcov --output=$(covDataDir)/$(lcovFile) ;

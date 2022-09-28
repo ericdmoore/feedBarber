@@ -240,10 +240,10 @@ export const JsonForm = (
   const schemaStr = typeof schema === "string"
     ? schema
     : JSON.stringify(schema.valueOf());
-  console.log({ schemaStr });
+  // console.log({ schemaStr });
 
   const schemaObj = JSON.parse(schemaStr);
-  console.log(schemaObj);
+  // console.log(schemaObj);
 
   // const reducer = (
   //     AccFn: ( Children: () => h.JSX.Element) => h.JSX.Element,
