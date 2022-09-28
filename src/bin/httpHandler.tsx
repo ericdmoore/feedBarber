@@ -1,6 +1,7 @@
 /** @jsx h */
 
-import { h, jsx, serve } from "../deps.ts";
+import { addSeconds, h, jsx, serve } from "../deps.ts";
+import serveStatic from "./pages/staticFile.ts";
 import configure from "./pages/configure.tsx";
 import create from "./pages/create.tsx";
 import logout from "./pages/logout.tsx";
@@ -35,6 +36,7 @@ const NotFound = (req: Request) =>
 
 serve({
   "/": header, // Home Page?
+  "/sa.*": serveStatic("."),
   "/user": user,
   "/create": create,
   "/signin": signin,
@@ -45,10 +47,8 @@ serve({
   "/t-{:tempToken}": token("Temp"),
   "/u-{:userToken}": token("User"),
 
-  "/:tokType(u|t)-:token/{:outputFmt}": configure("Configure From Scratch"), // builder
-  "/:tokType(u|t)-:token/:outputFmt/{:composition}": configure(
-    "Configure Params for Composition",
-  ), // missing url, so view config and preview a feed
+  "/:tokType(u|t)-:token/{:outputFmt}": configure("Start From Scratch"), // builder
+  "/:tokType(u|t)-:token/:outputFmt/{:composition}": configure("Composition in Progress"), // missing url, so view config and preview a feed
 
   "/:tokType(u|t)-:token/:outputFmt/:url(http.*)": proxy,
   "/:tokType(u|t)-:token/:outputFmt/:composition/:url(http.*)": proxy, // merge ?

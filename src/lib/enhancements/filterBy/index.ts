@@ -4,7 +4,7 @@ import {
   type ASTChainFunc,
   type EnhancementModule,
   type ProviderFunctions,
-  type ProviderInstallParamSchemas,
+  type ProviderParamSchemas,
 } from "../index.ts";
 
 import { filterBy, paramSchema } from "./filterBy.ts";
@@ -16,9 +16,9 @@ const aws = (() => {
   const paramSchema = {
     install: "",
     remove: "",
-  } as ProviderInstallParamSchemas;
+  } as ProviderParamSchemas;
   return { funcs: { install, remove }, paramSchema };
-})() as { funcs: ProviderFunctions; paramSchema: ProviderInstallParamSchemas };
+})() as { funcs: ProviderFunctions; paramSchema: ProviderParamSchemas };
 
 const azure = (() => {
   const install = async () => "";
@@ -26,9 +26,9 @@ const azure = (() => {
   const paramSchema = {
     install: "",
     remove: "",
-  } as ProviderInstallParamSchemas;
+  } as ProviderParamSchemas;
   return { funcs: { install, remove }, paramSchema };
-})() as { funcs: ProviderFunctions; paramSchema: ProviderInstallParamSchemas };
+})() as { funcs: ProviderFunctions; paramSchema: ProviderParamSchemas };
 
 const gcloud = (() => {
   const install = async () => "";
@@ -36,9 +36,9 @@ const gcloud = (() => {
   const paramSchema = {
     install: "",
     remove: "",
-  } as ProviderInstallParamSchemas;
+  } as ProviderParamSchemas;
   return { funcs: { install, remove }, paramSchema };
-})() as { funcs: ProviderFunctions; paramSchema: ProviderInstallParamSchemas };
+})() as { funcs: ProviderFunctions; paramSchema: ProviderParamSchemas };
 
 export const enhancementModule = {
   run,

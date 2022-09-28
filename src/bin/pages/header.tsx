@@ -2,7 +2,10 @@
 import { h, sift } from "../../deps.ts";
 type Handler = sift.Handler;
 import { ILayoutHeader, pageLayout } from "./layout.tsx";
-import { functions } from "../../lib/parsers/enhancementFunctions.ts";
+import {
+  type FunctionPathBuilderInputDict,
+  functions,
+} from "../../lib/parsers/enhancementFunctions.ts";
 
 const EchoLink = (p: { href: string }) => (
   <li>
@@ -10,8 +13,16 @@ const EchoLink = (p: { href: string }) => (
   </li>
 );
 
-// find: class="([a-zA-Z0-9 -:]+)"
-// replace: class={tw("$1")}
+const funcHref = async (
+  prefix: string,
+  p: FunctionPathBuilderInputDict,
+  trailSlash = false,
+) => {
+  const pref = prefix.endsWith("/") ? prefix : `${prefix}/`;
+  return `${pref}${(await functions.stringify()(p)).right}${
+    trailSlash ? "/" : ""
+  }`;
+};
 
 export const header: Handler = async (_req, _con) => {
   const header: ILayoutHeader = { title: "Feed City" };
@@ -33,19 +44,13 @@ export const header: Handler = async (_req, _con) => {
           <EchoLink href="t-1234sdfg2345?something=1&else=2" />
           <EchoLink href="u-1234sdfg2345" />
           <EchoLink href="u-ericdmoore/json/https://randsinrepose.com/feed" />
-          <EchoLink
-            href={`u-ericdmoore/json/f1(a:1,b:2)|f2(c:${
-              btoa("a,b,c")
-            })/https://randsinrepose.com/feed`}
-          />
           <EchoLink href="u-ericdmoore/rss/https://randsinrepose.com/feed" />
           <EchoLink href="u-ericdmoore/atom/https://randsinrepose.com/feed" />
           {/* <EchoLink href='u-ericdmoore/city/article(articleCss:I3ByaW1hcnk=)|postLinks(nextPost:Lm5leHQ+YTpudGgtY2hpbGQoMik=,prevPost:LnByZXZpb3VzPmE6bnRoLWNoaWxkKDIp)|hash()/https://randsinrepose.com/feed' /> */}
           <EchoLink
-            href={`u-ericdmoore/city/` +
-              (await functions.stringify()({ f1: { param1: "hello World" } }))
-                .right +
-              "/"}
+            href={await funcHref(`u-ericdmoore/city/`, {
+              a: { param1: "hello World" },
+            })}
           />
           <EchoLink href="u-1234sdfg2345?preview&other=Thing&last=true" />
         </ul>

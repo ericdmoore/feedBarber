@@ -11,64 +11,89 @@ import {
 
 import { functions } from "../../lib/parsers/enhancementFunctions.ts";
 
-type VNode = sift.VNode;
+// type VNode = sift.VNode;
 type Handler = sift.Handler;
 type VirtualSheet = sheets.VirtualSheet;
 
 const { virtualSheet, getStyleTagProperties } = sheets;
+const sheet = virtualSheet();
+setup({ sheet, theme });
 
 const twInlineStyle = (sheet: VirtualSheet) => {
   const { id, textContent } = getStyleTagProperties(sheet);
   return (
     <>
-      {/* <style id={id}>{textContent}</style> */}
-      <script src="https://cdn.tailwindcss.com?plugins=forms,typography,aspect-ratio,line-clamp">
-      </script>
+      
+      {/* <script defer src="/sa/fa/js/brands.min.js"></script> */}
+      {/* <script defer src="/sa/fa/js/solid.min.js"></script> */}
+      {/* <script defer src="/sa/fa/js/fontawesome.min.js"></script> */}
+      {/* <script src="https://cdn.tailwindcss.com?plugins=forms,typography,aspect-ratio,line-clamp"></script> */}
+      <style id={id}>{textContent}</style>
     </>
   );
 };
 
-export const configure =
-  (s = "Configure Composition"): Handler => (_req, _con, _pathParam) => {
-    const sheet = virtualSheet();
-    setup({ sheet, theme });
+/*
+- Configure the functions in the URL bar
+- Add other functions to the URL bar
 
-    const body = (
-      <body>
-        <h1 class={tw(`font-serif text(3xl slate-500)`)}>{s}</h1>
-        <h1 class="font-serif text(3xl slate-500)">{s}</h1>
-        <h4>Direct Path Params</h4>
-        <pre></pre>
+- Show form elements based on json schema
+- submit redirects the URL to one containing the validated elements
 
-        <h4>Funcs</h4>
-        <pre></pre>
+*/
 
-        <p>Here we will</p>
-        <ul>
-          <li>
-            <a href="#funcs">Show all the functions to be used</a>
-          </li>
-          <li>Show all params setup for each function</li>
-          <li>Sync the URL with function(param) and order</li>
-        </ul>
+export const configure = (s = "Configure Composition") => {
 
-        <h3 id="funcs">Functions & Params</h3>
-        {/* parse | stringify for the object-based pretty print */}
-        <pre>
-					{
-						Object.entries(moduleMap).map(([k, v]) => {
-							return `${k} : ${JSON.stringify(JSON.parse(v.paramsSchema.run), null, 2)}`;
-						}).join('\n\n')
-					}
-        </pre>
-      </body>
-    );
+  // const sheet = virtualSheet();
 
-    return pageLayout(
-      () => body,
-      { title: "Feed City" },
-      () => twInlineStyle(sheet),
-    );
-  };
+  return ((_req, _con, _pathParam) => {  
+      const body = (
+        <body class={tw('max-w-2xl m-auto')}>
+          <h1 class={tw('font-serif text(3xl purple-500)')}>{s}</h1>
+  
+          <ul class={tw(`list-disc`)}>
+            <li>
+              <a href="#funcs">Function Menu</a> w/ Params Schemas
+            </li>
+            <li>Sync the URL with function(param) and order</li>
+          </ul>
+  
+          <h3 id="funcs" class={tw(`mt-6`)}>Functions & Param List</h3>
+  
+          {/* parse | stringify for the object-based pretty print */}
+  
+          <div>
+            {Object.entries(moduleMap).map(([k, v]) => {
+              return (
+                <details>
+                  <summary>{k}</summary>
+                  <pre> {JSON.stringify(JSON.parse(v.paramsSchema.run), null, 2)}</pre>
+                </details>
+              );
+            })}
+          </div>
+        </body>
+      );
+  
+      return pageLayout(
+        () => body,
+        {
+          title: "Feed City",
+          description: s,
+          og: {
+            url: "https://feeds.city",
+            title: "Feeds City",
+            type: "website",
+            image: "data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🏙</text></svg>",
+          },
+        },
+        () => twInlineStyle(sheet),
+      );
+    }) as Handler;
+}
+
+
+
+
 
 export default configure;
