@@ -114,6 +114,7 @@ import * as addTranslation from "./addTranslation/index.ts";
 import * as removeAds from "./removeAds/index.ts";
 import * as setPath from "./setPath/index.ts";
 import * as filterBy from "./filterBy/index.ts";
+
 // import * as addText2voice from './addText2voice.ts'
 // import * as filterByTags from './filterByTags.ts'
 // import * as filterOlderThanLastRead from './filterOlderThanLastRead.ts'
@@ -175,12 +176,12 @@ export * as addLighthouseReportHistory from "./addLighthouseReport/index.ts";
 export * as addPostLinks from "./addPostLinks/index.ts";
 export * as addSeoTodos from "./addSeoNotes/index.ts";
 export * as addSubscribbables from "./addSubscribables/index.ts";
-export * as addText2voice from "./addText2voice/index.ts";
-export * as addVoiceTotext from "./addVoice2text/index.ts";
 export * as addTranslation from "./addTranslation/index.ts";
-// export * as annotateWIthBackLinks from "./annotateWIthBackLinks/index.ts";
+export * as addVoiceTotext from "./addVoice2text/index.ts";
 export * as filterBy from "./filterBy/index.ts";
 export * as findBrokenLinks from "./findBrokenLinks/index.ts";
 export * as removeAds from "./removeAds/index.ts";
 export * as setPath from "./setPath/index.ts";
 export * as scoreAsDuplicate from "./scoreAsDuplicate/index.ts";
+// export * as addText2voice from "./addText2voice/index.ts";
+// export * as annotateWIthBackLinks from "./annotateWIthBackLinks/index.ts";

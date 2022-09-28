@@ -1,12 +1,12 @@
 // deno-lint-ignore-file require-await
-// tie it all together
-import {
-  type ASTChainFunc,
-  type EnhancementModule,
-  type ProviderFunctions,
-  type ProviderParamSchemas,
-} from "../index.ts";
+
 import { addTextToVoice, paramSchema } from "./addText2voice.ts";
+import type {
+  ASTChainFunc,
+  EnhancementModule,
+  ProviderFunctions,
+  ProviderParamSchemas,
+} from "../index.ts";
 
 const run = addTextToVoice as ASTChainFunc;
 
