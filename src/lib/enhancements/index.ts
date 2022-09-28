@@ -6,7 +6,6 @@ export type AST = ASTComputable | ASTJson;
 export type ASTChainFunc = (
   i: unknown,
 ) => (ast: PromiseOr<AST>) => Promise<AST>;
-
 export type CloudChangeFunction = (...inputs: unknown[]) => Promise<string>;
 export interface ProviderFunctions {
   install: CloudChangeFunction;
@@ -110,19 +109,18 @@ import * as addLighthouseReport from "./addLighthouseReport/index.ts";
 import * as addPostLinks from "./addPostLinks/index.ts";
 import * as addSeoNotes from "./addSeoNotes/index.ts";
 import * as addSubscribbables from "./addSubscribables/index.ts";
-// import * as addText2voice from './addText2voice.ts'
 import * as addVoiceTotext from "./addVoice2text/index.ts";
 import * as addTranslation from "./addTranslation/index.ts";
-// import * as annotateWIthBackLinks from './annotateWIthBackLinks/index.ts'
+import * as removeAds from "./removeAds/index.ts";
+import * as setPath from "./setPath/index.ts";
 import * as filterBy from "./filterBy/index.ts";
+// import * as addText2voice from './addText2voice.ts'
 // import * as filterByTags from './filterByTags.ts'
 // import * as filterOlderThanLastRead from './filterOlderThanLastRead.ts'
 // import * as findBrokenLinks from './findBrokenLinks/index.ts'
 // import * as preview from './preview/index.ts'
-import * as removeAds from "./removeAds/index.ts";
+// import * as annotateWIthBackLinks from './annotateWIthBackLinks/index.ts'
 // import * as scoreAsDuplicate from './scoreAsDuplicate/index.ts'
-import * as setPath from "./setPath/index.ts";
-
 // import * as manageTags from './manageTags.ts'
 
 export const moduleMap = {

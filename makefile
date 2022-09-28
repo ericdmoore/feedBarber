@@ -58,8 +58,12 @@ start:
 cli:
 	deno run --allow-net src/bin/cli.ts
 
-fmt:
+fmt-check:
 	deno fmt ./src/lib ./src/bin ./tests --check
+
+fmt:
+	deno fmt ./src/lib ./src/bin ./tests
+
 lint:
 	deno lint ./src/lib ./src/bin ./tests --json | jq '[.diagnostics[].file] | unique'
 

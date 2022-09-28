@@ -1,5 +1,3 @@
-// // deno-lint-ignore-file no-unused-vars
-
 // Assumes Same Key/Secret for ALL aws needs
 // Polly, S3, Dynamo, Cloudfront
 // Assumes Table Exists
@@ -34,9 +32,9 @@ import {
   type SynthesisTaskIdentifiers,
   type SynthesisTaskResponse,
   type VoiceId,
-} from "../../client/aws-polly.ts";
+} from "../../clients/aws-polly.ts";
 
-import { identicon } from "../../client/svg-avatars.ts";
+import { identicon } from "../../clients/svg-avatars.ts";
 
 // mod.ts audit: OK
 import {
