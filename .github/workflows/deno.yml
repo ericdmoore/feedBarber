@@ -36,7 +36,7 @@ jobs:
         run: deno fmt ./src ./tests --check
 
       - name: Run linter
-        run: deno lint
+        run: deno lint ./src ./tests --json | jq '[.diagnostics[].file] | unique';
 
       - name: Run tests
         run: make test_ci
