@@ -25,32 +25,17 @@ test_ci:
 test-reload: 
 	DENO_JOBS=3 deno test --allow-read --allow-net --allow-env --coverage=$(covDataDir) --parallel --reload ./tests/**/*
 
-
-cov:
-	deno coverage $(covDataDir) --lcov --output=$(covDataDir)/$(lcovFile) ;
-
 coverage_prev_clear:
 	rm -f ${dynamoDBFile}
 	rm -rf ${covDir}
 	rm -rf ${covRptDir}
 
-coverage: coverage_prev_clear local_db_start wait5 test cov
+cov:
+	deno coverage $(covDataDir) --lcov --output=$(covDataDir)/$(lcovFile) ;
+
+coverage: coverage_prev_clear wait5 test cov
 	genhtml -o ${covRptDir}/html $(covDataDir)/$(lcovFile);
 	open ${covRptDir}/html/index.html
-
-local_dl:
-	./local_db_avail.sh $(DIR) $(URL)
-
-local_db_start:
-	java -D"java.library.path=$(DIR)/DynamoDBLocal_lib" -jar "$(DIR)/DynamoDBLocal.jar" -sharedDb &
-
-local_db_stop:
-	pkill java
-
-wait5:
-	sleep 5.1
-
-local_tests: local_db_start wait5 tests local_db_stop
 
 server:
 	open http://localhost:8000; denon run --allow-net --allow-env ./src/bin/httpHandler.tsx

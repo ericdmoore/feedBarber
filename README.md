@@ -26,8 +26,10 @@
 ## NON-GOALs
 
 - Unless you enjoy reading XML, this is not the best way to
-  collect/aggregate/read an cured/enhanced feed. This IS a way to make the
-  content that shows up in your existing feed reader - BETTER
+  collect & read enhanced feeds. This is first and foremost, a way to make the
+  content destined to shows up in your existing feed reader BETTER.
+
+- Perhaps this project will one day spawn a sister project that could better utlize such effortless enhancement. Maybe one day...
 
 ## Usage
 
