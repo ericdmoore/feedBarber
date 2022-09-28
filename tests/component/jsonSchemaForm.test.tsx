@@ -14,5 +14,5 @@ Deno.test("simpleUser", () => {
   // console.log("form.ref:", form.ref);
 
   // console.log({ simpleUserObj });
-  console.log("simpleUserObj: >> \n\n", JSON.stringify(simpleUserObj, null, 2));
+  // console.log("simpleUserObj: >> \n\n", JSON.stringify(simpleUserObj, null, 2));
 });

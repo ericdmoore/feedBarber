@@ -28,9 +28,9 @@ export const simpleUser = S.object()
 
 const _extending = (
   base: flusch.ObjectSchema,
-  extensionItem: flusch.ObjectSchema,
+  _extensionItem: flusch.ObjectSchema,
 ): flusch.ObjectSchema => {
-  console.log(base, extensionItem);
+  // console.log(base, extensionItem);
   const baseSchema = base.valueOf();
 
   // merge properties
