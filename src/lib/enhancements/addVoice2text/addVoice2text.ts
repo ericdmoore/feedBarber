@@ -21,9 +21,9 @@ import { superstruct as s } from "../../../deps.ts";
 import { streamToString } from "../../utils/pumpReader.ts";
 
 import {
-  type OutputFormat,
   OutputFormatMimeEnum,
   pollyClient,
+  type OutputFormat,
   type PollyClientInterface,
   type StartSpeechTaskRequired,
   type Status,
